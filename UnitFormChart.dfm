@@ -52,6 +52,8 @@ object FormChart: TFormChart
     OnGetText = VirtualStringTree1GetText
     OnPaintText = VirtualStringTree1PaintText
     OnGetImageIndex = VirtualStringTree1GetImageIndex
+    ExplicitLeft = -1
+    ExplicitTop = -8
     Columns = <
       item
         Position = 0
@@ -61,12 +63,12 @@ object FormChart: TFormChart
       item
         Position = 1
         Width = 84
-        WideText = #8470
+        WideText = #1042#1088#1077#1084#1103
       end
       item
         Position = 2
         Width = 99
-        WideText = #1044#1072#1090#1072
+        WideText = #1055#1072#1088#1090#1080#1103
       end>
   end
   object Chart2: TChart
