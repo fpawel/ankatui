@@ -96,6 +96,7 @@ type
         function DeviceVars: TArray<TDeviceVar>;
         function DeviceCoefs: TArray<TDeviceVar>;
         function PartiesYears: TArray<integer>;
+        function SeriesYears: TArray<integer>;
         function PartyValues(partyID: int64): TKeysValues;
         function CurrentPartyProducts: TArray<TProduct>;
         function CurrentPartyID: int64;
@@ -484,6 +485,29 @@ begin
         while not Eof do
         begin
             xs.Add(TKeyValue.Create(FieldValues['name'], FieldValues['value']));
+            Next;
+        end;
+        Close;
+        Free;
+    end;
+    result := xs.ToArray;
+    xs.Free;
+end;
+
+function TDataModule1.SeriesYears: TArray<integer>;
+var
+    xs: TList<integer>;
+begin
+    xs := TList<integer>.Create;
+    with TFDQuery.Create(nil) do
+    begin
+        Connection := FDConnectionProductsDB;
+        SQL.Text := 'SELECT DISTINCT year FROM series_info;';
+        Open;
+        First;
+        while not Eof do
+        begin
+            xs.Add(FieldValues['year']);
             Next;
         end;
         Close;

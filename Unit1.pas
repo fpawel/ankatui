@@ -66,6 +66,7 @@ type
         VirtualStringTree1: TVirtualStringTree;
     ToolButton2: TToolButton;
     TabSheet7: TTabSheet;
+    TabSheet8: TTabSheet;
         procedure FormCreate(Sender: TObject);
         procedure ComboBox1CloseUp(Sender: TObject);
         procedure StringGrid1SelectCell(Sender: TObject; ACol, ARow: integer;
@@ -131,7 +132,7 @@ implementation
 uses dateutils, rest.json, Winapi.uxtheme, System.Math, UnitFormNewPartyDialog,
     stringgridutils,
     listports, UnitFormParties,
-    CurrentWorkTreeData, stringutils, vclutils, UnitFormLog;
+    CurrentWorkTreeData, stringutils, vclutils, UnitFormLog, UnitFormChart;
 
 {$R *.dfm}
 
@@ -154,6 +155,13 @@ begin
         Splitter1.Parent := TabSheet4;
         Panel1.Parent := TabSheet4;
         VirtualStringTree1.Parent := TabSheet4;
+    end;
+
+    with TFormChart.Create(self) do
+    begin
+        Splitter1.Parent := TabSheet8;
+        Panel1.Parent := TabSheet8;
+        VirtualStringTree1.Parent := TabSheet8;
     end;
 
     with TFormLog.Create(self) do

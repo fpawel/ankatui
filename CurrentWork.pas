@@ -186,6 +186,7 @@ begin
                 FTreeView.Expanded[d.FNode] := True;
                 d.FInfo.FCreatedAt := now;
                 d.FInfo.FHasMessage := True;
+                d.FInfo.FHasError := false;
 
             end;
             if (d.FChildren.Count = 0) and op.FRun then

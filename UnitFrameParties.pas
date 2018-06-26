@@ -482,7 +482,7 @@ begin
                 level := FieldValues['level'];
                 str_message := FieldValues['message'];
                 work_index := FieldValues['work_index'];
-                AddRichEditTExt(RichEdit1, IncHour(created_at, 3), level,
+                RichEdit_AddText(RichEdit1, IncHour(created_at, 3), level,
                   '[' + inttostr2(work_index) + '] ' + str_message);
 
                 Next;

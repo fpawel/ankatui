@@ -21,12 +21,14 @@ uses
   UnitFrameCoef in 'UnitFrameCoef.pas' {FrameCoef: TFrame},
   UnitFrameVar in 'UnitFrameVar.pas' {FrameVar: TFrame},
   UnitFormManualControl in 'UnitFormManualControl.pas' {FormManualControl},
-  UnitFormParties in 'UnitFormParties.pas' {FormParties},
-  UnitFormPartiesNodes in 'UnitFormPartiesNodes.pas',
+  UnitFormChart in 'UnitFormChart.pas' {FormChart},
+  UnitFormChartNodes in 'UnitFormChartNodes.pas',
   msglevel in 'msglevel.pas',
   parties in 'parties.pas',
   variantutils in 'utils\variantutils.pas',
-  vclutils in 'utils\vclutils.pas';
+  vclutils in 'utils\vclutils.pas',
+  UnitFrameParties in 'UnitFrameParties.pas' {FrameParties: TFrame},
+  UnitFormPartiesNodes in 'UnitFormPartiesNodes.pas';
 
 {$R *.res}
 

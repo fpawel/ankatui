@@ -210,18 +210,10 @@ object Form1: TForm1
         object TabSheet6: TTabSheet
           Caption = #1050#1086#1101#1092#1092#1080#1094#1080#1077#1085#1090#1099
           ImageIndex = 3
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
         end
         object TabSheet2: TTabSheet
           Caption = #1046#1091#1088#1085#1072#1083
           ImageIndex = 1
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object RichEdit1: TRichEdit
             Left = 0
             Top = 0
@@ -244,10 +236,6 @@ object Form1: TForm1
           Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
           ImageIndex = 2
           OnShow = TabSheet5Show
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
         end
       end
       object Panel3: TPanel
@@ -350,18 +338,14 @@ object Form1: TForm1
     object TabSheet4: TTabSheet
       Caption = #1040#1088#1093#1080#1074
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
     end
     object TabSheet7: TTabSheet
       Caption = #1046#1091#1088#1085#1072#1083
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
+    end
+    object TabSheet8: TTabSheet
+      Caption = #1043#1088#1072#1092#1080#1082
+      ImageIndex = 3
     end
   end
   object ImageList1: TImageList
@@ -374,7 +358,7 @@ object Form1: TForm1
     Left = 480
     Top = 178
     Bitmap = {
-      494C010107009C00800132003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010107009C00840132003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000C80000006400000001002000000000008038
       0100000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -2992,7 +2976,7 @@ object Form1: TForm1
     Left = 472
     Top = 256
     Bitmap = {
-      494C0101030018017C0110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010103001801800110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

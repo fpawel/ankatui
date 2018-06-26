@@ -1,7 +1,7 @@
 object DataModule1: TDataModule1
   OldCreateOrder = False
   OnCreate = DataModuleCreate
-  Height = 484
+  Height = 618
   Width = 892
   object FDConnectionProductsDB: TFDConnection
     Params.Strings = (
