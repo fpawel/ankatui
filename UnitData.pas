@@ -732,8 +732,10 @@ begin
         while not Eof do
         begin
             PrintWorkMessages(ARichEdit, work_index, '',
-              FieldValues['product_serial'], FieldValues['created_at'],
-              FieldValues['level'], FieldValues['message']);
+              FieldValues['product_serial'],
+              FieldValues['created_at'],
+              FieldValues['level'],
+              FieldValues['message']);
             Next;
         end;
         Close;

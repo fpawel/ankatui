@@ -28,7 +28,8 @@ uses
   variantutils in 'utils\variantutils.pas',
   vclutils in 'utils\vclutils.pas',
   UnitFrameParties in 'UnitFrameParties.pas' {FrameParties: TFrame},
-  UnitFormPartiesNodes in 'UnitFormPartiesNodes.pas';
+  UnitFormPartiesNodes in 'UnitFormPartiesNodes.pas',
+  UnitFormCurrentWork in 'UnitFormCurrentWork.pas' {FormCurrentWork};
 
 {$R *.res}
 
@@ -40,6 +41,7 @@ begin
   Application.CreateForm(TFormNewPartyDialog, FormNewPartyDialog);
   Application.CreateForm(TFormPopup, FormPopup);
   Application.CreateForm(TFormManualControl, FormManualControl);
+  //Application.CreateForm(TFormCurrentWork, FormCurrentWork);
   //Application.CreateForm(TFormParties, FormParties);
   Application.Run;
 end.

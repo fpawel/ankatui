@@ -52,7 +52,6 @@ type
         procedure AddNode(par: PVirtualNode; op_info: TOperationInfo);
         function RootNodeData: TNodeData;
 
-        
         procedure RichEdit1ContextPopup(Sender: TObject; MousePos: TPoint;
           var Handled: boolean);
 
@@ -327,10 +326,7 @@ begin
 
 end;
 
-
-
 procedure TCurrentWork.RichEdit1ContextPopup(Sender: TObject; MousePos: TPoint;
-
 var Handled: boolean);
 begin
     RichEdit_PopupMenu(TRichEdit(Sender));
@@ -448,7 +444,7 @@ begin
     begin
         p := Sender.GetNodeData(Node);
         FRichEdit.Lines.Clear;
-        DataModule1.PrintCurrentWorkMessages(FRichEdit,p.x.FInfo.FOrdinal);
+        DataModule1.PrintCurrentWorkMessages(FRichEdit, p.x.FInfo.FOrdinal);
         FTreeView.RepaintNode(Node);
     end;
 end;
