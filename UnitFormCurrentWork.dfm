@@ -85,9 +85,5 @@ object FormCurrentWork: TFormCurrentWork
     TabOrder = 1
     Zoom = 100
     OnContextPopup = RichEdit1ContextPopup
-    ExplicitLeft = 8
-    ExplicitTop = 8
-    ExplicitWidth = 684
-    ExplicitHeight = 511
   end
 end

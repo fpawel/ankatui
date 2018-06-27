@@ -69,9 +69,8 @@ implementation
 
 {$R *.dfm}
 
-uses UnitData, rest.json, System.sysutils, richeditutils, dateutils, stringutils,
-    msglevel, variants,
-    Winapi.Windows, Winapi.Messages, variantutils;
+uses UnitData, rest.json, richeditutils, dateutils, stringutils,
+    msglevel,variantutils;
 
 function checkStateToStr(x: TCheckState): string;
 begin
