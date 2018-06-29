@@ -50,7 +50,6 @@ object FormNewPartyDialog: TFormNewPartyDialog
     inherited CategoryPanelGroup1: TCategoryPanelGroup
       Width = 711
       Height = 414
-      ExplicitTop = 5
       ExplicitWidth = 721
       ExplicitHeight = 424
     end

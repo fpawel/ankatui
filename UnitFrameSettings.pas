@@ -33,6 +33,7 @@ type
     TConfigSection = class
     public
         FName: string;
+        FSortOrder: integer;
         FItems: TArray<TConfigValue>;
     end;
 
@@ -290,7 +291,7 @@ begin
       TDelegatedComparer<TConfigSection>.Construct(
         function(const a, b: TConfigSection): integer
         begin
-            Result := TComparer<string>.Default.Compare(a.FName, b.FName);
+            Result := TComparer<integer>.Default.Compare(a.FSortOrder, b.FSortOrder);
         end));
 
     for i := 0 to length(h.FItems) - 1 do

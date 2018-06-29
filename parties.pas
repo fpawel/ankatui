@@ -21,6 +21,7 @@ var
 begin
     result := TConfigSection.Create;
     vars := TList<TConfigValue>.Create;
+    result.FSortOrder := -1;
     result.FName := 'Параметры партии';
     with FDQueryProducts do
     begin

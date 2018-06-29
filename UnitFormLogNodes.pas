@@ -34,6 +34,7 @@ type
         FYear: integer;
         procedure Populate; override;
         constructor Create(ATreeView: TVirtualStringTree; AYear: integer);
+        function IsToday: boolean;
     end;
 
     TNodeMonth = class(TNodeData)
@@ -42,17 +43,17 @@ type
         procedure Populate; override;
         constructor Create(ATreeView: TVirtualStringTree; ANode: PVirtualNode;
           AYear, AMonth: integer);
+        function IsToday: boolean;
     end;
 
     TNodeDay = class(TNodeData)
     public
         FYear, FMonth, FDay: integer;
         procedure Populate; override;
+        function IsToday: boolean;
         constructor Create(ATreeView: TVirtualStringTree; ANode: PVirtualNode;
           AYear, AMonth, ADay: integer);
     end;
-
-    
 
     TNodeWorkLog = class(TNodeData)
     public
@@ -71,15 +72,45 @@ type
         X: TNodeData;
     end;
 
+function IsTodayNode(n:TNodeData): boolean;
+
 implementation
 
 uses dateutils, FireDAC.Stan.PAram, stringutils, richeditutils;
+
+function IsTodayNode(n:TNodeData): boolean;
+begin
+    result :=
+        (n is TNodeYear) AND (n as TNodeYear).IsToday  OR
+        (n is TNodeMonth) AND (n as TNodeMonth).IsToday  OR
+        (n is TNodeDay) AND (n as TNodeDay).IsToday;
+
+end;
 
 function inttostr2(n: integer): string;
 begin
     result := inttostr(n);
     if n < 10 then
         result := '0' + result;
+end;
+
+function TNodeYear.IsToday: boolean;
+begin
+    result := (FYear = YearOf(now));
+
+end;
+
+function TNodeMonth.IsToday: boolean;
+begin
+    result := (FYear = YearOf(now)) AND (FMonth = MonthOf(now));
+
+end;
+
+function TNodeDay.IsToday: boolean;
+begin
+    result := (FYear = YearOf(now)) AND (FMonth = MonthOf(now)) AND
+      (FDay = DayOf(now));
+
 end;
 
 procedure freeNodeData(t: TVirtualStringTree; n: PVirtualNode);
@@ -120,6 +151,8 @@ begin
     FYear := AYear;
     FColumn[0].ImageIndex := 0;
     FColumn[0].Text := inttostr(FYear);
+    if AYear = YearOf(now) then
+        FTreeView.Expanded[FNode] := true;
 
 end;
 
@@ -135,6 +168,8 @@ begin
     dt := EncodeDateTime(2000, FMonth, 1, 0, 0, 0, 0);
     FColumn[0].Text := FormatDateTime('mm', dt) + ' ' +
       FormatDateTime('mmmm', dt);
+    if (AYear = YearOf(now)) AND (AMonth = MonthOf(now)) then
+        FTreeView.Expanded[FNode] := true;
 end;
 
 constructor TNodeDay.Create(ATreeView: TVirtualStringTree; ANode: PVirtualNode;
@@ -148,11 +183,12 @@ begin
     FColumn[0].Text := inttostr(FDay);
     if FDay < 10 then
         FColumn[0].Text := '0' + FColumn[0].Text;
+    if IsToday then
+        FTreeView.Expanded[FNode] := true;
 end;
 
-
-constructor TNodeWorkLog.Create(ATreeView: TVirtualStringTree; ANode: PVirtualNode;
-  FDQuery: TFDQuery);
+constructor TNodeWorkLog.Create(ATreeView: TVirtualStringTree;
+  ANode: PVirtualNode; FDQuery: TFDQuery);
 begin
     inherited Create(ATreeView, ATreeView.AddChild(ANode));
     with FDQuery do
@@ -200,7 +236,8 @@ begin
         First;
         while not Eof do
         begin
-            TNodeDay.Create(FTreeView, FNode, FYear, FMonth, FieldValues['day']);
+            TNodeDay.Create(FTreeView, FNode, FYear, FMonth,
+              FieldValues['day']);
             Next;
         end;
         close;
@@ -209,6 +246,9 @@ begin
 end;
 
 procedure TNodeDay.Populate;
+var
+    Node: PVirtualNode;
+    d: TNodeWorkLog;
 begin
     with DataModule1.FDQueryWorkLogsYearMonthDay do
     begin
@@ -219,18 +259,23 @@ begin
         First;
         while not Eof do
         begin
+            d := TNodeWorkLog.Create(FTreeView, FNode,
+              DataModule1.FDQueryWorkLogsYearMonthDay);
 
-            TNodeWorkLog.Create(FTreeView, FNode, DataModule1.FDQueryWorkLogsYearMonthDay);
+            Node := d.FNode;
             Next;
         end;
-        Close;
+        close;
     end;
+    if Assigned(Node) then
+        FTreeView.Selected[Node] := true;
+
 end;
 
-
-
-
 procedure TNodeWorkLog.Populate;
+var
+    Node: PVirtualNode;
+    d: TNodeWorkLog;
 begin
     with DataModule1.FDQueryWorksByParentRecordID do
     begin
@@ -240,21 +285,16 @@ begin
         FTreeView.HasChildren[FNode] := false;
         while not Eof do
         begin
-            TNodeWorkLog.Create(FTreeView, FNode,
+            d := TNodeWorkLog.Create(FTreeView, FNode,
               DataModule1.FDQueryWorksByParentRecordID);
+            Node := d.FNode;
             Next;
             FTreeView.HasChildren[FNode] := true;
         end;
-        Close;
+        close;
     end;
-
+    if Assigned(Node) then
+        FTreeView.Selected[Node] := true;
 end;
-
-
-
-
-
-
-
 
 end.

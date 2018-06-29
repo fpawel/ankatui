@@ -9,7 +9,8 @@ uses
     Vcl.ExtCtrls, Vcl.ComCtrls, Vcl.ToolWin,
     parties, System.Generics.Collections,
     System.ImageList, UnitData, Vcl.ImgList, Vcl.Menus, VirtualTrees, pipe,
-    CurrentWork, msglevel, settings, UnitFormPopup, UnitFrameCoef, UnitFrameVar,
+    CurrentWork, msglevel, UnitFormLog, settings, UnitFormPopup, UnitFrameCoef,
+    UnitFrameVar,
     UnitFormManualControl;
 
 type
@@ -51,8 +52,6 @@ type
         Splitter1: TSplitter;
         PageControl1: TPageControl;
         TabSheet1: TTabSheet;
-        TabSheet2: TTabSheet;
-        RichEdit1: TRichEdit;
         Panel5: TPanel;
         ImageList2: TImageList;
         PageControl2: TPageControl;
@@ -64,9 +63,9 @@ type
         N3: TMenuItem;
         CategoryPanel2: TCategoryPanel;
         VirtualStringTree1: TVirtualStringTree;
-    ToolButton2: TToolButton;
-    TabSheet7: TTabSheet;
-    TabSheet8: TTabSheet;
+        ToolButton2: TToolButton;
+        TabSheet7: TTabSheet;
+        TabSheet8: TTabSheet;
         procedure FormCreate(Sender: TObject);
         procedure ComboBox1CloseUp(Sender: TObject);
         procedure StringGrid1SelectCell(Sender: TObject; ACol, ARow: integer;
@@ -99,7 +98,7 @@ type
         procedure FormClose(Sender: TObject; var Action: TCloseAction);
         procedure N2Click(Sender: TObject);
         procedure N3Click(Sender: TObject);
-    procedure ToolButton2Click(Sender: TObject);
+        procedure ToolButton2Click(Sender: TObject);
     private
         { Private declarations }
         FProducts: TArray<TProduct>;
@@ -109,6 +108,7 @@ type
         FFrameCoef: TFrameCoef;
         FFrameVar: TFrameVar;
         FReadProduct: integer;
+        FFormLog: TFormLog;
         procedure HandleReadVar(content: string);
         procedure HandleReadCoefficient(content: string);
         procedure HandleCurentWorkMessage(content: string);
@@ -132,7 +132,7 @@ implementation
 uses dateutils, rest.json, Winapi.uxtheme, System.Math, UnitFormNewPartyDialog,
     stringgridutils,
     listports, UnitFormParties,
-    CurrentWorkTreeData, stringutils, vclutils, UnitFormLog, UnitFormChart;
+    CurrentWorkTreeData, stringutils, vclutils, UnitFormChart;
 
 {$R *.dfm}
 
@@ -164,11 +164,21 @@ begin
         VirtualStringTree1.Parent := TabSheet8;
     end;
 
-    with TFormLog.Create(self) do
+    FFormLog := TFormLog.Create(self);
+    with FFormLog do
     begin
         Splitter1.Parent := TabSheet7;
         RichEdit1.Parent := TabSheet7;
         VirtualStringTree1.Parent := TabSheet7;
+        FFormLog.FOnRenderMessages := procedure
+            begin
+                if PageControl2.activePage = TabSheet7 then
+                begin
+                    FFormLog.RichEdit1.SetFocus;
+                    SendMessage(FFormLog.RichEdit1.Handle, EM_SCROLL,
+                      SB_LINEDOWN, 0);
+                end;
+            end;
     end;
 
     UpdateGroupHeights;
@@ -205,8 +215,7 @@ begin
     SetCurrentParty;
 
     FPipe := TPipe.Create;
-    FCurrentWork := TCurrentWork.Create(FPipe, Panel5, VirtualStringTree1,
-      RichEdit1);
+    FCurrentWork := TCurrentWork.Create(FPipe, Panel5, VirtualStringTree1);
 
     FPipe.Handle('READ_COEFFICIENT', HandleReadCoefficient);
     FPipe.Handle('READ_VAR', HandleReadVar);
@@ -261,13 +270,26 @@ var
 begin
     m := TJson.JsonToObject<TWorkMsg>(content);
 
-    FCurrentWork.AddWorkMessage(m);
-    Panel2.Caption := Format('%s %d: %s', [timetostr(IncHour(m.FCreatedAt, 3)),
-      m.FWork, m.FText]);
+    Panel2.Caption := Format('%s [%d] %s: %s',
+      [timetostr(IncHour(m.FCreatedAt, 3)), m.FWorkIndex, m.FWork, m.FText]);
     if m.FLevel >= LError then
-        Panel2.Font.Color := clRed
+    begin
+        Panel2.Font.Color := clRed;
+        FCurrentWork.SetRunError;
+    end
     else
         Panel2.Font.Color := clNavy;
+
+    FFormLog.MoveCursorToLast;
+    PrintWorkMessages(FFormLog.RichEdit1, m.FWorkIndex, '', m.FProductSerial,
+      m.FCreatedAt, m.FLevel, m.FText);
+
+    if PageControl2.activePage = TabSheet7 then
+    begin
+        FFormLog.RichEdit1.SetFocus;
+        SendMessage(FFormLog.RichEdit1.Handle, EM_SCROLL, SB_LINEDOWN, 0);
+    end;
+
     m.Free;
 end;
 
@@ -392,7 +414,7 @@ const
     AllowWinControls = true;
     AllLevels = true;
 begin
-    if PageControl1.ActivePage <> TabSheet5 then
+    if PageControl1.activePage <> TabSheet5 then
         exit;
 
     GetCursorPos(CursorPos);
@@ -410,7 +432,7 @@ var
     i, ARow, ACol: integer;
     v: TDeviceVar;
     c: RProductCoefValue;
-    CurrentPartyID : int64;
+    CurrentPartyID: int64;
 
 begin
     for i := 0 to length(FProducts) - 1 do
@@ -420,11 +442,11 @@ begin
     FProducts := DataModule1.CurrentPartyProducts;
 
     CurrentPartyID := DataModule1.CurrentPartyID;
-    CategoryPanel1.Caption := format ('Приборы партии № %d', [CurrentPartyID]);
-    TabSheet3.Caption := format ('Партия № %d', [CurrentPartyID]);
+    CategoryPanel1.Caption := Format('Приборы партии № %d', [CurrentPartyID]);
+    TabSheet3.Caption := Format('Партия № %d', [CurrentPartyID]);
 
-    TCategoryPanel(FSettings.FFrameSettings.CategoryPanelGroup1.Panels.First).Caption :=
-        format ('Параметры партии № %d', [CurrentPartyID]);
+//    TCategoryPanel(FSettings.FFrameSettings.CategoryPanelGroup1.Panels.First)
+//      .Caption := Format('Параметры партии № %d', [CurrentPartyID]);
 
     with StringGrid1 do
     begin

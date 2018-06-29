@@ -16,19 +16,16 @@ type
     TWorkMsg = class
         FLevel: integer;
         FText: string;
-        FWork: integer;
+        FWorkIndex: integer;
+        FWork: string;
         FProductSerial: integer;
         FCreatedAt: TDAteTime;
     end;
 
     TCurrentWork = class
         FTreeView: TVirtualStringTree;
-        FRichEdit: TRichEdit;
         FPanelTopText: TPanel;
         FPipe: TPipe;
-
-        procedure VirtualStringTree1Change(Sender: TBaseVirtualTree;
-          Node: PVirtualNode);
 
         procedure VirtualStringTree1GetImageIndex(Sender: TBaseVirtualTree;
           Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
@@ -52,15 +49,14 @@ type
         procedure AddNode(par: PVirtualNode; op_info: TOperationInfo);
         function RootNodeData: TNodeData;
 
-        procedure RichEdit1ContextPopup(Sender: TObject; MousePos: TPoint;
-          var Handled: boolean);
-
         procedure Run;
 
-        procedure AddWorkMessage(x: TWorkMsg);
+        procedure SetRunError;
+
+        procedure ResetError;
 
         constructor Create(APipe: TPipe; APanelTopText: TPanel;
-          ATreeView: TVirtualStringTree; ARichEdit: TRichEdit);
+          ATreeView: TVirtualStringTree);
     end;
 
 implementation
@@ -128,12 +124,11 @@ begin
 end;
 
 constructor TCurrentWork.Create(APipe: TPipe; APanelTopText: TPanel;
-  ATreeView: TVirtualStringTree; ARichEdit: TRichEdit);
+  ATreeView: TVirtualStringTree);
 begin
     inherited Create;
     FPipe := APipe;
     FTreeView := ATreeView;
-    FRichEdit := ARichEdit;
     FPanelTopText := APanelTopText;
 
     FTreeView.OnBeforeCellPaint := TreeViewBeforeCellPaint;
@@ -141,9 +136,6 @@ begin
     FTreeView.OnChecked := TreeViewChecked;
     FTreeView.OnGetText := VirtualStringTree1GetText;
     FTreeView.OnGetImageIndex := VirtualStringTree1GetImageIndex;
-    FTreeView.OnChange := VirtualStringTree1Change;
-
-    FRichEdit.OnContextPopup := RichEdit1ContextPopup;
 
     FPipe.Handle('SETUP_CURRENT_WORKS',
         procedure(content: string)
@@ -179,6 +171,9 @@ begin
         begin
             op := TJson.JsonToObject<TNotifyOperation>(content);
             d := RootNodeData.FDescendants[op.FOrdinal];
+            if op.FName <> d.FInfo.FName then
+                exit;
+
             if op.FRun then
             begin
                 // VirtualStringTree1.Selected[d.FNode] := true;
@@ -186,7 +181,6 @@ begin
                 d.FInfo.FCreatedAt := now;
                 d.FInfo.FHasMessage := True;
                 d.FInfo.FHasError := false;
-
             end;
             if (d.FChildren.Count = 0) and op.FRun then
             begin
@@ -199,26 +193,28 @@ begin
 
 end;
 
-procedure TCurrentWork.AddWorkMessage(x: TWorkMsg);
+procedure TCurrentWork.ResetError;
 var
     n: TNodeData;
-    s: string;
 begin
-    if x.FProductSerial <> 0 then
-        s := format('%s: прибор %d: %s', [inttostr2(x.FWork),
-          x.FProductSerial, x.FText])
-    else
-        s := format('%s: %s', [inttostr2(x.FWork), x.FText]);
+    for n in RootNodeData.FDescendants do
+        if n.FInfo.FHasError then
+        begin
+            n.FInfo.FHasError := false;
+            FTreeView.RepaintNode(n.FNode);
+        end;
+end;
 
-    RichEdit_AddText(FRichEdit, IncHour(x.FCreatedAt, 3), x.FLevel, s);
-    if x.FLevel >= LError then
-        for n in RootNodeData.FDescendants do
-            if n.FRun then
-            begin
-                n.FInfo.FHasError := True;
-                FTreeView.RepaintNode(n.FNode);
-            end;
-    RichEdit_SrollDown(FRichEdit);
+procedure TCurrentWork.SetRunError;
+var
+    n: TNodeData;
+begin
+    for n in RootNodeData.FDescendants do
+        if n.FRun then
+        begin
+            n.FInfo.FHasError := True;
+            FTreeView.RepaintNode(n.FNode);
+        end;
 end;
 
 function TCurrentWork.RootNodeData: TNodeData;
@@ -326,13 +322,6 @@ begin
 
 end;
 
-procedure TCurrentWork.RichEdit1ContextPopup(Sender: TObject; MousePos: TPoint;
-var Handled: boolean);
-begin
-    RichEdit_PopupMenu(TRichEdit(Sender));
-    Handled := True;
-end;
-
 procedure TCurrentWork.Run;
 var
     Node: PVirtualNode;
@@ -352,7 +341,6 @@ begin
         end;
         Node := FTreeView.GetNext(Node);
     end;
-    FRichEdit.Lines.Clear;
     for i := 0 to d.Root.FDescendants.Count - 1 do
     begin
         d.Root.FDescendants[i].FInfo.FHasError := false;
@@ -431,22 +419,6 @@ begin
 
     end;
 
-end;
-
-procedure TCurrentWork.VirtualStringTree1Change(Sender: TBaseVirtualTree;
-Node: PVirtualNode);
-var
-    p: PTreeData;
-    i: integer;
-    s: string;
-begin
-    if Assigned(Node) then
-    begin
-        p := Sender.GetNodeData(Node);
-        FRichEdit.Lines.Clear;
-        DataModule1.PrintCurrentWorkMessages(FRichEdit, p.x.FInfo.FOrdinal);
-        FTreeView.RepaintNode(Node);
-    end;
 end;
 
 end.

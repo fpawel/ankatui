@@ -13,8 +13,8 @@ type
         FConfig: TConfig;
         FFrameSettings: TFrameSettings;
 
-    constructor Create;
-    procedure Validate;
+        constructor Create;
+        procedure Validate;
 
     end;
 
@@ -23,15 +23,73 @@ implementation
 uses parties, System.Generics.Collections, UnitData, FireDAC.Stan.PAram,
     stringutils;
 
+procedure readSectionItems(sect: TConfigSection);
+var
+    vars: TList<TConfigValue>;
+    value_list: TList<string>;
+begin
+    vars := TList<TConfigValue>.Create;
+    with DataModule1.FDQueryConfig2 do
+    begin
+
+        SQL.Text :=
+          'SELECT * FROM config WHERE section_name = :section ORDER BY sort_order;';
+        ParamByName('section').Value := sect.FName;
+        Open;
+        First;
+        while not Eof do
+        begin
+            vars.add(TConfigValue.Create);
+            with vars.Last do
+            begin
+                FSection := sect.FName;
+                FType := FieldValues['type'];
+                FValue := VarToStr(FieldValues['value']);
+                FVar := FieldValues['var'];
+                FName := FieldValues['name'];
+                FSortOrder := FieldValues['sort_order'];
+                FMinSet := FieldValues['min'] <> System.Variants.Null;
+                FMaxSet := FieldValues['max'] <> System.Variants.Null;
+                if FMinSet then
+                    FMin := FieldValues['min'];
+                if FMaxSet then
+                    FMax := FieldValues['max'];
+
+                value_list := TList<string>.Create;
+                with DataModule1.FDQueryConfig3 do
+                begin
+                    SQL.Text :=
+                      'select value from value_list where var = :var;';
+                    ParamByName('var').Value := FVar;
+                    Open;
+                    First;
+                    while not Eof do
+                    begin
+                        value_list.add(FieldValues['value']);
+                        Next;
+                    end;
+                    Close;
+
+                end;
+                FList := value_list.ToArray;
+                value_list.Free;
+            end;
+            Next;
+        end;
+        Close;
+        sect.FItems := vars.ToArray;
+    end;
+    vars.Free;
+end;
 
 constructor TSettingsControl.Create;
 var
     sections: TList<TConfigSection>;
-    vars: TList<TConfigValue>;
-    value_list: TList<string>;
+
+    sect: TConfigSection;
 begin
     inherited Create;
-    FFrameSettings:= TFrameSettings.Create(nil);
+    FFrameSettings := TFrameSettings.Create(nil);
     FConfig := TConfig.Create;
     sections := TList<TConfigSection>.Create;
     sections.add(PartyValuesSection(DataModule1.FDQuery1,
@@ -39,66 +97,17 @@ begin
     with DataModule1.FDQueryConfig do
     begin
 
-        SQL.Text := 'SELECT DISTINCT section FROM config;';
+        SQL.Text := 'SELECT * FROM section;';
         Open;
         First;
         while not Eof do
         begin
-            sections.add(TConfigSection.Create);
-            sections.Last.FName := VarToStr(FieldByName('section').Value);
+            sect := TConfigSection.Create;
+            sect.FName := FieldByName('name').Value;
+            sect.FSortOrder := FieldByName('sort_order').Value;
+            readSectionItems(sect);
+            sections.add(sect);
             Next;
-
-            with DataModule1.FDQueryConfig2 do
-            begin
-                vars := TList<TConfigValue>.Create;
-                SQL.Text :=
-                  'SELECT * FROM config WHERE section = :section ORDER BY sort_order;';
-                ParamByName('section').Value := sections.Last.FName;
-                Open;
-                First;
-                while not Eof do
-                begin
-                    vars.add(TConfigValue.Create);
-                    with vars.Last do
-                    begin
-                        FSection := sections.Last.FName;
-                        FType := FieldValues['type'];
-                        FValue := VarToStr(FieldValues['value']);
-                        FVar := FieldValues['var'];
-                        FName := FieldValues['name'];
-                        FSortOrder := FieldValues['sort_order'];
-                        FMinSet := FieldValues['min'] <> System.Variants.Null;
-                        FMaxSet := FieldValues['max'] <> System.Variants.Null;
-                        if FMinSet then
-                            FMin := FieldValues['min'];
-                        if FMaxSet then
-                            FMax := FieldValues['max'];
-
-                        value_list := TList<string>.Create;
-                        with DataModule1.FDQueryConfig3 do
-                        begin
-                            SQL.Text :=
-                              'select value from value_list where var = :var;';
-                            ParamByName('var').Value := FVar;
-                            Open;
-                            First;
-                            while not Eof do
-                            begin
-                                value_list.add(FieldValues['value']);
-                                Next;
-                            end;
-                            Close;
-
-                        end;
-                        FList := value_list.ToArray;
-                        value_list.Free;
-                    end;
-                    Next;
-                end;
-                Close;
-                sections.Last.FItems := vars.ToArray;
-                vars.Free;
-            end;
         end;
         Close;
     end;
@@ -141,33 +150,37 @@ var
     pv: TConfigValue;
     i: integer;
 begin
-    for pv in FConfig.FItems[0].FItems do
-        with DataModule1.FDQuery1 do
-        begin
-            SQL.Text :=
-              'select value from party_value where party_id in current_party_id and var = :var;';
-            ParamByName('var').Value := pv.FVar;
-            Open;
-            First;
-            pv.FValue := VarToStr(FieldByName('value').Value);
-            Close;
-        end;
-    for i := 1 to length(FConfig.FItems) - 1 do
+
+    for i := 0 to length(FConfig.FItems) - 1 do
     begin
-        for pv in FConfig.FItems[i].FItems do
-            with DataModule1.FDQueryConfig do
-            begin
-                SQL.Text := 'SELECT value FROM config WHERE var  = :var;';
-                ParamByName('var').Value := pv.FVar;
-                Open;
-                First;
-                pv.FValue := VarToStr(FieldByName('value').Value);
-                Close;
-            end;
+        if FConfig.FItems[i].FName = 'Параметры партии' then
+
+            for pv in FConfig.FItems[i].FItems do
+                with DataModule1.FDQuery1 do
+                begin
+                    SQL.Text :=
+                      'select value from party_value where party_id in current_party_id and var = :var;';
+                    ParamByName('var').Value := pv.FVar;
+                    Open;
+                    First;
+                    pv.FValue := VarToStr(FieldByName('value').Value);
+                    Close;
+                end
+        else
+
+            for pv in FConfig.FItems[i].FItems do
+                with DataModule1.FDQueryConfig do
+                begin
+                    SQL.Text := 'SELECT value FROM config WHERE var  = :var;';
+                    ParamByName('var').Value := pv.FVar;
+                    Open;
+                    First;
+                    pv.FValue := VarToStr(FieldByName('value').Value);
+                    Close;
+                end;
 
     end;
     FFrameSettings.InvalidateControls;
 end;
-
 
 end.

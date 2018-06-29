@@ -8,7 +8,6 @@ procedure RichEdit_AddText(RichEdit1: TRichEdit; dt: TDateTime; level: integer;
   text: string);
 
 procedure RichEdit_PopupMenu(re: TRichEdit);
-procedure RichEdit_SrollDown(RichEdit1: TRichEdit );
 
 implementation
 
@@ -24,36 +23,6 @@ begin
     cf.dwMask := CFM_BACKCOLOR;
     cf.crBackColor := ColorToRGB(c);
     r.Perform(EM_SETCHARFORMAT, SCF_SELECTION, lparam(@cf));
-end;
-
-procedure RichEdit_SrollDown(RichEdit1: TRichEdit );
-var c : TWinControl;
-begin
-
-    if (Screen.ActiveForm <> nil ) then
-        c := Screen.ActiveForm.ActiveControl;
-
-    if RichEdit1.Visible then
-    try
-        RichEdit1.SetFocus;
-    except
-
-    end;
-
-    SendMessage(RichEdit1.Handle, EM_SCROLL, SB_LINEDOWN, 0);
-
-    if Assigned(c) AND c.Visible then
-    try
-        c.SetFocus;
-    except
-
-    end;
-
-
-    //Richedit1.SelStart := length(RichEdit1.Text);
-    //.SelLength := 0;
-    //RichEdit1.Perform(EM_SCROLLCARET, 0, 0);
-    //RichEdit1.Perform(EM_SCROLL,SB_LINEDOWN,0);
 end;
 
 procedure RichEdit_AddText(RichEdit1: TRichEdit; dt: TDateTime; level: integer;

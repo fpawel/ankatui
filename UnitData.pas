@@ -134,6 +134,10 @@ var
 
 function ProductVarEqual(X, Y: RProductVar): boolean;
 
+procedure PrintWorkMessages(ARichEdit: TRichEdit; work_index: integer;
+  work: string; product_serial: variant; created_at: TDatetime; level: integer;
+  Text: string);
+
 implementation
 
 uses dateutils, Vcl.dialogs, System.Variants, stringutils, variantutils,
@@ -740,7 +744,6 @@ begin
         end;
         Close;
     end;
-    RichEdit_SrollDown(ARichEdit);
 end;
 
 procedure TDataModule1.PrintDayLog(ARichEdit: TRichEdit;
@@ -764,7 +767,6 @@ begin
         end;
         Close;
     end;
-    RichEdit_SrollDown(ARichEdit);
 end;
 
 procedure TDataModule1.PrintWorkLog(ARichEdit: TRichEdit; record_id: longint);
@@ -785,7 +787,6 @@ begin
         end;
         Close;
     end;
-    RichEdit_SrollDown(ARichEdit);
 end;
 
 end.

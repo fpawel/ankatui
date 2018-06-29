@@ -10,12 +10,13 @@ uses
     System.ImageList, UnitFormLogNodes, Vcl.ImgList;
 
 type
+    TOnRenderMessages = reference to procedure;
 
     TFormLog = class(TForm)
         ImageList1: TImageList;
         Splitter1: TSplitter;
         VirtualStringTree1: TVirtualStringTree;
-    RichEdit1: TRichEdit;
+        RichEdit1: TRichEdit;
         procedure FormCreate(Sender: TObject);
         procedure VirtualStringTree1BeforeCellPaint(Sender: TBaseVirtualTree;
           TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
@@ -39,11 +40,13 @@ type
         procedure RichEdit1ContextPopup(Sender: TObject; MousePos: TPoint;
           var Handled: boolean);
 
-
     private
         { Private declarations }
     public
         { Public declarations }
+        FOnRenderMessages: TOnRenderMessages;
+        procedure MoveCursorToLast;
+
     end;
 
 var
@@ -78,7 +81,6 @@ end;
 procedure TFormLog.FormCreate(Sender: TObject);
 var
     d: RTreeData;
-
 begin
     VirtualStringTree1.NodeDataSize := SizeOf(RTreeData);
     with DataModule1.FDQueryWorkLogYears do
@@ -92,22 +94,43 @@ begin
         end;
         Close;
     end;
+end;
 
+procedure TFormLog.MoveCursorToLast;
+var
+    Node: PVirtualNode;
+    p: PTreeData;
+    d: TNodeDay;
+begin
 
-
+    Node := VirtualStringTree1.GetFirst;
+    while Assigned(Node) do
+    begin
+        p := VirtualStringTree1.GetNodeData(Node);
+        if IsTodayNode(p.X) then
+        begin
+            if not VirtualStringTree1.Expanded[Node] then
+                VirtualStringTree1.Expanded[Node] := true;
+            if p.X is TNodeDay then
+            begin
+                VirtualStringTree1.Selected[Node.LastChild] := true;
+                exit;
+            end;
+        end;
+        Node := VirtualStringTree1.GetNext(Node);
+    end;
 end;
 
 procedure TFormLog.RichEdit1ContextPopup(Sender: TObject; MousePos: TPoint;
   var Handled: boolean);
 begin
     RichEdit_PopupMenu(TRichEdit(Sender));
-    Handled := True;
+    Handled := true;
 end;
 
-procedure TFormLog.VirtualStringTree1BeforeCellPaint
-  (Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;
-  Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect;
-  var ContentRect: TRect);
+procedure TFormLog.VirtualStringTree1BeforeCellPaint(Sender: TBaseVirtualTree;
+  TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
+  CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
 var
     p: PTreeData;
     d: TNodeData;
@@ -137,24 +160,27 @@ begin
         exit;
     p := Sender.GetNodeData(Node);
 
-
     if p.X is TNodeWorkLog then
     begin
         RichEdit1.Align := alClient;
-        RichEdit1.Visible := True;
+        RichEdit1.Visible := true;
         DataModule1.PrintWorkLog(RichEdit1, (p.X as TNodeWorkLog).FRecordID);
+        if Assigned(FOnRenderMessages) then
+            FOnRenderMessages;
         exit;
     end;
 
     if p.X is TNodeDay then
     begin
         RichEdit1.Align := alClient;
-        RichEdit1.Visible := True;
+        RichEdit1.Visible := true;
+
         with p.X as TNodeDay do
-            DataModule1.PrintDayLog(RichEdit1, Fday, Fmonth, Fyear);
+            DataModule1.PrintDayLog(RichEdit1, FDay, FMonth, FYear);
+        if Assigned(FOnRenderMessages) then
+            FOnRenderMessages;
         exit;
     end;
-
     RichEdit1.Lines.Clear;
 end;
 
@@ -180,7 +206,7 @@ begin
     if p.X.FPopulated then
         exit;
     p.X.Populate;
-    p.X.FPopulated := True;
+    p.X.FPopulated := true;
 end;
 
 procedure TFormLog.VirtualStringTree1GetImageIndex(Sender: TBaseVirtualTree;

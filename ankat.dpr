@@ -28,8 +28,7 @@ uses
   variantutils in 'utils\variantutils.pas',
   vclutils in 'utils\vclutils.pas',
   UnitFrameParties in 'UnitFrameParties.pas' {FrameParties: TFrame},
-  UnitFormPartiesNodes in 'UnitFormPartiesNodes.pas',
-  UnitFormCurrentWork in 'UnitFormCurrentWork.pas' {FormCurrentWork};
+  UnitFormPartiesNodes in 'UnitFormPartiesNodes.pas';
 
 {$R *.res}
 

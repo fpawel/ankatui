@@ -128,6 +128,7 @@ begin
     FConfig.FItems[0] := PartyValuesSection(DataModule1.FDQuery1,
       DataModule1.FDQueryConfig);
 
+
     FConfig.FItems[1] := TConfigSection.Create;
     with FConfig.FItems[1] do
     begin
@@ -150,6 +151,9 @@ begin
 
     DataModule1.FDQuery1.Close;
 
+
+    FConfig.FItems[0].FSortOrder := 0;
+    FConfig.FItems[1].FSortOrder := 1;
     SetupFrameSettings;
 
 end;

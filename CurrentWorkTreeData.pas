@@ -14,6 +14,7 @@ type
 
     TNotifyOperation = class
         FOrdinal: integer;
+        FName: string;
         FRun: boolean;
     end;
 

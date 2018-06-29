@@ -52,7 +52,6 @@ object FormLog: TFormLog
     OnGetText = VirtualStringTree1GetText
     OnPaintText = VirtualStringTree1PaintText
     OnGetImageIndex = VirtualStringTree1GetImageIndex
-    ExplicitLeft = -1
     Columns = <
       item
         Position = 0
@@ -89,10 +88,6 @@ object FormLog: TFormLog
     TabOrder = 1
     Zoom = 100
     OnContextPopup = RichEdit1ContextPopup
-    ExplicitLeft = 646
-    ExplicitTop = 272
-    ExplicitWidth = 339
-    ExplicitHeight = 139
   end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
@@ -102,7 +97,7 @@ object FormLog: TFormLog
     Left = 128
     Top = 168
     Bitmap = {
-      494C010106009C003C0110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010106009C00440110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       000000000000000000000000000000000000B5794DFFB5794DFFB5794DFFB579
       4DFFB5794DFFB5794DFFB5794DFFB5794DFFB5794DFFB5794DFFB5794DFFB579
