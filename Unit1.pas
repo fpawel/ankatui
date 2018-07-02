@@ -370,6 +370,7 @@ begin
     ToolButtonRun.Visible := not started;
     ToolButtonStop.Visible := started;
     FormManualControl.Button1.Enabled := not started;
+    FormManualControl.Button6.Enabled := not started;
     FormManualControl.RadioGroup1.Enabled := not started;
     FormManualControl.GroupBox2.Enabled := not started;
     ToolBar1.Width := 122;
@@ -467,21 +468,21 @@ end;
 
 procedure TForm1.N1Click(Sender: TObject);
 begin
-    FPipe.WriteStrMsg('READ_VARS', nil);
+    FPipe.WriteMsgJSON('READ_VARS', nil);
     SetupWorkStarted('Опрос', true);
     PageControl1.ActivePageIndex := 0;
 end;
 
 procedure TForm1.N2Click(Sender: TObject);
 begin
-    FPipe.WriteStrMsg('READ_COEFFICIENTS', nil);
+    FPipe.WriteMsgJSON('READ_COEFFICIENTS', nil);
     SetupWorkStarted('Считывание коэффициентов', true);
     PageControl1.ActivePageIndex := 1;
 end;
 
 procedure TForm1.N3Click(Sender: TObject);
 begin
-    FPipe.WriteStrMsg('WRITE_COEFFICIENTS', nil);
+    FPipe.WriteMsgJSON('WRITE_COEFFICIENTS', nil);
     SetupWorkStarted('Запись коэффициентов', true);
     PageControl1.ActivePageIndex := 1;
 end;
@@ -821,7 +822,7 @@ end;
 
 procedure TForm1.ToolButtonStopClick(Sender: TObject);
 begin
-    FPipe.WriteStrMsg('CURRENT_WORK_STOP', nil);
+    FPipe.WriteMsgJSON('CURRENT_WORK_STOP', nil);
     ToolButtonStop.Visible := false;
 
 end;

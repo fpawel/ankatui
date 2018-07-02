@@ -178,7 +178,6 @@ begin
             begin
                 // VirtualStringTree1.Selected[d.FNode] := true;
                 FTreeView.Expanded[d.FNode] := True;
-                d.FInfo.FCreatedAt := now;
                 d.FInfo.FHasMessage := True;
                 d.FInfo.FHasError := false;
             end;
@@ -231,12 +230,6 @@ var
 begin
 
     Node := FTreeView.AddChild(par);
-    Node.CheckState := parseCheckState
-      (DataModule1.GetCurrentWorkCheckState(op_info.FOrdinal));
-
-    FTreeView.Expanded[Node] := True;
-    FTreeView.CheckType[Node] := ctTriStateCheckBox;
-
     d.x := TNodeData.Create(Node, op_info);
 
     if par <> nil then
@@ -254,6 +247,11 @@ begin
 
     if par = nil then
         d.x.EnumDescendants;
+
+    FTreeView.Expanded[Node] := True;
+    FTreeView.CheckType[Node] := ctTriStateCheckBox;
+    Node.CheckState := parseCheckState
+      (DataModule1.GetCurrentWorkCheckState(op_info.FOrdinal));
 
     Node := FTreeView.GetFirst;
     while Assigned(Node) do
@@ -276,7 +274,7 @@ begin
     x := TOperationCheckState.Create;
     x.FOrdinal := d.FInfo.FOrdinal;
     x.FCheckState := checkStateToStr(FTreeView.CheckState[Node]);
-    FPipe.WriteStrMsg('CURRENT_WORK_CHECKED_CHANGED', x);
+    FPipe.WriteMsgJSON('CURRENT_WORK_CHECKED_CHANGED', x);
 end;
 
 procedure TCurrentWork.TreeViewBeforeCellPaint(Sender: TBaseVirtualTree;
@@ -344,11 +342,10 @@ begin
     for i := 0 to d.Root.FDescendants.Count - 1 do
     begin
         d.Root.FDescendants[i].FInfo.FHasError := false;
-        d.Root.FDescendants[i].FInfo.FCreatedAt := 0;
         d.Root.FDescendants[i].FInfo.FHasMessage := false;
         FTreeView.RepaintNode(d.Root.FDescendants[i].FNode);
     end;
-    FPipe.WriteStrMsg('CURRENT_WORK_START', d.NotifyOperation);
+    FPipe.WriteMsgJSON('CURRENT_WORK_START', d.NotifyOperation);
 end;
 
 procedure TCurrentWork.TreeViewPaintText(Sender: TBaseVirtualTree;
@@ -368,9 +365,7 @@ begin
         TargetCanvas.Font.Color := clRed;
     end;
 
-    if Column = 2 then
-        TargetCanvas.Font.Color := clGreen
-    else if Column = 1 then
+    if Column = 1 then
         TargetCanvas.Font.Color := clNavy;
 
 end;
@@ -391,9 +386,6 @@ begin
             CellText := d.FInfo.FName;
         1:
             CellText := inttostr2(d.FInfo.FOrdinal);
-        2:
-            if d.FInfo.FHasMessage then
-                CellText := TimeToStr(d.FInfo.FCreatedAt);
     end;
 end;
 

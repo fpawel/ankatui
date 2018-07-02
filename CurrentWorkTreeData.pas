@@ -25,7 +25,6 @@ type
         FChildren: array of TOperationInfo;
         FHasError: boolean;
         FHasMessage: boolean;
-        FCreatedAt: TDAteTime;
     end;
 
     

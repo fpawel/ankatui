@@ -3,7 +3,7 @@ object FormManualControl: TFormManualControl
   Top = 0
   BorderStyle = bsToolWindow
   Caption = #1056#1091#1095#1085#1086#1077' '#1091#1087#1088#1072#1074#1083#1077#1085#1080#1077
-  ClientHeight = 433
+  ClientHeight = 505
   ClientWidth = 291
   Color = clWindow
   Font.Charset = DEFAULT_CHARSET
@@ -16,6 +16,19 @@ object FormManualControl: TFormManualControl
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 19
+  object Label2: TLabel
+    Left = 124
+    Top = 32
+    Width = 38
+    Height = 19
+    Caption = '20"'#1057
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clNavy
+    Font.Height = -16
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
   object GroupBox1: TGroupBox
     Left = 0
     Top = 0
@@ -24,9 +37,6 @@ object FormManualControl: TFormManualControl
     Align = alTop
     Caption = #1054#1090#1087#1088#1072#1074#1082#1072' '#1082#1086#1084#1072#1085#1076#1099
     TabOrder = 0
-    ExplicitLeft = 8
-    ExplicitTop = 8
-    ExplicitWidth = 273
     object Edit1: TEdit
       Left = 17
       Top = 56
@@ -56,7 +66,7 @@ object FormManualControl: TFormManualControl
   end
   object RadioGroup1: TRadioGroup
     Left = 0
-    Top = 97
+    Top = 161
     Width = 291
     Height = 138
     Align = alTop
@@ -72,41 +82,24 @@ object FormManualControl: TFormManualControl
       #1050#1083#1072#1087#1072#1085' 5'
       #1050#1083#1072#1087#1072#1085' 6')
     TabOrder = 1
-    ExplicitLeft = 8
-    ExplicitTop = 111
-    ExplicitWidth = 273
+    ExplicitTop = 97
   end
   object GroupBox2: TGroupBox
     Left = 0
-    Top = 235
+    Top = 299
     Width = 291
-    Height = 198
+    Height = 206
     Align = alClient
     Caption = #1058#1077#1088#1084#1086#1082#1072#1084#1077#1088#1072
     TabOrder = 2
-    ExplicitLeft = 8
-    ExplicitTop = 255
-    ExplicitWidth = 273
-    ExplicitHeight = 194
+    ExplicitTop = 235
+    ExplicitHeight = 278
     object Label1: TLabel
       Left = 17
       Top = 32
       Width = 101
       Height = 19
       Caption = #1058#1077#1084#1087#1077#1088#1072#1090#1091#1088#1072':'
-    end
-    object Label2: TLabel
-      Left = 124
-      Top = 32
-      Width = 38
-      Height = 19
-      Caption = '20"'#1057
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clNavy
-      Font.Height = -16
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
     end
     object Label3: TLabel
       Left = 17
@@ -154,6 +147,33 @@ object FormManualControl: TFormManualControl
       Height = 27
       TabOrder = 4
       Text = '0'
+    end
+  end
+  object GroupBox3: TGroupBox
+    Left = 0
+    Top = 97
+    Width = 291
+    Height = 64
+    Align = alTop
+    Caption = #1059#1089#1090#1072#1085#1086#1074#1082#1072' '#1088#1077#1078#1080#1084#1072' '#1088#1072#1073#1086#1090#1099' '#1040#1053#1050#1040#1058
+    TabOrder = 3
+    object Edit3: TEdit
+      Left = 17
+      Top = 24
+      Width = 135
+      Height = 27
+      TabOrder = 0
+      Text = '0'
+      OnChange = Edit3Change
+    end
+    object Button6: TButton
+      Left = 158
+      Top = 23
+      Width = 97
+      Height = 27
+      Caption = #1042#1099#1087#1086#1083#1085#1080#1090#1100
+      TabOrder = 1
+      OnClick = Button6Click
     end
   end
 end

@@ -115,17 +115,12 @@ object Form1: TForm1
             Columns = <
               item
                 Position = 1
-                Width = 208
-                WideText = #1054#1087#1077#1088#1072#1094#1080#1103
+                Width = 322
+                WideText = #1044#1077#1081#1089#1090#1074#1080#1077
               end
               item
                 Position = 0
                 WideText = #8470
-              end
-              item
-                Position = 2
-                Width = 100
-                WideText = #1042#1088#1077#1084#1103
               end>
           end
         end
@@ -201,7 +196,7 @@ object Form1: TForm1
         Top = 59
         Width = 692
         Height = 545
-        ActivePage = TabSheet5
+        ActivePage = TabSheet1
         Align = alClient
         TabOrder = 1
         object TabSheet1: TTabSheet
@@ -337,7 +332,7 @@ object Form1: TForm1
     Left = 480
     Top = 178
     Bitmap = {
-      494C010107009C00940132003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010107009C00980132003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000C80000006400000001002000000000008038
       0100000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -2955,7 +2950,7 @@ object Form1: TForm1
     Left = 472
     Top = 256
     Bitmap = {
-      494C010103001801900110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010103001801940110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

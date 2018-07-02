@@ -63,7 +63,8 @@ type
         procedure Connect(pipe_server: string);
         procedure Handle(msg: string; h: TReadPipeHandler);
 
-        procedure WriteStrMsg(Msg: string; obj: TObject);
+        procedure WriteMsgJSON(Msg: string; obj: TObject);
+        procedure WriteMsgStr(Msg: string; str: string);
         procedure Close;
 
     end;
@@ -393,26 +394,35 @@ begin
     end;
 end;
 
-procedure TPipe.WriteStrMsg(Msg: string; obj: TObject);
+procedure TPipe.WriteMsgJSON(Msg: string; obj: TObject);
+
+begin
+    if Assigned(obj) then
+        WriteMsgStr(Msg, TJson.ObjectToJsonString(obj))
+    else
+        WriteMsgStr(Msg, '');
+    FPipePeerToMasterConn.WriteStrMsg(m);
+end;
+
+procedure TPipe.WriteMsgStr(Msg: string; str: string);
 var
     m: TStrMsg;
 begin
     if not FConnected then
         RaiseError('not connected');
     m.Msg := Msg;
-    if Assigned(obj) then
-        m.Str := TJson.ObjectToJsonString(obj)
-    else
-        m.Str := '';
+    m.Str := str;
     FPipePeerToMasterConn.WriteStrMsg(m);
 end;
+
+
 
 procedure TPipe.Close;
 begin
     if not FConnected then
         exit;
 
-    WriteStrMsg('CLOSE', nil);
+    WriteMsgJSON('CLOSE', nil);
 
     FConnected := false;
     CloseHandle(FPipeMasterToPeerConn.hPipe);

@@ -29,10 +29,15 @@ type
         Button5: TButton;
         Edit2: TEdit;
         Label3: TLabel;
+    GroupBox3: TGroupBox;
+    Edit3: TEdit;
+    Button6: TButton;
         procedure Edit1Change(Sender: TObject);
         procedure FormCreate(Sender: TObject);
         procedure Button1Click(Sender: TObject);
     procedure ComboBox2Change(Sender: TObject);
+    procedure Button6Click(Sender: TObject);
+    procedure Edit3Change(Sender: TObject);
     private
         { Private declarations }
         FModbusCommands: TArray<TModbusCommand>;
@@ -52,7 +57,7 @@ implementation
 
 {$R *.dfm}
 
-uses stringutils, Unit1;
+uses stringutils, Unit1, stringgridutils;
 
 procedure TFormManualControl.Button1Click(Sender: TObject);
 var
@@ -60,9 +65,15 @@ var
 begin
     X := TSendModbusCmd.Create;
     if GetModbusCommand(X.FCmd, X.FArg) then
-        FPipe.WriteStrMsg('MODBUS_CMD', X);
+        FPipe.WriteMsgJSON('MODBUS_CMD', X);
     X.Free;
     Form1.SetupWorkStarted('отправка команды', true);
+end;
+
+procedure TFormManualControl.Button6Click(Sender: TObject);
+begin
+    FPipe.WriteMsgStr('SEND_SET_WORK_MODE',  Edit3.Text);
+    Form1.SetupWorkStarted('установкарежима работы', true);
 end;
 
 procedure TFormManualControl.ComboBox2Change(Sender: TObject);
@@ -73,6 +84,12 @@ end;
 procedure TFormManualControl.Edit1Change(Sender: TObject);
 begin
     InvalidateModbusCommand;
+end;
+
+procedure TFormManualControl.Edit3Change(Sender: TObject);
+var arg:extended;
+begin
+    Button6.Enabled := TryStrToFloat( str_validate_decimal_separator(Edit3.Text), arg);
 end;
 
 procedure TFormManualControl.InvalidateModbusCommand;
