@@ -49,6 +49,8 @@ type
         procedure AddNode(par: PVirtualNode; op_info: TOperationInfo);
         function RootNodeData: TNodeData;
 
+        function SelectedOperation:TOperationInfo;
+
         procedure Run;
 
         procedure SetRunError;
@@ -190,6 +192,15 @@ begin
             FTreeView.RepaintNode(d.FNode);
         end);
 
+end;
+
+function TCurrentWork.SelectedOperation:TOperationInfo;
+begin
+    if Assigned(FTreeView.FocusedNode) then
+        Result :=
+            PTreeData(FTreeView.GetNodeData(FTreeView.FocusedNode)).X.FInfo
+    else
+        Result := nil;
 end;
 
 procedure TCurrentWork.ResetError;

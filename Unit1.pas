@@ -66,6 +66,8 @@ type
         ToolButton2: TToolButton;
         TabSheet7: TTabSheet;
         TabSheet8: TTabSheet;
+    N4: TMenuItem;
+    N5: TMenuItem;
         procedure FormCreate(Sender: TObject);
         procedure ComboBox1CloseUp(Sender: TObject);
         procedure StringGrid1SelectCell(Sender: TObject; ACol, ARow: integer;
@@ -99,6 +101,7 @@ type
         procedure N2Click(Sender: TObject);
         procedure N3Click(Sender: TObject);
         procedure ToolButton2Click(Sender: TObject);
+    procedure N4Click(Sender: TObject);
     private
         { Private declarations }
         FProducts: TArray<TProduct>;
@@ -485,6 +488,16 @@ begin
     FPipe.WriteMsgJSON('WRITE_COEFFICIENTS', nil);
     SetupWorkStarted('Запись коэффициентов', true);
     PageControl1.ActivePageIndex := 1;
+end;
+
+procedure TForm1.N4Click(Sender: TObject);
+var i:integer;
+begin
+    if FCurrentWork.SelectedOperation <> nil then
+        i := FCurrentWork.SelectedOperation.FOrdinal;
+    FPipe.WriteMsgStr('RUN_MAIN_WORK', inttostr(i));
+    SetupWorkStarted(FCurrentWork.SelectedOperation.FName, true);
+    PageControl1.ActivePageIndex := 0;
 end;
 
 procedure TForm1.CategoryPanel1Collapse(Sender: TObject);

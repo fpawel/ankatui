@@ -401,7 +401,6 @@ begin
         WriteMsgStr(Msg, TJson.ObjectToJsonString(obj))
     else
         WriteMsgStr(Msg, '');
-    FPipePeerToMasterConn.WriteStrMsg(m);
 end;
 
 procedure TPipe.WriteMsgStr(Msg: string; str: string);
