@@ -45,7 +45,6 @@ type
     public
         { Public declarations }
         FOnRenderMessages: TOnRenderMessages;
-        procedure MoveCursorToLast;
 
     end;
 
@@ -93,31 +92,6 @@ begin
             Next;
         end;
         Close;
-    end;
-end;
-
-procedure TFormLog.MoveCursorToLast;
-var
-    Node: PVirtualNode;
-    p: PTreeData;
-    d: TNodeDay;
-begin
-
-    Node := VirtualStringTree1.GetFirst;
-    while Assigned(Node) do
-    begin
-        p := VirtualStringTree1.GetNodeData(Node);
-        if IsTodayNode(p.X) then
-        begin
-            if not VirtualStringTree1.Expanded[Node] then
-                VirtualStringTree1.Expanded[Node] := true;
-            if p.X is TNodeDay then
-            begin
-                VirtualStringTree1.Selected[Node.LastChild] := true;
-                exit;
-            end;
-        end;
-        Node := VirtualStringTree1.GetNext(Node);
     end;
 end;
 

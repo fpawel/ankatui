@@ -68,6 +68,8 @@ type
         TabSheet8: TTabSheet;
     N4: TMenuItem;
     N5: TMenuItem;
+    TabSheet2: TTabSheet;
+    RichEdit1: TRichEdit;
         procedure FormCreate(Sender: TObject);
         procedure ComboBox1CloseUp(Sender: TObject);
         procedure StringGrid1SelectCell(Sender: TObject; ACol, ARow: integer;
@@ -102,6 +104,7 @@ type
         procedure N3Click(Sender: TObject);
         procedure ToolButton2Click(Sender: TObject);
     procedure N4Click(Sender: TObject);
+    procedure PopupMenu1Popup(Sender: TObject);
     private
         { Private declarations }
         FProducts: TArray<TProduct>;
@@ -283,16 +286,11 @@ begin
     else
         Panel2.Font.Color := clNavy;
 
-    FFormLog.MoveCursorToLast;
-    PrintWorkMessages(FFormLog.RichEdit1, m.FWorkIndex, '', m.FProductSerial,
+    PrintWorkMessages(RichEdit1, m.FWorkIndex, m.FWork, m.FProductSerial,
       m.FCreatedAt, m.FLevel, m.FText);
-
-    if PageControl2.activePage = TabSheet7 then
-    begin
-        FFormLog.RichEdit1.SetFocus;
-        SendMessage(FFormLog.RichEdit1.Handle, EM_SCROLL, SB_LINEDOWN, 0);
-    end;
-
+    PageControl1.ActivePage := TabSheet2;
+    RichEdit1.SetFocus;
+    SendMessage(RichEdit1.Handle, EM_SCROLL, SB_LINEDOWN, 0);
     m.Free;
 end;
 
@@ -491,13 +489,21 @@ begin
 end;
 
 procedure TForm1.N4Click(Sender: TObject);
-var i:integer;
+var o:TOperationInfo;
 begin
+    o := FCurrentWork.SelectedOperation;
+    if o = nil then
+        o := FCurrentWork.RootNodeData.FInfo;
+    FPipe.WriteMsgStr('RUN_MAIN_WORK', inttostr(o.FOrdinal));
+    SetupWorkStarted(o.FName, true);
+end;
+
+procedure TForm1.PopupMenu1Popup(Sender: TObject);
+begin
+    N4.Caption := 'Автоматическая настройка';
     if FCurrentWork.SelectedOperation <> nil then
-        i := FCurrentWork.SelectedOperation.FOrdinal;
-    FPipe.WriteMsgStr('RUN_MAIN_WORK', inttostr(i));
-    SetupWorkStarted(FCurrentWork.SelectedOperation.FName, true);
-    PageControl1.ActivePageIndex := 0;
+        N4.Caption := N4.Caption + ': ' + LowerCase(FCurrentWork.SelectedOperation.FName);
+
 end;
 
 procedure TForm1.CategoryPanel1Collapse(Sender: TObject);

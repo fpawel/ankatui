@@ -347,8 +347,7 @@ object DataModule1: TDataModule1
     Connection = FDConnectionProductsDB
     SQL.Strings = (
       'SELECT DISTINCT cast(strftime('#39'%Y'#39', created_at) AS INT) as year'
-      'FROM work_log a'
-      'WHERE a.parent_record_id ISNULL  AND work NOTNULL;')
+      'FROM work WHERE parent_work_id ISNULL;')
     Left = 720
     Top = 124
   end
@@ -356,9 +355,9 @@ object DataModule1: TDataModule1
     Connection = FDConnectionProductsDB
     SQL.Strings = (
       'SELECT DISTINCT cast(strftime('#39'%m'#39', created_at) AS INT) as month'
-      'FROM work_log a'
+      'FROM work a'
       'WHERE cast(strftime('#39'%Y'#39', created_at) AS INT) = :year'
-      'AND a.parent_record_id ISNULL;')
+      'AND a.parent_work_id ISNULL;')
     Left = 712
     Top = 188
     ParamData = <
@@ -371,11 +370,11 @@ object DataModule1: TDataModule1
     Connection = FDConnectionProductsDB
     SQL.Strings = (
       'SELECT DISTINCT cast(strftime('#39'%d'#39', created_at) AS INT) as day'
-      'FROM work_log'
+      'FROM work'
       'WHERE'
       '    cast(strftime('#39'%Y'#39', created_at) AS INT) = :year AND'
       '    cast(strftime('#39'%m'#39', created_at) AS INT) = :month AND'
-      '    parent_record_id ISNULL;')
+      '    parent_work_id ISNULL;')
     Left = 712
     Top = 244
     ParamData = <

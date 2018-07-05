@@ -713,9 +713,9 @@ var
     s: string;
 begin
     s := Text;
-    if not VariantIsEmptyOrNull(product_serial) then
+    if (not VariantIsEmptyOrNull(product_serial)) AND (product_serial <> 0) then
         s := 'прибор ' + inttostr2(product_serial) + ': ' + s;
-    if work <> '' then
+    if (work <> '') AND (work_index = 0) then
         s := work + ': ' + s;
     if work_index <> 0 then
         s := '[' + inttostr2(work_index) + ']: ' + s;
