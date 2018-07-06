@@ -59,7 +59,7 @@ type
     public
         FCreatedAt: TDateTime;
         FWork: string;
-        FRecordID: int64;
+        FWorkID: int64;
         FHasError: boolean;
         FHasChildren: boolean;
         FWorkIndex: integer;
@@ -194,12 +194,12 @@ begin
     with FDQuery do
     begin
 
-        FRecordID := FieldValues['record_id'];
+        FWorkID := FieldValues['work_id'];
         FCreatedAt := FieldValues['created_at'];
         FHasError := FieldValues['has_error'];
         FWorkIndex := FieldValues['work_index'];
         FHasChildren := FieldValues['has_children'];
-        FWork := FieldValues['work'];
+        FWork := FieldValues['work_name'];
     end;
 
     FColumn[0].Text := FWork;
@@ -279,7 +279,7 @@ var
 begin
     with DataModule1.FDQueryWorksByParentRecordID do
     begin
-        ParamByName('parent_record_id').Value := FRecordID;
+        ParamByName('parent_work_id').Value := FWorkID;
         open;
         First;
         FTreeView.HasChildren[FNode] := false;

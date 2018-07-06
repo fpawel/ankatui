@@ -249,8 +249,8 @@ begin
     inherited Create(ATreeView, ATreeView.AddChild(ANode));
     with FDQuery do
     begin
-        FWork := FieldValues['work'];
-        FRecordID := FieldValues['record_id'];
+        FWork := FieldValues['work_name'];
+        FRecordID := FieldValues['work_id'];
         FCreatedAt := FieldValues['created_at'];
         FHasError := FieldValues['has_error'];
         FWorkIndex := FieldValues['work_index'];
@@ -294,7 +294,7 @@ procedure TNodeWorkLog.Populate;
 begin
     with DataModule1.FDQueryWorksByParentRecordID do
     begin
-        ParamByName('parent_record_id').Value := FRecordID;
+        ParamByName('parent_work_id').Value := FRecordID;
         open;
         First;
         FTreeView.HasChildren[FNode] := false;

@@ -760,7 +760,7 @@ begin
         while not Eof do
         begin
             PrintWorkMessages(ARichEdit, FieldValues['work_index'],
-              FieldValues['work'], FieldValues['product_serial'],
+              FieldValues['work_name'], FieldValues['product_serial'],
               FieldValues['created_at'], FieldValues['level'],
               FieldValues['message']);
             Next;
@@ -774,7 +774,7 @@ begin
     ARichEdit.Lines.Clear;
     with FDQueryWorkMessages do
     begin
-        ParamByName('record_id').Value := record_id;
+        ParamByName('work_id').Value := record_id;
         Open;
         First;
         while not Eof do

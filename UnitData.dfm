@@ -12,6 +12,7 @@ object DataModule1: TDataModule1
       'DriverID=SQLite')
     UpdateOptions.AssignedValues = [uvLockWait]
     UpdateOptions.LockWait = True
+    Connected = True
     Left = 80
     Top = 24
   end
@@ -22,35 +23,34 @@ object DataModule1: TDataModule1
   object FDQueryWorksByParentRecordID: TFDQuery
     Connection = FDConnectionProductsDB
     SQL.Strings = (
-      'SELECT a.record_id, a.created_at, a.work, a.work_index, ('
-      '  WITH RECURSIVE acc(record_id, parent_record_id, level) AS ('
-      '    SELECT'
-      '      record_id, parent_record_id, level'
-      '    FROM work_log WHERE work_log.record_id = a.record_id'
-      '    UNION'
-      '    SELECT'
-      '      w.record_id, w.parent_record_id, w.level'
-      '    FROM acc'
+      'SELECT'
+      '       w.work_id, w.created_at, w.work_index, w.work_name,'
       
-        '      INNER JOIN work_log w ON w.parent_record_id = acc.record_i' +
+        '       exists(SELECT * FROM work ww WHERE ww.parent_work_id = w.' +
+        'work_id) AS has_children,'
+      '       ('
+      '       WITH RECURSIVE a(work_id, parent_work_id, level) AS ('
+      '         SELECT c.work_id, parent_work_id, level'
+      
+        '         FROM work c INNER JOIN work_log ON c.work_id = work_log' +
+        '.work_id'
+      '         WHERE c.work_id = w.work_id'
+      '         UNION'
+      '         SELECT b.work_id, b.parent_work_id, l.level'
+      
+        '         FROM a INNER JOIN work b ON b.parent_work_id = a.work_i' +
         'd'
-      '  )'
-      '  SELECT'
-      '    EXISTS( SELECT * FROM acc WHERE level >= 4)'
-      ') as has_error, ('
-      '   SELECT exists('
-      '       SELECT * FROM  work_log b'
-      
-        '       WHERE b.work NOTNULL AND b.parent_record_id = a.record_id' +
-        ' )'
-      ') as has_children'
-      'FROM work_log a'
-      'WHERE a.parent_record_id = :parent_record_id  AND work NOTNULL ;')
+      '                INNER JOIN work_log l ON l.work_id = a.work_id'
+      '       ) SELECT EXISTS(SELECT * FROM a WHERE level >= 4)'
+      '       ) AS has_error'
+      'FROM work w'
+      'WHERE'
+      '    w.parent_work_id = :parent_work_id;')
     Left = 88
     Top = 188
     ParamData = <
       item
-        Name = 'PARENT_RECORD_ID'
+        Name = 'PARENT_WORK_ID'
         ParamType = ptInput
       end>
   end
@@ -67,33 +67,29 @@ object DataModule1: TDataModule1
   object FDQueryPartyWorks: TFDQuery
     Connection = FDConnectionProductsDB
     SQL.Strings = (
-      'SELECT a.record_id, a.created_at, a.work, a.work_index, ('
-      '  WITH RECURSIVE acc(record_id, parent_record_id, level) AS ('
-      '    SELECT'
-      '        record_id, parent_record_id, level'
-      '    FROM work_log WHERE work_log.record_id = a.record_id'
-      '    UNION'
-      '    SELECT'
-      '        w.record_id, w.parent_record_id, w.level'
+      'SELECT a.work_id, a.created_at, a.work_name, a.work_index, ('
+      '  WITH RECURSIVE acc(work_id, parent_work_id, level) AS ('
+      '    SELECT work_id, parent_work_id, level'
+      
+        '    FROM work_log2 WHERE work_log2.work_id = a.work_id OR work_l' +
+        'og2.parent_work_id = a.work_id'
+      '  UNION'
+      '    SELECT w.work_id, w.parent_work_id, w2.level'
       '    FROM acc'
-      
-        '      INNER JOIN work_log w ON w.parent_record_id = acc.record_i' +
-        'd'
+      '           INNER JOIN work w ON w.parent_work_id = acc.work_id'
+      '           INNER JOIN work_log w2 ON w2.work_id = w.work_id'
       '  )'
-      '  SELECT'
-      '      EXISTS( SELECT * FROM acc WHERE level >= 4)'
-      ') as has_error, ('
-      '         SELECT exists('
-      '                    SELECT * FROM  work_log b'
       
-        '                    WHERE b.work NOTNULL AND b.parent_record_id ' +
-        '= a.record_id )'
-      '       ) as has_children'
-      'FROM work_log a'
+        '  SELECT EXISTS( SELECT * FROM acc WHERE level >= 4)) as has_err' +
+        'or, ('
+      
+        '    SELECT exists( SELECT * FROM  work b WHERE b.parent_work_id ' +
+        '= a.work_id )'
+      '  ) as has_children'
+      'FROM work a'
       'WHERE'
-      '  a.party_id = :party_id AND'
-      '  a.parent_record_id ISNULL  AND'
-      '  work NOTNULL AND'
+      '    a.party_id = :party_id AND'
+      '    a.parent_work_id ISNULL AND'
       '    cast(strftime('#39'%Y'#39', a.created_at) AS INT) = :year AND'
       '    cast(strftime('#39'%m'#39', a.created_at) AS INT) = :month AND'
       '    cast(strftime('#39'%d'#39', a.created_at) AS INT) = :day;')
@@ -120,31 +116,30 @@ object DataModule1: TDataModule1
   object FDQueryWorkMessages: TFDQuery
     Connection = FDConnectionProductsDB
     SQL.Strings = (
-      'WITH RECURSIVE acc(record_id, parent_record_id) AS ('
-      '  SELECT'
-      '    record_id, parent_record_id'
-      '  FROM work_log WHERE work_log.record_id = :record_id'
+      
+        'WITH RECURSIVE a(record_id, work_id, parent_work_id, created_at,' +
+        ' work_name, work_index, level, message, product_serial) AS ('
+      
+        '    SELECT record_id, work_id, parent_work_id, created_at, work_' +
+        'name, work_index, level, message, product_serial'
+      
+        '    FROM work_log2 b WHERE b.work_id = :work_id OR b.parent_work' +
+        '_id = :work_id'
       '  UNION'
-      '  SELECT'
-      '    w.record_id, w.parent_record_id'
-      '  FROM acc'
-      '    INNER JOIN work_log w ON w.parent_record_id = acc.record_id'
+      
+        '    SELECT w.record_id, w.work_id, w.parent_work_id, w.created_a' +
+        't, w.work_name, w.work_index, w.level, w.message, w.product_seri' +
+        'al'
+      
+        '    FROM a INNER JOIN work_log2 w ON w.parent_work_id = a.work_i' +
+        'd'
       ')'
-      'SELECT'
-      '  l.created_at as created_at,'
-      '  l.product_serial as product_serial,'
-      '  p.work_index as work_index,'
-      '  l.level as level,'
-      '  l.message as message'
-      'FROM acc'
-      '  INNER JOIN work_log p ON acc.parent_record_id = p.record_id'
-      '  INNER JOIN work_log l ON acc.record_id = l.record_id'
-      'WHERE l.message NOT NULL AND l.level NOT NULL;')
+      'SELECT * FROM a;')
     Left = 224
     Top = 112
     ParamData = <
       item
-        Name = 'RECORD_ID'
+        Name = 'WORK_ID'
         ParamType = ptInput
       end>
   end
@@ -227,10 +222,8 @@ object DataModule1: TDataModule1
       '    cast(strftime('#39'%Y'#39', created_at) AS INT) as year,'
       '    cast(strftime('#39'%m'#39', created_at) AS INT) as month,'
       '    cast(strftime('#39'%d'#39', created_at) AS INT) as day'
-      'FROM work_log a'
-      
-        'WHERE a.party_id = :party_id AND a.parent_record_id ISNULL  AND ' +
-        'work NOTNULL;')
+      'FROM work a'
+      'WHERE a.party_id = :party_id AND a.parent_work_id ISNULL;')
     Left = 408
     Top = 176
     ParamData = <
@@ -313,26 +306,18 @@ object DataModule1: TDataModule1
   object FDQueryDayLog: TFDQuery
     Connection = FDConnectionProductsDB
     SQL.Strings = (
-      'SELECT'
-      '  w.created_at AS created_at,'
-      '  w.level AS level,'
-      '  l.work AS work,'
-      '  l.work_index AS work_index,'
-      '  w.product_serial AS product_serial,'
-      '  w.message AS message'
-      'FROM work_log w'
-      '  INNER JOIN work_log l on w.parent_record_id = l.record_id'
+      'SELECT * FROM work_log2'
       'WHERE'
-      '  w.message NOTNULL AND'
-      '  cast(strftime('#39'%Y'#39', w.created_at) AS INT) = :year AND'
-      '  cast(strftime('#39'%m'#39', w.created_at) AS INT) = :month AND'
-      '  cast(strftime('#39'%d'#39', w.created_at) AS INT) = :day;')
+      '    cast(strftime('#39'%Y'#39', created_at) AS INT) = :year AND'
+      '    cast(strftime('#39'%m'#39', created_at) AS INT) = :month AND'
+      '    cast(strftime('#39'%d'#39', created_at) AS INT) = :day;')
     Left = 712
     Top = 360
     ParamData = <
       item
         Name = 'YEAR'
         ParamType = ptInput
+        Value = Null
       end
       item
         Name = 'MONTH'
@@ -390,35 +375,29 @@ object DataModule1: TDataModule1
   object FDQueryWorkLogsYearMonthDay: TFDQuery
     Connection = FDConnectionProductsDB
     SQL.Strings = (
-      'SELECT a.record_id, a.created_at, a.work, a.work_index, ('
-      '  WITH RECURSIVE acc(record_id, parent_record_id, level) AS ('
-      '    SELECT'
-      '        record_id, parent_record_id, level'
-      '    FROM work_log WHERE work_log.record_id = a.record_id'
-      '    UNION'
-      '    SELECT'
-      '        w.record_id, w.parent_record_id, w.level'
-      '    FROM acc'
+      'SELECT'
+      '   w.work_id, w.created_at, w.work_index, w.work_name,'
       
-        '      INNER JOIN work_log w ON w.parent_record_id = acc.record_i' +
-        'd'
-      '  )'
-      '  SELECT'
-      '      EXISTS( SELECT * FROM acc WHERE level >= 4)'
-      ') as has_error, ('
-      '         SELECT exists('
-      '                    SELECT * FROM  work_log b'
+        '   exists(SELECT * FROM work ww WHERE ww.parent_work_id = w.work' +
+        '_id) AS has_children,'
+      '    ('
+      '       WITH RECURSIVE a(work_id, parent_work_id, level) AS ('
+      '         SELECT work_id, parent_work_id, level'
+      '         FROM work_log2'
+      '         WHERE work_id = w.work_id OR parent_work_id = w.work_id'
+      '         UNION'
+      '         SELECT l.work_id, l.parent_work_id, l.level'
       
-        '                    WHERE b.work NOTNULL AND b.parent_record_id ' +
-        '= a.record_id )'
-      '       ) as has_children'
-      'FROM work_log a'
-      '                                                     WHERE'
-      '    a.parent_record_id ISNULL  AND'
-      '    work NOTNULL AND'
-      '    cast(strftime('#39'%Y'#39', a.created_at) AS INT) = :year AND'
-      '    cast(strftime('#39'%m'#39', a.created_at) AS INT) = :month AND'
-      '    cast(strftime('#39'%d'#39', a.created_at) AS INT) = :day;')
+        '         FROM a INNER JOIN work_log2 l ON l.parent_work_id = a.w' +
+        'ork_id'
+      '       ) SELECT EXISTS(SELECT * FROM a WHERE level >= 4)'
+      '    ) AS has_error'
+      'FROM work w'
+      'WHERE'
+      '    w.parent_work_id ISNULL AND'
+      '    cast(strftime('#39'%Y'#39', created_at) AS INT) = :year AND'
+      '    cast(strftime('#39'%m'#39', created_at) AS INT) = :month AND'
+      '    cast(strftime('#39'%d'#39', created_at) AS INT) = :day;')
     Left = 336
     Top = 396
     ParamData = <

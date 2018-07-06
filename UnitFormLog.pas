@@ -138,7 +138,7 @@ begin
     begin
         RichEdit1.Align := alClient;
         RichEdit1.Visible := true;
-        DataModule1.PrintWorkLog(RichEdit1, (p.X as TNodeWorkLog).FRecordID);
+        DataModule1.PrintWorkLog(RichEdit1, (p.X as TNodeWorkLog).FworkID);
         if Assigned(FOnRenderMessages) then
             FOnRenderMessages;
         exit;

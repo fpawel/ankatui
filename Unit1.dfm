@@ -13,7 +13,6 @@ object Form1: TForm1
   OldCreateOrder = False
   OnClose = FormClose
   OnCreate = FormCreate
-  OnMouseWheel = FormMouseWheel
   PixelsPerInch = 96
   TextHeight = 19
   object Panel4: TPanel
@@ -54,7 +53,7 @@ object Form1: TForm1
     object TabSheet3: TTabSheet
       Caption = #1058#1077#1082#1091#1097#1072#1103' '#1087#1072#1088#1090#1080#1103
       object Splitter1: TSplitter
-        Left = 385
+        Left = 321
         Top = 59
         Width = 5
         Height = 545
@@ -62,179 +61,22 @@ object Form1: TForm1
         ExplicitTop = 61
         ExplicitHeight = 594
       end
-      object CategoryPanelGroup1: TCategoryPanelGroup
-        Left = 0
-        Top = 59
-        Width = 385
-        Height = 545
-        VertScrollBar.Tracking = True
-        BevelInner = bvNone
-        BevelOuter = bvNone
-        Constraints.MinWidth = 300
-        GradientColor = clSkyBlue
-        HeaderFont.Charset = DEFAULT_CHARSET
-        HeaderFont.Color = clWindowText
-        HeaderFont.Height = -16
-        HeaderFont.Name = 'Tahoma'
-        HeaderFont.Style = []
-        HeaderHeight = 25
-        TabOrder = 0
-        OnResize = CategoryPanelGroup1Resize
-        object CategoryPanel2: TCategoryPanel
-          Top = 113
-          Height = 318
-          Caption = #1057#1094#1077#1085#1072#1088#1080#1081
-          TabOrder = 0
-          OnCollapse = CategoryPanel2Collapse
-          OnExpand = CategoryPanel2Expand
-          object VirtualStringTree1: TVirtualStringTree
-            Left = 0
-            Top = 0
-            Width = 381
-            Height = 291
-            Align = alClient
-            BorderStyle = bsNone
-            DefaultNodeHeight = 25
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -16
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            Header.AutoSizeIndex = 0
-            Header.Font.Charset = DEFAULT_CHARSET
-            Header.Font.Color = clWindowText
-            Header.Font.Height = -13
-            Header.Font.Name = 'Tahoma'
-            Header.Font.Style = []
-            Header.Height = 30
-            Header.Options = [hoColumnResize, hoDrag, hoShowImages, hoShowSortGlyphs, hoVisible]
-            Images = ImageList2
-            ParentFont = False
-            TabOrder = 0
-            TreeOptions.MiscOptions = [toAcceptOLEDrop, toCheckSupport, toFullRepaintOnResize, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
-            Columns = <
-              item
-                Position = 1
-                Width = 322
-                WideText = #1044#1077#1081#1089#1090#1074#1080#1077
-              end
-              item
-                Position = 0
-                WideText = #8470
-              end>
-          end
-        end
-        object CategoryPanel1: TCategoryPanel
-          Top = 0
-          Height = 113
-          Caption = #1055#1088#1080#1073#1086#1088#1099
-          TabOrder = 1
-          OnCollapse = CategoryPanel1Collapse
-          OnExpand = CategoryPanel1Expand
-          object StringGrid1: TStringGrid
-            Left = 0
-            Top = 0
-            Width = 381
-            Height = 86
-            Align = alClient
-            BorderStyle = bsNone
-            ColCount = 4
-            DefaultDrawing = False
-            FixedColor = clBackground
-            FixedCols = 0
-            RowCount = 1
-            FixedRows = 0
-            GradientEndColor = clBlack
-            Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing]
-            TabOrder = 0
-            OnDblClick = StringGrid1DblClick
-            OnDrawCell = StringGrid1DrawCell
-            OnKeyPress = StringGrid1KeyPress
-            OnMouseUp = StringGrid1MouseUp
-            OnSelectCell = StringGrid1SelectCell
-            OnTopLeftChanged = StringGrid1TopLeftChanged
-            ColWidths = (
-              64
-              64
-              64
-              64)
-            RowHeights = (
-              24)
-          end
-          object CheckBox1: TCheckBox
-            Left = 180
-            Top = 24
-            Width = 143
-            Height = 34
-            Caption = 'CheckBox1'
-            TabOrder = 1
-            OnClick = CheckBox1Click
-          end
-          object ComboBox1: TComboBox
-            Left = 20
-            Top = 32
-            Width = 145
-            Height = 24
-            BevelInner = bvNone
-            BevelOuter = bvNone
-            Style = csOwnerDrawFixed
-            Color = clGradientInactiveCaption
-            ItemHeight = 18
-            ItemIndex = 0
-            TabOrder = 2
-            Text = 'COM1'
-            OnCloseUp = ComboBox1CloseUp
-            OnDropDown = ComboBox1DropDown
-            OnExit = ComboBox1Exit
-            Items.Strings = (
-              'COM1')
-          end
-        end
-      end
       object PageControl1: TPageControl
-        Left = 390
+        Left = 326
         Top = 59
-        Width = 692
+        Width = 756
         Height = 545
         ActivePage = TabSheet1
         Align = alClient
-        TabOrder = 1
+        TabOrder = 0
         object TabSheet1: TTabSheet
           Caption = #1054#1087#1088#1086#1089
+          ExplicitWidth = 684
         end
         object TabSheet6: TTabSheet
           Caption = #1050#1086#1101#1092#1092#1080#1094#1080#1077#1085#1090#1099
           ImageIndex = 3
-        end
-        object TabSheet2: TTabSheet
-          Caption = #1057#1086#1086#1073#1097#1077#1085#1080#1103
-          ImageIndex = 3
-          ExplicitLeft = 6
-          ExplicitTop = 28
-          object RichEdit1: TRichEdit
-            Left = 0
-            Top = 0
-            Width = 684
-            Height = 511
-            Align = alClient
-            BorderStyle = bsNone
-            Font.Charset = RUSSIAN_CHARSET
-            Font.Color = clWindowText
-            Font.Height = -16
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-            ScrollBars = ssVertical
-            TabOrder = 0
-            Zoom = 100
-            ExplicitLeft = 2
-            ExplicitTop = -2
-          end
-        end
-        object TabSheet5: TTabSheet
-          Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
-          ImageIndex = 2
-          OnShow = TabSheet5Show
+          ExplicitWidth = 684
         end
       end
       object Panel3: TPanel
@@ -244,11 +86,11 @@ object Form1: TForm1
         Height = 59
         Align = alTop
         BevelOuter = bvNone
-        TabOrder = 2
+        TabOrder = 1
         object ToolBar1: TToolBar
-          Left = 960
+          Left = 904
           Top = 0
-          Width = 122
+          Width = 178
           Height = 59
           Align = alRight
           ButtonHeight = 56
@@ -274,6 +116,13 @@ object Form1: TForm1
             Caption = 'ToolButton2'
             ImageIndex = 6
             OnClick = ToolButton2Click
+          end
+          object ToolButton3: TToolButton
+            Left = 114
+            Top = 0
+            Caption = 'ToolButton3'
+            ImageIndex = 4
+            OnClick = ToolButton3Click
           end
         end
         object ToolBar2: TToolBar
@@ -314,12 +163,13 @@ object Form1: TForm1
         object Panel5: TPanel
           Left = 121
           Top = 0
-          Width = 839
+          Width = 783
           Height = 59
           Align = alClient
           Alignment = taLeftJustify
           BevelOuter = bvNone
           TabOrder = 2
+          ExplicitWidth = 839
         end
       end
       object Panel2: TPanel
@@ -331,7 +181,65 @@ object Form1: TForm1
         Alignment = taLeftJustify
         BevelOuter = bvNone
         ParentColor = True
+        TabOrder = 2
+      end
+      object StringGrid1: TStringGrid
+        Left = 0
+        Top = 59
+        Width = 321
+        Height = 545
+        Align = alLeft
+        BorderStyle = bsNone
+        ColCount = 4
+        DefaultDrawing = False
+        FixedColor = clBackground
+        FixedCols = 0
+        RowCount = 1
+        FixedRows = 0
+        GradientEndColor = clBlack
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing]
         TabOrder = 3
+        OnDblClick = StringGrid1DblClick
+        OnDrawCell = StringGrid1DrawCell
+        OnKeyPress = StringGrid1KeyPress
+        OnMouseUp = StringGrid1MouseUp
+        OnSelectCell = StringGrid1SelectCell
+        OnTopLeftChanged = StringGrid1TopLeftChanged
+        ColWidths = (
+          64
+          64
+          64
+          64)
+        RowHeights = (
+          24)
+      end
+      object CheckBox1: TCheckBox
+        Left = 12
+        Top = 108
+        Width = 143
+        Height = 34
+        Caption = 'CheckBox1'
+        TabOrder = 4
+        OnClick = CheckBox1Click
+      end
+      object ComboBox1: TComboBox
+        Left = 12
+        Top = 148
+        Width = 145
+        Height = 24
+        BevelInner = bvNone
+        BevelOuter = bvNone
+        Style = csOwnerDrawFixed
+        Color = clGradientInactiveCaption
+        ItemHeight = 18
+        ItemIndex = 0
+        TabOrder = 5
+        Text = 'COM1'
+        OnCloseUp = ComboBox1CloseUp
+        OnDropDown = ComboBox1DropDown
+        OnExit = ComboBox1Exit
+        Items.Strings = (
+          'COM1')
       end
     end
     object TabSheet4: TTabSheet
@@ -357,7 +265,7 @@ object Form1: TForm1
     Left = 480
     Top = 178
     Bitmap = {
-      494C010107009C00A00132003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010107009C00A40132003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000C80000006400000001002000000000008038
       0100000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -2952,7 +2860,6 @@ object Form1: TForm1
       00000000000000000000000000000000000000000000}
   end
   object PopupMenu1: TPopupMenu
-    OnPopup = PopupMenu1Popup
     Left = 392
     Top = 16
     object N4: TMenuItem
@@ -2983,7 +2890,7 @@ object Form1: TForm1
     Left = 472
     Top = 256
     Bitmap = {
-      494C0101030018019C0110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010103001801A00110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

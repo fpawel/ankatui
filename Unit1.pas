@@ -11,7 +11,7 @@ uses
     System.ImageList, UnitData, Vcl.ImgList, Vcl.Menus, VirtualTrees, pipe,
     CurrentWork, msglevel, UnitFormLog, settings, UnitFormPopup, UnitFrameCoef,
     UnitFrameVar,
-    UnitFormManualControl;
+    UnitFormManualControl, UnitFormConsole;
 
 type
 
@@ -40,8 +40,6 @@ type
         Panel3: TPanel;
         ToolBar1: TToolBar;
         ToolButton1: TToolButton;
-        CategoryPanelGroup1: TCategoryPanelGroup;
-        CategoryPanel1: TCategoryPanel;
         ImageList1: TImageList;
         PopupMenu1: TPopupMenu;
         N1: TMenuItem;
@@ -57,19 +55,15 @@ type
         PageControl2: TPageControl;
         TabSheet3: TTabSheet;
         TabSheet4: TTabSheet;
-        TabSheet5: TTabSheet;
         TabSheet6: TTabSheet;
         Panel2: TPanel;
         N3: TMenuItem;
-        CategoryPanel2: TCategoryPanel;
-        VirtualStringTree1: TVirtualStringTree;
         ToolButton2: TToolButton;
         TabSheet7: TTabSheet;
         TabSheet8: TTabSheet;
-    N4: TMenuItem;
-    N5: TMenuItem;
-    TabSheet2: TTabSheet;
-    RichEdit1: TRichEdit;
+        N4: TMenuItem;
+        N5: TMenuItem;
+        ToolButton3: TToolButton;
         procedure FormCreate(Sender: TObject);
         procedure ComboBox1CloseUp(Sender: TObject);
         procedure StringGrid1SelectCell(Sender: TObject; ACol, ARow: integer;
@@ -88,29 +82,17 @@ type
           Button: TMouseButton; Shift: TShiftState; X, Y: integer);
         procedure N1Click(Sender: TObject);
         procedure ToolButtonStopClick(Sender: TObject);
-        procedure CategoryPanelGroup1Resize(Sender: TObject);
-        procedure CategoryPanel1Expand(Sender: TObject);
-        procedure CategoryPanel1Collapse(Sender: TObject);
-        procedure CategoryPanel2Collapse(Sender: TObject);
-        procedure CategoryPanel2Expand(Sender: TObject);
-        procedure TabSheet5Show(Sender: TObject);
-        procedure FormMouseWheel(Sender: TObject; Shift: TShiftState;
-          WheelDelta: integer; MousePos: TPoint; var Handled: boolean);
         procedure StringGrid1DblClick(Sender: TObject);
-        procedure CategoryPanel3Collapse(Sender: TObject);
-        procedure CategoryPanel3Expand(Sender: TObject);
         procedure FormClose(Sender: TObject; var Action: TCloseAction);
         procedure N2Click(Sender: TObject);
         procedure N3Click(Sender: TObject);
         procedure ToolButton2Click(Sender: TObject);
+    procedure ToolButton3Click(Sender: TObject);
     procedure N4Click(Sender: TObject);
-    procedure PopupMenu1Popup(Sender: TObject);
     private
         { Private declarations }
         FProducts: TArray<TProduct>;
-        FPipe: TPipe;
-        FCurrentWork: TCurrentWork;
-        FSettings: TSettingsControl;
+
         FFrameCoef: TFrameCoef;
         FFrameVar: TFrameVar;
         FReadProduct: integer;
@@ -122,9 +104,8 @@ type
         procedure HandleReadProduct(content: string);
         procedure HandleEndWork(content: string);
 
-        procedure UpdateGroupHeights;
-
     public
+        FPipe: TPipe;
         { Public declarations }
         procedure SetCurrentParty;
         procedure SetupWorkStarted(work: string; started: boolean);
@@ -138,7 +119,8 @@ implementation
 uses dateutils, rest.json, Winapi.uxtheme, System.Math, UnitFormNewPartyDialog,
     stringgridutils,
     listports, UnitFormParties,
-    CurrentWorkTreeData, stringutils, vclutils, UnitFormChart;
+    CurrentWorkTreeData, stringutils, vclutils, UnitFormChart, UnitFormSettings,
+  UnitFormCurrentWork;
 
 {$R *.dfm}
 
@@ -187,12 +169,6 @@ begin
             end;
     end;
 
-    UpdateGroupHeights;
-
-    FSettings := TSettingsControl.Create;
-    FSettings.FFrameSettings.Parent := TabSheet5;
-    FSettings.FFrameSettings.Align := alclient;
-
     ToolBar2.Width := 58;
     ComboBox1DropDown(ComboBox1);
 
@@ -221,7 +197,7 @@ begin
     SetCurrentParty;
 
     FPipe := TPipe.Create;
-    FCurrentWork := TCurrentWork.Create(FPipe, Panel5, VirtualStringTree1);
+    //FCurrentWork := TCurrentWork.Create(FPipe, Panel5, VirtualStringTree1);
 
     FPipe.Handle('READ_COEFFICIENT', HandleReadCoefficient);
     FPipe.Handle('READ_VAR', HandleReadVar);
@@ -234,7 +210,7 @@ begin
 
     FPipe.Handle('END_WORK', HandleEndWork);
 
-    FPipe.Connect('ANKAT');
+
 
 end;
 
@@ -281,16 +257,17 @@ begin
     if m.FLevel >= LError then
     begin
         Panel2.Font.Color := clRed;
-        FCurrentWork.SetRunError;
+        FormCurrentWork.SetRunError;
     end
     else
         Panel2.Font.Color := clNavy;
 
-    PrintWorkMessages(RichEdit1, m.FWorkIndex, m.FWork, m.FProductSerial,
+    if not FormConsole.Visible then
+        FormConsole.Show;
+    PrintWorkMessages(FormConsole.RichEdit1, m.FWorkIndex, m.FWork, m.FProductSerial,
       m.FCreatedAt, m.FLevel, m.FText);
-    PageControl1.ActivePage := TabSheet2;
-    RichEdit1.SetFocus;
-    SendMessage(RichEdit1.Handle, EM_SCROLL, SB_LINEDOWN, 0);
+    FormConsole.RichEdit1.SetFocus;
+    SendMessage(FormConsole.RichEdit1.Handle, EM_SCROLL, SB_LINEDOWN, 0);
     m.Free;
 end;
 
@@ -368,65 +345,24 @@ begin
     Panel5.Caption := work;
     Panel5.Font.Color := clNavy;
     ToolButton1.Visible := not started;
+    ToolButton2.Visible := not started;
     ToolButtonRun.Visible := not started;
     ToolButtonStop.Visible := started;
     FormManualControl.Button1.Enabled := not started;
     FormManualControl.Button6.Enabled := not started;
     FormManualControl.RadioGroup1.Enabled := not started;
     FormManualControl.GroupBox2.Enabled := not started;
-    ToolBar1.Width := 122;
+    ToolBar1.Width := 178;
     if started then
-        ToolBar1.Width := ToolBar1.Width - ToolButton1.Width;
+        ToolBar1.Width := 58;
     // UpdateGroupHeights;
 end;
 
-procedure TForm1.UpdateGroupHeights;
-var
-    i: integer;
-    p: TCategoryPanel;
-    h: integer;
-begin
-    if not CategoryPanel2.Collapsed then
-    begin
-        h := CategoryPanelGroup1.ClientHeight;
-        for i := 0 to CategoryPanelGroup1.Panels.Count - 1 do
-        begin
-            p := TCategoryPanel(CategoryPanelGroup1.Panels.Items[i]);
-            if p <> CategoryPanel2 then
-                h := h - p.Height;
-        end;
-        CategoryPanel2.Height := h
-    end;
 
-end;
 
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
     FPipe.Close;
-end;
-
-procedure TForm1.FormMouseWheel(Sender: TObject; Shift: TShiftState;
-  WheelDelta: integer; MousePos: TPoint; var Handled: boolean);
-var
-    CursorPos: TPoint;
-    FormPos: TPoint;
-
-const
-    AllowDisabled = true;
-    AllowWinControls = true;
-    AllLevels = true;
-begin
-    if PageControl1.activePage <> TabSheet5 then
-        exit;
-
-    GetCursorPos(CursorPos);
-    CursorPos := TabSheet5.ScreenToClient(CursorPos);
-    ActiveControl := nil;
-    if Assigned(TabSheet5.ControlAtPos(CursorPos, AllowDisabled,
-      AllowWinControls, AllLevels)) then
-        FSettings.FFrameSettings.CategoryPanelGroup1.VertScrollBar.Position :=
-          FSettings.FFrameSettings.CategoryPanelGroup1.VertScrollBar.Position -
-          WheelDelta div 5;
 end;
 
 procedure TForm1.SetCurrentParty;
@@ -444,17 +380,15 @@ begin
     FProducts := DataModule1.CurrentPartyProducts;
 
     CurrentPartyID := DataModule1.CurrentPartyID;
-    CategoryPanel1.Caption := Format('Приборы партии № %d', [CurrentPartyID]);
     TabSheet3.Caption := Format('Партия № %d', [CurrentPartyID]);
 
-//    TCategoryPanel(FSettings.FFrameSettings.CategoryPanelGroup1.Panels.First)
-//      .Caption := Format('Параметры партии № %d', [CurrentPartyID]);
+    // TCategoryPanel(FSettings.FFrameSettings.CategoryPanelGroup1.Panels.First)
+    // .Caption := Format('Параметры партии № %d', [CurrentPartyID]);
 
     with StringGrid1 do
     begin
         RowCount := length(FProducts) + 1;
         FixedRows := 1;
-        CategoryPanel1.Height := RowCount * DefaultRowHeight + 50;
         for i := 0 to length(FProducts) - 1 do
         begin
             Cells[0, i + 1] := inttostr(i + 1);
@@ -489,56 +423,8 @@ begin
 end;
 
 procedure TForm1.N4Click(Sender: TObject);
-var o:TOperationInfo;
 begin
-    o := FCurrentWork.SelectedOperation;
-    if o = nil then
-        o := FCurrentWork.RootNodeData.FInfo;
-    FPipe.WriteMsgStr('RUN_MAIN_WORK', inttostr(o.FOrdinal));
-    SetupWorkStarted(o.FName, true);
-end;
-
-procedure TForm1.PopupMenu1Popup(Sender: TObject);
-begin
-    N4.Caption := 'Автоматическая настройка';
-    if FCurrentWork.SelectedOperation <> nil then
-        N4.Caption := N4.Caption + ': ' + LowerCase(FCurrentWork.SelectedOperation.FName);
-
-end;
-
-procedure TForm1.CategoryPanel1Collapse(Sender: TObject);
-begin
-    UpdateGroupHeights;
-end;
-
-procedure TForm1.CategoryPanel1Expand(Sender: TObject);
-begin
-    UpdateGroupHeights;
-end;
-
-procedure TForm1.CategoryPanel2Collapse(Sender: TObject);
-begin
-    UpdateGroupHeights;
-end;
-
-procedure TForm1.CategoryPanel2Expand(Sender: TObject);
-begin
-    UpdateGroupHeights;
-end;
-
-procedure TForm1.CategoryPanel3Collapse(Sender: TObject);
-begin
-    UpdateGroupHeights;
-end;
-
-procedure TForm1.CategoryPanel3Expand(Sender: TObject);
-begin
-    UpdateGroupHeights;
-end;
-
-procedure TForm1.CategoryPanelGroup1Resize(Sender: TObject);
-begin
-    UpdateGroupHeights;
+    FormCurrentWork.Show;
 end;
 
 procedure TForm1.CheckBox1Click(Sender: TObject);
@@ -814,11 +700,6 @@ begin
     ComboBox1.Visible := false;
 end;
 
-procedure TForm1.TabSheet5Show(Sender: TObject);
-begin
-    FSettings.Validate;
-end;
-
 procedure TForm1.TFrameRun1ToolButtonRunMouseUp(Sender: TObject;
   Button: TMouseButton; Shift: TShiftState; X, Y: integer);
 begin
@@ -837,6 +718,12 @@ procedure TForm1.ToolButton2Click(Sender: TObject);
 begin
     FormManualControl.FPipe := FPipe;
     FormManualControl.Show;
+end;
+
+procedure TForm1.ToolButton3Click(Sender: TObject);
+begin
+    FormSettings.Position := poScreenCenter;
+    FormSettings.Show;
 end;
 
 procedure TForm1.ToolButtonStopClick(Sender: TObject);

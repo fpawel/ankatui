@@ -206,9 +206,13 @@ end;
 procedure TFrameSettings.Validate;
 var
     p: TLabel;
+    v:boolean;
 begin
     if Assigned(FOnValidate) then
-        FOnValidate(Valid);
+    begin
+        v := Valid;
+        FOnValidate(v);
+    end;
 
 end;
 
