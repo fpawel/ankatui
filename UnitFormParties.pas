@@ -44,6 +44,7 @@ type
         function PartyHTML(n: TNodeParty): string;
     private
         { Private declarations }
+        procedure Refresh;
     public
         { Public declarations }
     end;
@@ -78,16 +79,21 @@ begin
 end;
 
 procedure TFormParties.FormCreate(Sender: TObject);
-var
-    d: RTreeData;
-    year: integer;
-
 begin
     VirtualStringTree1.NodeDataSize := SizeOf(RTreeData);
-    for year in DataModule1.PartiesYears do
-        TNodeYear.Create(VirtualStringTree1, year);
     RichEdit1.Visible := false;
     HtmlViewer1.Visible := false;
+    Refresh;
+end;
+
+procedure TFormParties.Refresh;
+var
+  year: Integer;
+begin
+    VirtualStringTree1.Clear;
+    for year in DataModule1.PartiesYears do
+        TNodeYear.Create(VirtualStringTree1, year);
+
 end;
 
 function TFormParties.PartyHTML(n: TNodeParty): string;

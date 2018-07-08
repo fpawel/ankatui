@@ -10,7 +10,7 @@ uses
     parties, System.Generics.Collections,
     System.ImageList, UnitData, Vcl.ImgList, Vcl.Menus, VirtualTrees, pipe,
     CurrentWork, msglevel, UnitFormLog, settings, UnitFormPopup, UnitFrameCoef,
-    UnitFrameVar,
+    UnitFrameVar, UnitFormParties,
     UnitFormManualControl, UnitFormConsole;
 
 type
@@ -48,14 +48,11 @@ type
         ToolButtonRun: TToolButton;
         ToolButtonStop: TToolButton;
         Splitter1: TSplitter;
-        PageControl1: TPageControl;
-        TabSheet1: TTabSheet;
         Panel5: TPanel;
         ImageList2: TImageList;
         PageControl2: TPageControl;
         TabSheet3: TTabSheet;
         TabSheet4: TTabSheet;
-        TabSheet6: TTabSheet;
         Panel2: TPanel;
         N3: TMenuItem;
         ToolButton2: TToolButton;
@@ -64,6 +61,9 @@ type
         N4: TMenuItem;
         N5: TMenuItem;
         ToolButton3: TToolButton;
+        Panel6: TPanel;
+        ToolBar3: TToolBar;
+        ToolButton4: TToolButton;
         procedure FormCreate(Sender: TObject);
         procedure ComboBox1CloseUp(Sender: TObject);
         procedure StringGrid1SelectCell(Sender: TObject; ACol, ARow: integer;
@@ -87,16 +87,12 @@ type
         procedure N2Click(Sender: TObject);
         procedure N3Click(Sender: TObject);
         procedure ToolButton2Click(Sender: TObject);
-    procedure ToolButton3Click(Sender: TObject);
-    procedure N4Click(Sender: TObject);
+        procedure ToolButton3Click(Sender: TObject);
+        procedure N4Click(Sender: TObject);
+        procedure ToolButton4Click(Sender: TObject);
     private
         { Private declarations }
-        FProducts: TArray<TProduct>;
 
-        FFrameCoef: TFrameCoef;
-        FFrameVar: TFrameVar;
-        FReadProduct: integer;
-        FFormLog: TFormLog;
         procedure HandleReadVar(content: string);
         procedure HandleReadCoefficient(content: string);
         procedure HandleCurentWorkMessage(content: string);
@@ -106,6 +102,12 @@ type
 
     public
         FPipe: TPipe;
+        FProducts: TArray<TProduct>;
+        FFrameCoef: TFrameCoef;
+        FFrameVar: TFrameVar;
+        FReadProduct: integer;
+        FFormLog: TFormLog;
+        FFormParties: TFormParties;
         { Public declarations }
         procedure SetCurrentParty;
         procedure SetupWorkStarted(work: string; started: boolean);
@@ -118,9 +120,9 @@ implementation
 
 uses dateutils, rest.json, Winapi.uxtheme, System.Math, UnitFormNewPartyDialog,
     stringgridutils,
-    listports, UnitFormParties,
+    listports,
     CurrentWorkTreeData, stringutils, vclutils, UnitFormChart, UnitFormSettings,
-  UnitFormCurrentWork;
+    UnitFormCurrentWork;
 
 {$R *.dfm}
 
@@ -131,13 +133,14 @@ var
 begin
     FReadProduct := -1;
     FFrameCoef := TFrameCoef.Create(self);
-    FFrameCoef.Parent := TabSheet6;
+    FFrameCoef.Parent := Panel6;
     FFrameCoef.Align := alclient;
 
     FFrameVar := TFrameVar.Create(self);
-    FFrameVar.Parent := TabSheet1;
+    // FFrameVar.Parent := TabSheet1;
     FFrameVar.Align := alclient;
 
+    FFormParties := TFormParties.Create(self);
     with TFormParties.Create(self) do
     begin
         Splitter1.Parent := TabSheet4;
@@ -197,7 +200,7 @@ begin
     SetCurrentParty;
 
     FPipe := TPipe.Create;
-    //FCurrentWork := TCurrentWork.Create(FPipe, Panel5, VirtualStringTree1);
+    // FCurrentWork := TCurrentWork.Create(FPipe, Panel5, VirtualStringTree1);
 
     FPipe.Handle('READ_COEFFICIENT', HandleReadCoefficient);
     FPipe.Handle('READ_VAR', HandleReadVar);
@@ -209,8 +212,6 @@ begin
     FPipe.Handle('READ_PRODUCT', HandleReadProduct);
 
     FPipe.Handle('END_WORK', HandleEndWork);
-
-
 
 end;
 
@@ -264,9 +265,9 @@ begin
 
     if not FormConsole.Visible then
         FormConsole.Show;
-    PrintWorkMessages(FormConsole.RichEdit1, m.FWorkIndex, m.FWork, m.FProductSerial,
-      m.FCreatedAt, m.FLevel, m.FText);
-    FormConsole.RichEdit1.SetFocus;
+    PrintWorkMessages(FormConsole.RichEdit1, m.FWorkIndex, m.FWork,
+      m.FProductSerial, m.FCreatedAt, m.FLevel, m.FText);
+    // FormConsole.RichEdit1.SetFocus;
     SendMessage(FormConsole.RichEdit1.Handle, EM_SCROLL, SB_LINEDOWN, 0);
     m.Free;
 end;
@@ -354,11 +355,32 @@ begin
     FormManualControl.GroupBox2.Enabled := not started;
     ToolBar1.Width := 178;
     if started then
+    begin
         ToolBar1.Width := 58;
+        ToolBar3.Visible := false;
+    end
+    else
+    begin
+
+        if Panel6.Controls[0] = FormCurrentWork.VirtualStringTree1 then
+        begin
+            PageControl2.Visible := false;
+            ToolBar3.Visible := true;
+            FormCurrentWork.VirtualStringTree1.Parent := self;
+            Panel5.Align := alTop;
+            Panel5.Height := 59;
+            Panel5.Parent := self;
+            Repaint;
+        end;
+        if (Panel6.ControlCount > 0) AND (Panel6.Controls[0] <> FFrameCoef.StringGrid3) then
+            Panel6.Controls[0].Parent := nil;
+
+        if FFrameCoef.StringGrid3.Parent <> Panel6 then
+            FFrameCoef.StringGrid3.Parent := Panel6;
+    end;
+
     // UpdateGroupHeights;
 end;
-
-
 
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
@@ -399,32 +421,33 @@ begin
     end;
     FFrameVar.SetCurrentParty(FProducts);
     FFrameCoef.SetCurrentParty(FProducts);
+    FFormParties.refresh;
 end;
 
 procedure TForm1.N1Click(Sender: TObject);
 begin
     FPipe.WriteMsgJSON('READ_VARS', nil);
     SetupWorkStarted('Опрос', true);
-    PageControl1.ActivePageIndex := 0;
+    Panel6.Controls[0].Parent := nil;
+    FFrameVar.StringGrid2.Parent := Form1.Panel6;
 end;
 
 procedure TForm1.N2Click(Sender: TObject);
 begin
     FPipe.WriteMsgJSON('READ_COEFFICIENTS', nil);
     SetupWorkStarted('Считывание коэффициентов', true);
-    PageControl1.ActivePageIndex := 1;
 end;
 
 procedure TForm1.N3Click(Sender: TObject);
 begin
     FPipe.WriteMsgJSON('WRITE_COEFFICIENTS', nil);
     SetupWorkStarted('Запись коэффициентов', true);
-    PageControl1.ActivePageIndex := 1;
 end;
 
 procedure TForm1.N4Click(Sender: TObject);
 begin
-    FormCurrentWork.Show;
+    FormCurrentWork.VirtualStringTree1.Parent := FormCurrentWork;
+    FormCurrentWork.ShowModal;
 end;
 
 procedure TForm1.CheckBox1Click(Sender: TObject);
@@ -724,6 +747,15 @@ procedure TForm1.ToolButton3Click(Sender: TObject);
 begin
     FormSettings.Position := poScreenCenter;
     FormSettings.Show;
+end;
+
+procedure TForm1.ToolButton4Click(Sender: TObject);
+begin
+    ToolBar3.Visible := false;
+    PageControl2.Visible := true;
+    FormCurrentWork.VirtualStringTree1.Parent := FormCurrentWork;
+    Panel5.Align := alclient;
+    Panel5.Parent := Panel3;
 end;
 
 procedure TForm1.ToolButtonStopClick(Sender: TObject);

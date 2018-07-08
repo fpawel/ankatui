@@ -11,6 +11,7 @@ object FormCurrentWork: TFormCurrentWork
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  Position = poScreenCenter
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 19
@@ -45,10 +46,6 @@ object FormCurrentWork: TFormCurrentWork
     OnGetText = VirtualStringTree1GetText
     OnPaintText = VirtualStringTree1PaintText
     OnGetImageIndex = VirtualStringTree1GetImageIndex
-    ExplicitLeft = -113
-    ExplicitTop = -211
-    ExplicitWidth = 748
-    ExplicitHeight = 511
     Columns = <
       item
         Position = 1
@@ -78,7 +75,7 @@ object FormCurrentWork: TFormCurrentWork
     Left = 472
     Top = 256
     Bitmap = {
-      494C010103001801A40110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010103001801A80110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

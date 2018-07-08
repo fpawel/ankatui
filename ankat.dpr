@@ -27,7 +27,6 @@ uses
   parties in 'parties.pas',
   variantutils in 'utils\variantutils.pas',
   vclutils in 'utils\vclutils.pas',
-  UnitFrameParties in 'UnitFrameParties.pas' {FrameParties: TFrame},
   UnitFormPartiesNodes in 'UnitFormPartiesNodes.pas',
   UnitFormSettings in 'UnitFormSettings.pas' {FormSettings},
   UnitFormConsole in 'UnitFormConsole.pas' {FormConsole},

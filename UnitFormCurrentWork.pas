@@ -137,6 +137,9 @@ begin
     Reset;
     Form1.FPipe.WriteMsgStr('RUN_MAIN_WORK', inttostr(o.FOrdinal));
     Form1.SetupWorkStarted(o.FName, true);
+    Form1.Panel6.Controls[0].Parent := nil;
+    VirtualStringTree1.Parent := Form1.Panel6;
+    ModalResult := mrOk;
 end;
 
 procedure TFormCurrentWork.FormCreate(Sender: TObject);
@@ -248,9 +251,10 @@ end;
 procedure TFormCurrentWork.VirtualStringTree1Change(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 begin
-    Button1.Caption := 'Запустить: настройка Анкат';
+    Button1.Caption := '   Запустить: [0] Настройка Анкат';
     if SelectedOperation <> nil then
-        Button1.Caption := 'Запустить: ' + LowerCase(SelectedOperation.FName);
+        Button1.Caption := Format('   Запустить: [%d] %s',
+         [ SelectedOperation.FOrdinal, AnsiLowerCase(SelectedOperation.FName)]);
 
 end;
 
