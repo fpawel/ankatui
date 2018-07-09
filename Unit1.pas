@@ -11,7 +11,7 @@ uses
     System.ImageList, UnitData, Vcl.ImgList, Vcl.Menus, VirtualTrees, pipe,
     CurrentWork, msglevel, UnitFormLog, settings, UnitFormPopup, UnitFrameCoef,
     UnitFrameVar, UnitFormParties,
-    UnitFormManualControl, UnitFormConsole;
+    UnitFormManualControl, inifiles;
 
 type
 
@@ -53,7 +53,6 @@ type
         PageControl2: TPageControl;
         TabSheet3: TTabSheet;
         TabSheet4: TTabSheet;
-        Panel2: TPanel;
         N3: TMenuItem;
         ToolButton2: TToolButton;
         TabSheet7: TTabSheet;
@@ -62,8 +61,25 @@ type
         N5: TMenuItem;
         ToolButton3: TToolButton;
         Panel6: TPanel;
-        ToolBar3: TToolBar;
-        ToolButton4: TToolButton;
+        RichEdit1: TRichEdit;
+        PanelConsole: TPanel;
+        Panel10: TPanel;
+        ToolBar4: TToolBar;
+        ImageList3: TImageList;
+        ToolButtonConsoleHide: TToolButton;
+        ToolButtonMoveConsoleDown: TToolButton;
+        ToolButtonMoveConsoleUp: TToolButton;
+        PanelConsolePlaceholderRight: TPanel;
+        PanelConsolePlaceholderBottom: TPanel;
+        SplitterConsoleHoriz: TSplitter;
+        SplitterConsoleVert: TSplitter;
+        Panel2: TPanel;
+    Panel9: TPanel;
+    Panel11: TPanel;
+    Panel12: TPanel;
+    Panel13: TPanel;
+    ToolBar5: TToolBar;
+    ToolButton7: TToolButton;
         procedure FormCreate(Sender: TObject);
         procedure ComboBox1CloseUp(Sender: TObject);
         procedure StringGrid1SelectCell(Sender: TObject; ACol, ARow: integer;
@@ -89,7 +105,13 @@ type
         procedure ToolButton2Click(Sender: TObject);
         procedure ToolButton3Click(Sender: TObject);
         procedure N4Click(Sender: TObject);
-        procedure ToolButton4Click(Sender: TObject);
+        procedure ToolButtonMoveConsoleUpClick(Sender: TObject);
+        procedure ToolButtonMoveConsoleDownClick(Sender: TObject);
+        procedure FormActivate(Sender: TObject);
+        procedure PanelConsolePlaceholderBottomResize(Sender: TObject);
+        procedure PanelConsolePlaceholderRightResize(Sender: TObject);
+        procedure ToolButtonConsoleHideClick(Sender: TObject);
+        procedure ToolButton7Click(Sender: TObject);
     private
         { Private declarations }
 
@@ -108,6 +130,7 @@ type
         FReadProduct: integer;
         FFormLog: TFormLog;
         FFormParties: TFormParties;
+        FIni: TIniFile;
         { Public declarations }
         procedure SetCurrentParty;
         procedure SetupWorkStarted(work: string; started: boolean);
@@ -120,7 +143,7 @@ implementation
 
 uses dateutils, rest.json, Winapi.uxtheme, System.Math, UnitFormNewPartyDialog,
     stringgridutils,
-    listports,
+    listports, System.IOUtils,
     CurrentWorkTreeData, stringutils, vclutils, UnitFormChart, UnitFormSettings,
     UnitFormCurrentWork;
 
@@ -131,6 +154,7 @@ var
     ARow: integer;
     i: integer;
 begin
+    FIni := TIniFile.Create(ExtractFileDir(paramstr(0)) + '\main.ini');
     FReadProduct := -1;
     FFrameCoef := TFrameCoef.Create(self);
     FFrameCoef.Parent := Panel6;
@@ -213,6 +237,8 @@ begin
 
     FPipe.Handle('END_WORK', HandleEndWork);
 
+    DataModule1.PrintLastMessages(RichEdit1, 500);
+
 end;
 
 procedure TForm1.HandleEndWork(content: string);
@@ -263,12 +289,12 @@ begin
     else
         Panel2.Font.Color := clNavy;
 
-    if not FormConsole.Visible then
-        FormConsole.Show;
-    PrintWorkMessages(FormConsole.RichEdit1, m.FWorkIndex, m.FWork,
-      m.FProductSerial, m.FCreatedAt, m.FLevel, m.FText);
+    SendMessage(RichEdit1.Handle, EM_SCROLL, SB_LINEDOWN, 0);
+    RichEdit1.SelStart := Length(RichEdit1.Text);
+    PrintWorkMessages(RichEdit1, m.FWorkIndex, m.FWork, m.FProductSerial,
+      m.FCreatedAt, m.FLevel, m.FText);
     // FormConsole.RichEdit1.SetFocus;
-    SendMessage(FormConsole.RichEdit1.Handle, EM_SCROLL, SB_LINEDOWN, 0);
+    SendMessage(RichEdit1.Handle, EM_SCROLL, SB_LINEDOWN, 0);
     m.Free;
 end;
 
@@ -342,8 +368,9 @@ end;
 
 procedure TForm1.SetupWorkStarted(work: string; started: boolean);
 begin
-    Panel2.Caption := '';
     Panel5.Caption := work;
+    Panel13.Caption := '   ' + work;
+
     Panel5.Font.Color := clNavy;
     ToolButton1.Visible := not started;
     ToolButton2.Visible := not started;
@@ -357,34 +384,73 @@ begin
     if started then
     begin
         ToolBar1.Width := 58;
-        ToolBar3.Visible := false;
+        if ToolBar5.Visible then
+            ToolButton7.Click;
     end
     else
     begin
 
         if Panel6.Controls[0] = FormCurrentWork.VirtualStringTree1 then
         begin
-            PageControl2.Visible := false;
-            ToolBar3.Visible := true;
-            FormCurrentWork.VirtualStringTree1.Parent := self;
-            Panel5.Align := alTop;
-            Panel5.Height := 59;
-            Panel5.Parent := self;
-            Repaint;
-        end;
-        if (Panel6.ControlCount > 0) AND (Panel6.Controls[0] <> FFrameCoef.StringGrid3) then
-            Panel6.Controls[0].Parent := nil;
+            Toolbar5.Visible := true;
+        end
+        else
+        begin
+            if (Panel6.ControlCount > 0) AND
+              (Panel6.Controls[0] <> FFrameCoef.StringGrid3) then
+                Panel6.Controls[0].Parent := nil;
 
-        if FFrameCoef.StringGrid3.Parent <> Panel6 then
-            FFrameCoef.StringGrid3.Parent := Panel6;
+            if FFrameCoef.StringGrid3.Parent <> Panel6 then
+                FFrameCoef.StringGrid3.Parent := Panel6;
+            Panel13.Caption := '   Коэффициенты';
+        end;
+
     end;
 
     // UpdateGroupHeights;
 end;
 
+procedure TForm1.FormActivate(Sender: TObject);
+var
+    wp: WINDOWPLACEMENT;
+    fs: TFileStream;
+    FileName: string;
+begin
+    FileName := TPath.Combine(ExtractFilePath(paramstr(0)), 'window.position');
+    if FileExists(FileName) then
+    begin
+        fs := TFileStream.Create(FileName, fmOpenRead);
+        fs.Read(wp, sizeof(wp));
+        fs.Free;
+        SetWindowPlacement(Handle, wp);
+    end;
+    self.OnActivate := nil;
+
+    PanelConsolePlaceholderRight.Width := FIni.ReadInteger('positions',
+      'console_right_width', 300);
+    PanelConsolePlaceholderBottom.Height := FIni.ReadInteger('positions',
+      'console_bottom_height', 300);
+    if FIni.ReadString('positions', 'console', 'down') = 'right' then
+        ToolButtonMoveConsoleUp.Click
+    else if FIni.ReadString('positions', 'console', 'down') = 'hiden' then
+        ToolButtonConsoleHide.Click;
+    RichEdit1.SetFocus;
+    SendMessage(RichEdit1.Handle, EM_SCROLL, SB_LINEDOWN, 0);
+end;
+
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
+var
+    wp: WINDOWPLACEMENT;
+    fs: TFileStream;
 begin
     FPipe.Close;
+
+    fs := TFileStream.Create(TPath.Combine(ExtractFilePath(paramstr(0)),
+      'window.position'), fmOpenWrite or fmCreate);
+    if not GetWindowPlacement(Handle, wp) then
+        raise Exception.Create('GetWindowPlacement: false');
+    fs.Write(wp, sizeof(wp));
+    fs.Free;
 end;
 
 procedure TForm1.SetCurrentParty;
@@ -395,7 +461,7 @@ var
     CurrentPartyID: int64;
 
 begin
-    for i := 0 to length(FProducts) - 1 do
+    for i := 0 to Length(FProducts) - 1 do
         FProducts[i].Free;
 
     ComboBox1DropDown(ComboBox1);
@@ -409,9 +475,9 @@ begin
 
     with StringGrid1 do
     begin
-        RowCount := length(FProducts) + 1;
+        RowCount := Length(FProducts) + 1;
         FixedRows := 1;
-        for i := 0 to length(FProducts) - 1 do
+        for i := 0 to Length(FProducts) - 1 do
         begin
             Cells[0, i + 1] := inttostr(i + 1);
             Cells[1, i + 1] := FProducts[i].FComport;
@@ -448,6 +514,18 @@ procedure TForm1.N4Click(Sender: TObject);
 begin
     FormCurrentWork.VirtualStringTree1.Parent := FormCurrentWork;
     FormCurrentWork.ShowModal;
+end;
+
+procedure TForm1.PanelConsolePlaceholderBottomResize(Sender: TObject);
+begin
+    FIni.WriteInteger('positions', 'console_bottom_height',
+      PanelConsolePlaceholderBottom.Height);
+end;
+
+procedure TForm1.PanelConsolePlaceholderRightResize(Sender: TObject);
+begin
+    FIni.WriteInteger('positions', 'console_right_width',
+      PanelConsolePlaceholderRight.Width);
 end;
 
 procedure TForm1.CheckBox1Click(Sender: TObject);
@@ -618,7 +696,7 @@ begin
     if ord(Key) = 1 then
     begin
         v := DataModule1.InvertProductsChecked;
-        for i := 0 to length(FProducts) - 1 do
+        for i := 0 to Length(FProducts) - 1 do
             FProducts[i].FChecked := v;
         StringGrid_Redraw(g);
     end;
@@ -749,13 +827,74 @@ begin
     FormSettings.Show;
 end;
 
-procedure TForm1.ToolButton4Click(Sender: TObject);
+procedure TForm1.ToolButton7Click(Sender: TObject);
 begin
-    ToolBar3.Visible := false;
-    PageControl2.Visible := true;
-    FormCurrentWork.VirtualStringTree1.Parent := FormCurrentWork;
-    Panel5.Align := alclient;
-    Panel5.Parent := Panel3;
+    Toolbar5.Visible := false;
+    Panel6.Controls[0].Parent := nil;
+    FFrameCoef.StringGrid3.Parent := Panel6;
+    Panel13.Caption := '   Коэффициенты';
+
+end;
+
+procedure TForm1.ToolButtonConsoleHideClick(Sender: TObject);
+begin
+    ToolButtonMoveConsoleDown.Visible := true;
+    ToolButtonMoveConsoleUp.Visible := true;
+    ToolButtonConsoleHide.Visible := false;
+    SplitterConsoleHoriz.Visible := false;
+    SplitterConsoleVert.Visible := false;
+    PanelConsolePlaceholderRight.Visible := false;
+    PanelConsolePlaceholderBottom.Visible := true;
+    PanelConsole.Parent := PanelConsolePlaceholderBottom;
+    PanelConsole.Height := Panel2.Height;
+    PanelConsolePlaceholderBottom.OnResize := nil;
+    PanelConsolePlaceholderBottom.Height := Panel2.Height;
+    PanelConsolePlaceholderBottom.OnResize :=
+      PanelConsolePlaceholderBottomResize;
+    FIni.WriteString('positions', 'console', 'hiden');
+end;
+
+procedure TForm1.ToolButtonMoveConsoleDownClick(Sender: TObject);
+begin
+    ToolButtonMoveConsoleDown.Visible := false;
+    ToolButtonMoveConsoleUp.Visible := true;
+    ToolButtonConsoleHide.Visible := true;
+    SplitterConsoleHoriz.Visible := true;
+    SplitterConsoleVert.Visible := false;
+    PanelConsolePlaceholderRight.Visible := false;
+    PanelConsolePlaceholderBottom.Visible := true;
+
+    PanelConsole.Parent := PanelConsolePlaceholderBottom;
+    SplitterConsoleHoriz.Top := 0;
+    PanelConsolePlaceholderBottom.Top := 100500;
+    FIni.WriteString('positions', 'console', 'down');
+    PanelConsolePlaceholderBottom.Height := FIni.ReadInteger('positions',
+      'console_bottom_height', 300);
+    RichEdit1.SetFocus;
+    SendMessage(RichEdit1.Handle, EM_SCROLL, SB_LINEDOWN, 0);
+end;
+
+procedure TForm1.ToolButtonMoveConsoleUpClick(Sender: TObject);
+begin
+    ToolButtonMoveConsoleDown.Visible := true;
+    ToolButtonMoveConsoleUp.Visible := false;
+    ToolButtonConsoleHide.Visible := true;
+    SplitterConsoleHoriz.Visible := false;
+    SplitterConsoleVert.Visible := true;
+    PanelConsolePlaceholderRight.Visible := true;
+    PanelConsolePlaceholderBottom.Visible := false;
+
+    PanelConsole.Parent := PanelConsolePlaceholderRight;
+    SplitterConsoleVert.Left := 0;
+    PanelConsolePlaceholderRight.Left := 100500;
+    self.Realign;
+
+    FIni.WriteString('positions', 'console', 'right');
+    PanelConsolePlaceholderRight.Width := FIni.ReadInteger('positions',
+      'console_right_width', 300);
+    RichEdit1.SetFocus;
+    SendMessage(RichEdit1.Handle, EM_SCROLL, SB_LINEDOWN, 0);
+
 end;
 
 procedure TForm1.ToolButtonStopClick(Sender: TObject);

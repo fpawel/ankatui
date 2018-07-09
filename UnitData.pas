@@ -127,6 +127,8 @@ type
           work_index: integer);
         procedure PrintDayLog(ARichEdit: TRichEdit; day, month, year: integer);
         procedure PrintWorkLog(ARichEdit: TRichEdit; record_id: longint);
+
+        procedure PrintLastMessages(ARichEdit: TRichEdit; count: integer);
     end;
 
 var
@@ -739,6 +741,28 @@ begin
               FieldValues['product_serial'],
               FieldValues['created_at'],
               FieldValues['level'],
+              FieldValues['message']);
+            Next;
+        end;
+        Close;
+    end;
+end;
+
+procedure TDataModule1.PrintLastMessages(ARichEdit: TRichEdit; count: integer);
+begin
+   ARichEdit.Lines.Clear;
+    with TFDQuery.Create(nil) do
+    begin
+        Connection := FDConnectionProductsDB;
+        SQL.Text := 'SELECT * FROM work_log2 LIMIT :count;';
+        ParamByName('count').Value := count;
+        Open;
+        First;
+        while not Eof do
+        begin
+            PrintWorkMessages(ARichEdit, FieldValues['work_index'],
+              FieldValues['work_name'], FieldValues['product_serial'],
+              FieldValues['created_at'], FieldValues['level'],
               FieldValues['message']);
             Next;
         end;

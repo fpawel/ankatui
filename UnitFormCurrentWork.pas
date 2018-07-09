@@ -137,7 +137,8 @@ begin
     Reset;
     Form1.FPipe.WriteMsgStr('RUN_MAIN_WORK', inttostr(o.FOrdinal));
     Form1.SetupWorkStarted(o.FName, true);
-    Form1.Panel6.Controls[0].Parent := nil;
+    while Form1.Panel6.ControlCount > 0 do
+        Form1.Panel6.Controls[0].Parent := nil;
     VirtualStringTree1.Parent := Form1.Panel6;
     ModalResult := mrOk;
 end;
