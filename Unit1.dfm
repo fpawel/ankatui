@@ -49,20 +49,21 @@ object Form1: TForm1
         Top = 59
         Width = 5
         Height = 360
+        ParentColor = False
         ExplicitLeft = 407
         ExplicitTop = 61
         ExplicitHeight = 594
       end
       object SplitterConsoleHoriz: TSplitter
         Left = 0
-        Top = 619
+        Top = 419
         Width = 1087
         Height = 5
         Cursor = crVSplit
         Align = alBottom
-        ExplicitLeft = 8
-        ExplicitTop = 460
-        ExplicitWidth = 1100
+        ParentColor = False
+        ExplicitLeft = -2
+        ExplicitTop = 414
       end
       object SplitterConsoleVert: TSplitter
         Left = 923
@@ -70,6 +71,7 @@ object Form1: TForm1
         Width = 5
         Height = 360
         Align = alRight
+        ParentColor = False
         Visible = False
         ExplicitLeft = 866
         ExplicitTop = 53
@@ -175,11 +177,10 @@ object Form1: TForm1
         Align = alLeft
         BevelOuter = bvNone
         TabOrder = 1
-        ExplicitHeight = 545
       end
       object PanelConsolePlaceholderBottom: TPanel
         Left = 0
-        Top = 419
+        Top = 424
         Width = 1087
         Height = 200
         Align = alBottom
@@ -188,8 +189,7 @@ object Form1: TForm1
         ParentColor = True
         TabOrder = 2
         OnResize = PanelConsolePlaceholderBottomResize
-        ExplicitTop = 463
-        ExplicitWidth = 1100
+        ExplicitTop = 419
         object PanelConsole: TPanel
           Left = 0
           Top = 0
@@ -200,7 +200,6 @@ object Form1: TForm1
           BevelOuter = bvNone
           ParentColor = True
           TabOrder = 0
-          ExplicitWidth = 1100
           object RichEdit1: TRichEdit
             Left = 0
             Top = 32
@@ -218,7 +217,6 @@ object Form1: TForm1
             ScrollBars = ssVertical
             TabOrder = 0
             Zoom = 100
-            ExplicitWidth = 1100
           end
           object Panel10: TPanel
             Left = 0
@@ -238,8 +236,6 @@ object Form1: TForm1
             ParentBackground = False
             ParentFont = False
             TabOrder = 1
-            ExplicitLeft = -2
-            ExplicitTop = 6
             DesignSize = (
               1087
               32)
@@ -255,7 +251,6 @@ object Form1: TForm1
               EdgeOuter = esNone
               Images = ImageList3
               TabOrder = 0
-              ExplicitLeft = 1030
               object ToolButtonMoveConsoleUp: TToolButton
                 Left = 0
                 Top = 0
@@ -309,9 +304,6 @@ object Form1: TForm1
         TabOrder = 3
         Visible = False
         OnResize = PanelConsolePlaceholderRightResize
-        ExplicitLeft = 936
-        ExplicitTop = 5
-        ExplicitHeight = 653
       end
       object Panel9: TPanel
         Left = 5
@@ -343,9 +335,6 @@ object Form1: TForm1
           OnMouseUp = StringGrid1MouseUp
           OnSelectCell = StringGrid1SelectCell
           OnTopLeftChanged = StringGrid1TopLeftChanged
-          ExplicitLeft = -237
-          ExplicitTop = 0
-          ExplicitHeight = 360
           ColWidths = (
             64
             64
@@ -401,7 +390,6 @@ object Form1: TForm1
           ParentBackground = False
           ParentFont = False
           TabOrder = 3
-          ExplicitTop = 8
         end
       end
       object Panel12: TPanel
@@ -414,9 +402,6 @@ object Form1: TForm1
         BevelOuter = bvNone
         ParentColor = True
         TabOrder = 5
-        ExplicitLeft = 0
-        ExplicitTop = 0
-        ExplicitWidth = 605
         object Panel6: TPanel
           Left = 0
           Top = 32
@@ -427,10 +412,8 @@ object Form1: TForm1
           BevelOuter = bvNone
           ParentColor = True
           TabOrder = 0
-          ExplicitLeft = 1
-          ExplicitTop = -6
-          ExplicitWidth = 605
-          ExplicitHeight = 360
+          ExplicitLeft = 6
+          ExplicitTop = 31
         end
         object Panel13: TPanel
           Left = 0
@@ -450,7 +433,6 @@ object Form1: TForm1
           ParentBackground = False
           ParentFont = False
           TabOrder = 1
-          ExplicitWidth = 605
           object ToolBar5: TToolBar
             Left = 600
             Top = 0
@@ -463,6 +445,7 @@ object Form1: TForm1
             EdgeOuter = esNone
             Images = ImageList3
             TabOrder = 0
+            Visible = False
             object ToolButton7: TToolButton
               Left = 0
               Top = 0
@@ -497,7 +480,7 @@ object Form1: TForm1
     Left = 480
     Top = 178
     Bitmap = {
-      494C010108009C00D40132003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010108009C00D80132003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000C8000000960000000100200000000000C0D4
       0100000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -4416,7 +4399,7 @@ object Form1: TForm1
     Left = 472
     Top = 256
     Bitmap = {
-      494C010103001801AC0110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010103001801B00110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -4565,7 +4548,7 @@ object Form1: TForm1
     Left = 544
     Top = 178
     Bitmap = {
-      494C01010300D401F00119001900FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C01010300D401F40119001900FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000640000001900000001002000000000001027
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

@@ -46,7 +46,7 @@ type
         procedure WriteStrMsg(m: TStrMsg);
     end;
 
-    TReadPipeHandler = reference to procedure(content: string);
+    TReadPipeHandler = reference to function(content: string):string;
 
     TPipe = class(TThread)
     private
@@ -383,12 +383,17 @@ begin
         m := FPipeMasterToPeerConn.ReadStrMsg;
         Synchronize(
             procedure
+            var s:string;
             begin
                 if (not terminated) and FConnected then
                 begin
                     if not FHandlers.ContainsKey(m.Msg) then
                         RaiseError(m.Msg + ': not found handler');
-                    FHandlers[m.Msg](m.Str);
+                    s := FHandlers[m.Msg](m.Str);
+                    if s <> '' then
+                        FPipeMasterToPeerConn.WriteString(s);
+
+
                 end;
             end);
     end;

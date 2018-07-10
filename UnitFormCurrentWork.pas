@@ -151,11 +151,12 @@ begin
     SetWindowLong(Button1.Handle, GWL_STYLE, defstyle or BS_LEFT );
 
     Form1.FPipe.Handle('SETUP_CURRENT_WORKS',
-        procedure(content: string)
+        function(content: string):string
         var
             Node: PVirtualNode;
             p: PTreeData;
         begin
+            Result := '';
             Node := VirtualStringTree1.GetFirst;
             while Assigned(Node) do
             begin
@@ -177,11 +178,12 @@ begin
         end);
 
     Form1.FPipe.Handle('CURRENT_WORK',
-        procedure(content: string)
+        function(content: string):string
         var
             d: TNodeData;
             op: TNotifyOperation;
         begin
+            Result := '';
             op := TJson.JsonToObject<TNotifyOperation>(content);
             d := RootNodeData.FDescendants[op.FOrdinal];
             if op.FName <> d.FInfo.FName then
@@ -202,8 +204,6 @@ begin
             d.FRun := op.FRun;
             VirtualStringTree1.RepaintNode(d.FNode);
         end);
-
-    Form1.FPipe.Connect('ANKAT');
 
 end;
 

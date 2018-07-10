@@ -9,11 +9,20 @@ uses
     Vcl.ExtCtrls, Vcl.ComCtrls, Vcl.ToolWin,
     parties, System.Generics.Collections,
     System.ImageList, UnitData, Vcl.ImgList, Vcl.Menus, VirtualTrees, pipe,
-    CurrentWork, msglevel, UnitFormLog, settings, UnitFormPopup, UnitFrameCoef,
+     msglevel, UnitFormLog, settings, UnitFormPopup, UnitFrameCoef,
     UnitFrameVar, UnitFormParties,
     UnitFormManualControl, inifiles;
 
 type
+
+    TWorkMsg = class
+        FLevel: integer;
+        FText: string;
+        FWorkIndex: integer;
+        FWork: string;
+        FProductSerial: integer;
+        FCreatedAt: TDAteTime;
+    end;
 
     TEndWorkInfo = class
         FError: string;
@@ -115,12 +124,13 @@ type
     private
         { Private declarations }
 
-        procedure HandleReadVar(content: string);
-        procedure HandleReadCoefficient(content: string);
-        procedure HandleCurentWorkMessage(content: string);
-        procedure HandleProductConnected(content: string);
-        procedure HandleReadProduct(content: string);
-        procedure HandleEndWork(content: string);
+        function HandleReadVar(content: string):string;
+        function HandleReadCoefficient(content: string):string;
+        function HandleCurentWorkMessage(content: string):string;
+        function HandleProductConnected(content: string):string;
+        function HandleReadProduct(content: string):string;
+        function HandleEndWork(content: string):string;
+        function HandleGasBlockConnectionError(content: string):string;
 
     public
         FPipe: TPipe;
@@ -237,14 +247,17 @@ begin
 
     FPipe.Handle('END_WORK', HandleEndWork);
 
+    FPipe.Handle('GAS_BLOCK_CONNECTION_ERROR', HandleGasBlockConnectionError);
+
     DataModule1.PrintLastMessages(RichEdit1, 500);
 
 end;
 
-procedure TForm1.HandleEndWork(content: string);
+function TForm1.HandleEndWork(content: string):string;
 var
     X: TEndWorkInfo;
 begin
+    Result:='';
     FFrameVar.reset;
     FFrameCoef.reset;
     X := TJson.JsonToObject<TEndWorkInfo>(content);
@@ -259,10 +272,24 @@ begin
 
 end;
 
-procedure TForm1.HandleProductConnected(content: string);
+function TForm1.HandleGasBlockConnectionError(content: string):string;
+var s:string;
+begin
+    s := 'Нет связи с газовым блоком'#10#13 + content + #10#13#10#13;
+    s := s + 'Нажмите OK чтобы игнорировать ошибку связи с газовым блоком и продолжить автоматическую настройку.'#10#13;
+    s := s + 'Нажмите ОТМЕНА чтобы прервать автоматическую настройку.';
+    if  MessageDlg(s, mtWarning, mbOKCancel,0 ) = IDOK  then
+        Result:='IGNORE'
+    else
+        Result:='ABORT';
+
+end;
+
+function TForm1.HandleProductConnected(content: string):string;
 var
     X: TProductConnected;
 begin
+    Result:='';
     X := TJson.JsonToObject<TProductConnected>(content);
     FProducts[X.FProduct].FConnectionError := not X.FOk;
     FProducts[X.FProduct].FConnection := X.FText;
@@ -271,16 +298,16 @@ begin
     X.Free;
 end;
 
-procedure TForm1.HandleCurentWorkMessage(content: string);
+function TForm1.HandleCurentWorkMessage(content: string):string;
 var
     m: TWorkMsg;
     i: integer;
 
 begin
+    Result:='';
     m := TJson.JsonToObject<TWorkMsg>(content);
 
-    Panel2.Caption := Format('%s [%d] %s: %s',
-      [timetostr(IncHour(m.FCreatedAt, 3)), m.FWorkIndex, m.FWork, m.FText]);
+    Panel2.Caption := Format('[%d] %s: %s', [m.FWorkIndex, m.FWork, m.FText]);
     if m.FLevel >= LError then
     begin
         Panel2.Font.Color := clRed;
@@ -298,11 +325,12 @@ begin
     m.Free;
 end;
 
-procedure TForm1.HandleReadProduct(content: string);
+function TForm1.HandleReadProduct(content: string):string;
 var
     X: TReadProduct;
     PrevProduct: integer;
 begin
+    Result:='';
     X := TJson.JsonToObject<TReadProduct>(content);
     PrevProduct := FReadProduct;
     FReadProduct := X.FProduct;
@@ -314,13 +342,14 @@ begin
     X.Free;
 end;
 
-procedure TForm1.HandleReadVar(content: string);
+function TForm1.HandleReadVar(content: string):string;
 var
     i: integer;
     X: TReadVar;
     p: TProduct;
     v: TDeviceVar;
 begin
+    Result:='';
     X := TJson.JsonToObject<TReadVar>(content);
     p := FProducts[X.FProduct];
     v := FFrameVar.FVars[X.FVar];
@@ -340,13 +369,14 @@ begin
     X.Free;
 end;
 
-procedure TForm1.HandleReadCoefficient(content: string);
+function TForm1.HandleReadCoefficient(content: string):string;
 var
     i: integer;
     X: TReadVar;
     p: TProduct;
     v: TDeviceVar;
 begin
+    Result:='';
     X := TJson.JsonToObject<TReadVar>(content);
     p := FProducts[X.FProduct];
     v := FFrameCoef.FCoefs[X.FVar];
@@ -468,10 +498,10 @@ begin
     FProducts := DataModule1.CurrentPartyProducts;
 
     CurrentPartyID := DataModule1.CurrentPartyID;
-    TabSheet3.Caption := Format('Партия № %d', [CurrentPartyID]);
+    TabSheet3.Caption := Format('Партия %d', [CurrentPartyID]);
 
     // TCategoryPanel(FSettings.FFrameSettings.CategoryPanelGroup1.Panels.First)
-    // .Caption := Format('Параметры партии № %d', [CurrentPartyID]);
+    // .Caption := Format('   %d', [CurrentPartyID]);
 
     with StringGrid1 do
     begin
@@ -830,7 +860,8 @@ end;
 procedure TForm1.ToolButton7Click(Sender: TObject);
 begin
     Toolbar5.Visible := false;
-    Panel6.Controls[0].Parent := nil;
+    if Panel6.ControlCount > 0 then
+        Panel6.Controls[0].Parent := nil;
     FFrameCoef.StringGrid3.Parent := Panel6;
     Panel13.Caption := '   Коэффициенты';
 

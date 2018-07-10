@@ -14,7 +14,6 @@ uses
   UnitFrameDelay in 'UnitFrameDelay.pas' {FrameDelay: TFrame},
   UnitFormLogNodes in 'UnitFormLogNodes.pas',
   CurrentWorkTreeData in 'CurrentWorkTreeData.pas',
-  CurrentWork in 'CurrentWork.pas',
   settings in 'settings.pas',
   UnitFormPopup in 'UnitFormPopup.pas' {FormPopup},
   UnitFormLog in 'UnitFormLog.pas' {FormLog},
@@ -30,7 +29,8 @@ uses
   UnitFormPartiesNodes in 'UnitFormPartiesNodes.pas',
   UnitFormSettings in 'UnitFormSettings.pas' {FormSettings},
   UnitFormConsole in 'UnitFormConsole.pas' {FormConsole},
-  UnitFormCurrentWork in 'UnitFormCurrentWork.pas' {FormCurrentWork};
+  UnitFormCurrentWork in 'UnitFormCurrentWork.pas' {FormCurrentWork},
+  UnitFormDelay in 'UnitFormDelay.pas' {FormDelay};
 
 {$R *.res}
 
@@ -45,6 +45,7 @@ begin
   Application.CreateForm(TFormSettings, FormSettings);
   Application.CreateForm(TFormConsole, FormConsole);
   Application.CreateForm(TFormCurrentWork, FormCurrentWork);
+  Application.CreateForm(TFormDelay, FormDelay);
   //Application.CreateForm(TFormCurrentWork, FormCurrentWork);
   //Application.CreateForm(TFormParties, FormParties);
   Application.Run;
