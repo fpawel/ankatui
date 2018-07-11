@@ -6,7 +6,7 @@ uses
     System.SysUtils, System.Variants,
     System.Classes,
     FireDAC.Comp.Client, UnitData,
-    VirtualTrees;
+    VirtualTrees, vcl.graphics;
 
 type
     PTreeData = ^RTreeData;
@@ -22,7 +22,7 @@ type
         FNode: PVirtualNode;
         FPopulated: boolean;
         FTreeView: TVirtualStringTree;
-        FColumn: array [0 .. 2] of RColumn;
+        FColumn: array [0 .. 3] of RColumn;
 
         procedure Populate; virtual; abstract;
         constructor Create(ATreeView: TVirtualStringTree;
@@ -57,7 +57,8 @@ type
         CreatedAt: TDateTime;
         PartyID: int64;
         SeriesID: int64;
-        Name: string;
+        WorkName: string;
+        WorkIndex: integer;
     end;
 
     TNodeSeries = class(TNodeData)
@@ -76,6 +77,18 @@ type
         procedure Populate; override;
         constructor Create(ATreeView: TVirtualStringTree; ANode: PVirtualNode;
           ASeriesInfo: RSeriesInfo; AVar: integer; AVarName: string);
+    end;
+
+    TNodeVarProduct = class(TNodeData)
+    public
+        FSeriesInfo: RSeriesInfo;
+        FVar: integer;
+        FVarName: string;
+        FSerial: integer;
+        FColor:Tcolor;
+        FColorSet:boolean;
+        constructor Create(ATreeView: TVirtualStringTree; ANode: PVirtualNode;
+          ASeriesInfo: RSeriesInfo; AVar: integer; ASerial: integer);
     end;
 
     RTreeData = record
@@ -166,28 +179,50 @@ constructor TNodeSeries.Create(ATreeView: TVirtualStringTree;
 begin
     inherited Create(ATreeView, ATreeView.AddChild(ANode));
     FSeriesInfo := ASeriesInfo;
-    FColumn[0].Text := ASeriesInfo.Name;
+    FColumn[0].Text := ASeriesInfo.WorkName;
     FColumn[1].Text := TimeToStr(ASeriesInfo.CreatedAt);
-    FColumn[2].Text := IntToStr(ASeriesInfo.PartyID);
+    FColumn[2].Text := inttostr(ASeriesInfo.PartyID);
+    FColumn[3].Text := inttostr2(ASeriesInfo.WorkIndex);
     FColumn[0].ImageIndex := 3;
 end;
 
-constructor TNodeVar.Create(ATreeView: TVirtualStringTree;
-  ANode: PVirtualNode; ASeriesInfo: RSeriesInfo; AVar:integer; AVarName: string);
+constructor TNodeVar.Create(ATreeView: TVirtualStringTree; ANode: PVirtualNode;
+  ASeriesInfo: RSeriesInfo; AVar: integer; AVarName: string);
 begin
     inherited Create(ATreeView, ATreeView.AddChild(ANode));
+
     FSeriesInfo := ASeriesInfo;
     FVar := AVar;
-    FVArName := AVarName;
-    FColumn[0].Text := inttostr(AVAr) + ' ' + AVarName;
+    FVarName := AVarName;
+    FColumn[0].Text := inttostr(AVar) + ' ' + AVarName;
     FColumn[0].ImageIndex := 4;
+
 end;
+
+constructor TNodeVarProduct.Create(ATreeView: TVirtualStringTree;
+  ANode: PVirtualNode; ASeriesInfo: RSeriesInfo; AVar: integer;
+  ASerial: integer);
+begin
+    inherited Create(ATreeView, ATreeView.AddChild(ANode));
+    ATreeView.HasChildren[FNode] := false;
+    FNode.CheckType := ctCheckBox;
+    FNode.CheckState := csCheckedNormal;
+
+    FSeriesInfo := ASeriesInfo;
+    FVar := AVar;
+    FSerial := ASerial;
+    FColumn[0].Text := inttostr(ASerial);
+    FColumn[0].ImageIndex := 5;
+    FColorSet := false;
+end;
+
 
 procedure TNodeYear.Populate;
 begin
     with DataModule1.FDQuery1 do
     begin
-        SQL.Text := 'SELECT DISTINCT month FROM series_info WHERE year = :year;';
+        SQL.Text :=
+          'SELECT DISTINCT month FROM series_info WHERE year = :year;';
         ParamByName('year').Value := FYear;
         open;
         First;
@@ -242,7 +277,8 @@ begin
             r.Day := FDay;
             r.CreatedAt := FieldValues['created_at'];
             r.PartyID := FieldValues['party_id'];
-            r.Name := FieldValues['name'];
+            r.WorkName := FieldValues['work_name'];
+            r.WorkIndex := FieldValues['work_index'];
             r.SeriesID := FieldValues['series_id'];
             TNodeSeries.Create(FTreeView, FNode, r);
             Next;
@@ -252,38 +288,47 @@ begin
 end;
 
 procedure TNodeSeries.Populate;
-var r: RSeriesInfo;
+var
+    r: RSeriesInfo;
 begin
     with TFDQuery.Create(nil) do
     begin
         Connection := DataModule1.FDConnectionProductsDB;
-        SQL.Text := 'SELECT DISTINCT read_var_id, var_name FROM chart_value_info WHERE series_id = :series_id;';
+        SQL.Text :=
+          'SELECT DISTINCT read_var_id, var_name FROM chart_value_info WHERE series_id = :series_id;';
         ParamByName('series_id').Value := FSeriesInfo.SeriesID;
         open;
         First;
         while not Eof do
         begin
-            TNodeVar.Create(FTreeView, FNode, FSeriesInfo, FieldValues['read_var_id'],
-            FieldValues['var_name']);
+            TNodeVar.Create(FTreeView, FNode, FSeriesInfo,
+              FieldValues['read_var_id'], FieldValues['var_name']);
             Next;
         end;
         Free;
     end;
 end;
 
-(*
-  TNodePartyLogsRoot = class(TNodeData)
-  public
-  FPartyID: int64;
-  constructor Create(ATreeView: TVirtualStringTree; ANode: PVirtualNode;
-  APartyID: int64;);
-  procedure Populate; override;
-  end;
-*)
-
 procedure TNodeVar.Populate;
 begin
-
+    with TFDQuery.Create(nil) do
+    begin
+        Connection := DataModule1.FDConnectionProductsDB;
+        SQL.Text :=
+          'SELECT DISTINCT product_serial product_serial FROM chart_value_info '
+          + 'WHERE series_id = :series_id AND read_var_id = :read_var_id;';
+        ParamByName('series_id').Value := FSeriesInfo.SeriesID;
+        ParamByName('read_var_id').Value := FVar;
+        open;
+        First;
+        while not Eof do
+        begin
+            TNodeVarProduct.Create(FTreeView, FNode, FSeriesInfo, FVar,
+              FieldValues['product_serial']);
+            Next;
+        end;
+        Free;
+    end;
 end;
 
 end.
