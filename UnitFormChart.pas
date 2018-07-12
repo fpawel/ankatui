@@ -16,7 +16,7 @@ type
         ImageList1: TImageList;
         Splitter1: TSplitter;
         VirtualStringTree1: TVirtualStringTree;
-        Chart2: TChart;
+        Chart1: TChart;
         procedure FormCreate(Sender: TObject);
         procedure VirtualStringTree1BeforeCellPaint(Sender: TBaseVirtualTree;
           TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
@@ -39,7 +39,6 @@ type
           TextType: TVSTTextType);
         procedure RichEdit1ContextPopup(Sender: TObject; MousePos: TPoint;
           var Handled: boolean);
-        procedure Chart2AfterDraw(Sender: TObject);
 
     private
         { Private declarations }
@@ -64,6 +63,41 @@ begin
         result := '0' + result;
 end;
 
+procedure GetSeriesValues(ser: TFastLineSeries; SeriesID: int64; AVar: integer;
+  product_serial: integer);
+var
+    FmtStngs: TFormatSettings;
+    X: string;
+    y: double;
+begin
+    GetLocaleFormatSettings(GetThreadLocale, FmtStngs);
+    FmtStngs.DateSeparator := '.';
+    FmtStngs.ShortDateFormat := 'dd/MM/yyyy';
+    FmtStngs.TimeSeparator := ':';
+    FmtStngs.LongTimeFormat := 'h:mm:ss';
+    with TFDQuery.Create(nil) do
+    begin
+        Connection := DataModule1.FDConnectionProductsDB;
+        SQL.Text :=
+          'SELECT x,y FROM chart_value_info WHERE product_serial = :product_serial '
+          + 'AND read_var_id = :read_var_id AND series_id = :series_id;';
+        ParamByName('product_serial').Value := product_serial;
+        ParamByName('read_var_id').Value := AVar;
+        ParamByName('series_id').Value := SeriesID;
+        open;
+        First;
+        while not Eof do
+        begin
+            X := FieldValues['x'];
+            y := FieldValues['y'];
+            ser.AddNullXY(StrToDateTime(X, FmtStngs), y);
+            Next;
+        end;
+        Close;
+        Free;
+    end;
+end;
+
 procedure freeNodeData(t: TVirtualStringTree; n: PVirtualNode);
 var
     p: PTreeData;
@@ -76,22 +110,6 @@ begin
     freeNodeData(t, n.NextSibling);
 end;
 
-procedure TFormChart.Chart2AfterDraw(Sender: TObject);
-var
-    ser: TChartSeries;
-    node_var_product: TNodeVarProduct;
-begin
-    for ser in Chart2.SeriesList do
-    begin
-        node_var_product := TNodeVarProduct(ser.TagObject);
-        node_var_product.FColor := ser.Color;
-        node_var_product.FColorSet := true;
-        VirtualStringTree1.RepaintNode(node_var_product.FNode);
-
-    end;
-
-end;
-
 procedure TFormChart.FormCreate(Sender: TObject);
 var
     d: RTreeData;
@@ -101,7 +119,7 @@ begin
     VirtualStringTree1.NodeDataSize := SizeOf(RTreeData);
     for year in DataModule1.SeriesYears do
         TNodeYear.Create(VirtualStringTree1, year);
-    Chart2.Visible := false;
+    Chart1.Visible := false;
 end;
 
 procedure TFormChart.RichEdit1ContextPopup(Sender: TObject; MousePos: TPoint;
@@ -127,93 +145,81 @@ begin
         TargetCanvas.Brush.Color := clSkyBlue;
         TargetCanvas.FillRect(CellRect);
     end;
-    
-    if (Column = 4) AND (p.X is TNodeVarProduct) then
-    begin
-        node_var_product := p.X as TNodeVarProduct;
-        if node_var_product.FColorSet then
-        begin
-            TargetCanvas.Brush.Color := node_var_product.FColor;
-            CellRect.Top := CellRect.Top + 10;
-            CellRect.Bottom := CellRect.Bottom - 10;
-            TargetCanvas.FillRect(CellRect);
-        end;
-
-    end;
 end;
 
 procedure TFormChart.VirtualStringTree1Change(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 var
     p: PTreeData;
-    node_var: TNodeVar;
-    node_var_product: TNodeVarProduct;
+
     ser: TFastLineSeries;
-    n: PVirtualNode;
-    X: string;
-    y: double;
-    FmtStngs: TFormatSettings;
+    product_serial: integer;
+
 begin
 
-    Chart2.Visible := false;
+    Chart1.Visible := false;
     if not Assigned(Node) then
         exit;
     p := Sender.GetNodeData(Node);
     if p.X is TNodeVar then
-    begin
-        node_var := p.X as TNodeVar;
-        Chart2.Visible := true;
-        Chart2.SeriesList.Clear;
-        Chart2.Title.Caption := node_var.FVarName;
-
-        GetLocaleFormatSettings(GetThreadLocale, FmtStngs);
-        FmtStngs.DateSeparator := '.';
-        FmtStngs.ShortDateFormat := 'dd/MM/yyyy';
-        FmtStngs.TimeSeparator := ':';
-        FmtStngs.LongTimeFormat := 'h:mm:ss';
-
-        if node.ChildCount = 0 then
-            VirtualStringTree1.Expanded[Node] := true;    
-
-        n := Node.FirstChild;
-        while Assigned(n) do
+        with p.X as TNodeVar do
         begin
-            p := Sender.GetNodeData(n);
+            while Chart1.SeriesCount > 0 do
+                with Chart1.Series[0] do
+                begin
+                    ParentChart := nil;
+                    Free;
+                end;
 
-            node_var_product := p.X as TNodeVarProduct;
+            Chart1.Title.Caption := FVarName;
+            for product_serial in DataModule1.GetSeriesVarProducts
+              (FSeriesInfo.SeriesID, FVar) do
+            begin
+                ser := TFastLineSeries.Create(nil);
+                ser.XValues.DateTime := true;
+                ser.Title := inttostr(product_serial);
+                GetSeriesValues(ser, FSeriesInfo.SeriesID, FVar,
+                  product_serial);
+                Chart1.AddSeries(ser);
+            end;
+            
+            with Chart1 do
+            begin
+                Title.Caption := FVarName;
+                Visible := true;
+            end;
+
+        end
+    else if p.X is TNodeVarProduct then
+        with p.X as TNodeVarProduct do
+        begin
+            while Chart1.SeriesCount > 0 do
+                with Chart1.Series[0] do
+                begin
+                    ParentChart := nil;
+                    Free;
+                end;
+
             ser := TFastLineSeries.Create(nil);
             ser.XValues.DateTime := true;
-            ser.Title := inttostr(node_var_product.FSerial);
-            ser.Active := n.CheckState = csCheckedNormal;
-            ser.TagObject := node_var_product;
+            ser.Title := inttostr(product_serial);
+            GetSeriesValues(ser, FSeriesInfo.SeriesID, FVar, FSerial);
 
-            with TFDQuery.Create(nil) do
+            with Chart1 do
             begin
-                Connection := DataModule1.FDConnectionProductsDB;
-                SQL.Text :=
-                  'SELECT x,y FROM chart_value_info WHERE product_serial = :product_serial '
-                  + 'AND read_var_id = :read_var_id AND series_id = :series_id;';
-                ParamByName('product_serial').Value := node_var_product.FSerial;
-                ParamByName('read_var_id').Value := node_var_product.FVar;
-                ParamByName('series_id').Value :=
-                  node_var_product.FSeriesInfo.SeriesID;
-                open;
-                First;
-                while not Eof do
-                begin
-                    X := FieldValues['x'];
-                    y := FieldValues['y'];
-                    ser.AddNullXY(StrToDateTime(X, FmtStngs), y);
-                    Next;
-                end;
-                Close;
-                Free;
+                Title.Caption := FVarName + ': ' + inttostr(FSerial);
+                AddSeries(ser);
+                Visible := true;
             end;
-            Chart2.AddSeries(ser);
-            n := n.NextSibling;
+
         end;
 
-        exit;
+    with Chart1 do
+    begin
+        Legend.Visible := Visible AND (seriescount > 1);
+        if SeriesCount = 1 then
+            Title.Caption := Title.Caption + ': ' + Series[0].Title;
+
     end;
 
 end;
@@ -296,13 +302,6 @@ begin
                 begin
                     if not Sender.Selected[Node] then
                         TargetCanvas.Font.Color := clMaroon;
-                end
-                else if p.X is TNodeVarProduct then
-                begin
-                    node_var_product := p.X as TNodeVarProduct;
-                    if node_var_product.FColorSet then
-                        TargetCanvas.Font.Color := node_var_product.FColor;
-
                 end;
 
             end;

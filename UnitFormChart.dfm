@@ -45,7 +45,6 @@ object FormChart: TFormChart
     Images = ImageList1
     ParentFont = False
     TabOrder = 0
-    TreeOptions.MiscOptions = [toAcceptOLEDrop, toCheckSupport, toFullRepaintOnResize, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
     OnBeforeCellPaint = VirtualStringTree1BeforeCellPaint
     OnChange = VirtualStringTree1Change
     OnCollapsed = VirtualStringTree1Collapsed
@@ -53,6 +52,7 @@ object FormChart: TFormChart
     OnGetText = VirtualStringTree1GetText
     OnPaintText = VirtualStringTree1PaintText
     OnGetImageIndex = VirtualStringTree1GetImageIndex
+    ExplicitLeft = -1
     Columns = <
       item
         Position = 0
@@ -78,14 +78,15 @@ object FormChart: TFormChart
         Width = 38
       end>
   end
-  object Chart2: TChart
+  object Chart1: TChart
     Left = 494
     Top = 0
     Width = 599
     Height = 576
     Legend.Alignment = laBottom
     Legend.Title.Visible = False
-    MarginRight = 5
+    Legend.Visible = False
+    MarginRight = 14
     MarginTop = 0
     MarginUnits = muPixels
     Title.Font.Charset = RUSSIAN_CHARSET
@@ -97,11 +98,11 @@ object FormChart: TFormChart
     Title.VertMargin = 0
     RightAxis.Visible = False
     View3D = False
-    OnAfterDraw = Chart2AfterDraw
     Align = alClient
     BevelOuter = bvNone
     Color = clWindow
     TabOrder = 1
+    ExplicitLeft = 495
     DefaultCanvas = 'TGDIPlusCanvas'
     ColorPaletteIndex = 13
   end
@@ -113,7 +114,7 @@ object FormChart: TFormChart
     Left = 128
     Top = 168
     Bitmap = {
-      494C010106009C00500110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010106009C00540110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       000000000000000000000000000000000000B5794DFFB5794DFFB5794DFFB579
       4DFFB5794DFFB5794DFFB5794DFFB5794DFFB5794DFFB5794DFFB5794DFFB579

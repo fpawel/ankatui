@@ -129,6 +129,8 @@ type
         procedure PrintWorkLog(ARichEdit: TRichEdit; record_id: longint);
 
         procedure PrintLastMessages(ARichEdit: TRichEdit; count: integer);
+
+        function GetSeriesVarProducts(seriesID:int64; AVar:integer): TArray<integer>;
     end;
 
 var
@@ -811,6 +813,32 @@ begin
         end;
         Close;
     end;
+end;
+
+function TDataModule1.GetSeriesVarProducts(seriesID:int64; AVar:integer): TArray<integer>;
+var
+    xs: TList<integer>;
+begin
+    xs := TList<integer>.create;
+    with TFDQuery.Create(nil) do
+    begin
+        Connection := FDConnectionProductsDB;
+        SQL.Text :=
+          'SELECT DISTINCT product_serial FROM chart_value_info '
+          + 'WHERE series_id = :series_id AND read_var_id = :read_var_id;';
+        ParamByName('series_id').Value := seriesID;
+        ParamByName('read_var_id').Value := AVar;
+        open;
+        First;
+        while not Eof do
+        begin
+            xs.Add(FieldValues['product_serial']);
+            Next;
+        end;
+        Free;
+    end;
+    result := xs.ToArray;
+    xs.Free;
 end;
 
 end.

@@ -187,7 +187,7 @@ begin
         Splitter1.Parent := TabSheet8;
         Panel1.Parent := TabSheet8;
         VirtualStringTree1.Parent := TabSheet8;
-        Chart2.Parent := TabSheet8;
+        Chart1.Parent := TabSheet8;
     end;
 
     FFormLog := TFormLog.Create(self);

@@ -85,10 +85,8 @@ type
         FVar: integer;
         FVarName: string;
         FSerial: integer;
-        FColor:Tcolor;
-        FColorSet:boolean;
         constructor Create(ATreeView: TVirtualStringTree; ANode: PVirtualNode;
-          ASeriesInfo: RSeriesInfo; AVar: integer; ASerial: integer);
+          ASeriesInfo: RSeriesInfo; AVar: integer; AVarName: string; ASerial: integer);
     end;
 
     RTreeData = record
@@ -200,20 +198,18 @@ begin
 end;
 
 constructor TNodeVarProduct.Create(ATreeView: TVirtualStringTree;
-  ANode: PVirtualNode; ASeriesInfo: RSeriesInfo; AVar: integer;
+  ANode: PVirtualNode; ASeriesInfo: RSeriesInfo; AVar: integer; AVarName: string;
   ASerial: integer);
 begin
     inherited Create(ATreeView, ATreeView.AddChild(ANode));
     ATreeView.HasChildren[FNode] := false;
-    FNode.CheckType := ctCheckBox;
-    FNode.CheckState := csCheckedNormal;
 
     FSeriesInfo := ASeriesInfo;
     FVar := AVar;
+    FVarName := AVarName;
     FSerial := ASerial;
     FColumn[0].Text := inttostr(ASerial);
     FColumn[0].ImageIndex := 5;
-    FColorSet := false;
 end;
 
 
@@ -310,24 +306,11 @@ begin
 end;
 
 procedure TNodeVar.Populate;
+var n:integer;
 begin
-    with TFDQuery.Create(nil) do
+    for n in DataModule1.GetSeriesVarProducts(FSeriesInfo.SeriesID, FVar) do
     begin
-        Connection := DataModule1.FDConnectionProductsDB;
-        SQL.Text :=
-          'SELECT DISTINCT product_serial product_serial FROM chart_value_info '
-          + 'WHERE series_id = :series_id AND read_var_id = :read_var_id;';
-        ParamByName('series_id').Value := FSeriesInfo.SeriesID;
-        ParamByName('read_var_id').Value := FVar;
-        open;
-        First;
-        while not Eof do
-        begin
-            TNodeVarProduct.Create(FTreeView, FNode, FSeriesInfo, FVar,
-              FieldValues['product_serial']);
-            Next;
-        end;
-        Free;
+        TNodeVarProduct.Create(FTreeView, FNode, FSeriesInfo, FVar, FVarName, n);
     end;
 end;
 
