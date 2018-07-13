@@ -130,7 +130,7 @@ type
         function HandleProductConnected(content: string):string;
         function HandleReadProduct(content: string):string;
         function HandleEndWork(content: string):string;
-        function HandleGasBlockConnectionError(content: string):string;
+        function HandlePromptErrorStopWork(content: string):string;
 
     public
         FPipe: TPipe;
@@ -248,7 +248,7 @@ begin
 
     FPipe.Handle('END_WORK', HandleEndWork);
 
-    FPipe.Handle('GAS_BLOCK_CONNECTION_ERROR', HandleGasBlockConnectionError);
+    FPipe.Handle('PROMPT_ERROR_STOP_WORK', HandlePromptErrorStopWork);
 
     DataModule1.PrintLastMessages(RichEdit1, 500);
 
@@ -273,11 +273,11 @@ begin
 
 end;
 
-function TForm1.HandleGasBlockConnectionError(content: string):string;
+function TForm1.HandlePromptErrorStopWork(content: string):string;
 var s:string;
 begin
-    s := 'Нет связи с газовым блоком'#10#13 + content + #10#13#10#13;
-    s := s + 'Нажмите OK чтобы игнорировать ошибку связи с газовым блоком и продолжить автоматическую настройку.'#10#13;
+    s := content + #10#13#10#13;
+    s := s + 'Нажмите OK чтобы игнорировать ошибку и продолжить автоматическую настройку.'#10#13;
     s := s + 'Нажмите ОТМЕНА чтобы прервать автоматическую настройку.';
     if  MessageDlg(s, mtWarning, mbOKCancel,0 ) = IDOK  then
         Result:='IGNORE'
