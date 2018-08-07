@@ -355,7 +355,7 @@ begin
     p := FProducts[X.FProduct];
     v := FFrameVar.FVars[X.FVar];
     Panel2.Font.Color := clNavy;
-    Panel2.Caption := Format('Считывание: прибор %d: регистр %d: %s: %s: ',
+    Panel2.Caption := Format('Считывание: АНКАТ %d: регистр %d: %s: %s: ',
       [p.FSerial, v.FVar, v.FName, v.FDescription]);
 
     if X.FError = '' then
@@ -382,7 +382,7 @@ begin
     p := FProducts[X.FProduct];
     v := FFrameCoef.FCoefs[X.FVar];
     Panel2.Font.Color := clNavy;
-    Panel2.Caption := Format('Считывание: прибор %d: коэффициент %d: %s: %s: ',
+    Panel2.Caption := Format('Считывание: АНКАТ %d: коэффициент %d: %s: %s: ',
       [p.FSerial, v.FVar, v.FName, v.FDescription]);
 
     if X.FError = '' then
