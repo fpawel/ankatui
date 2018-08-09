@@ -100,6 +100,7 @@ type
         function PartyValues(partyID: int64): TKeysValues;
         function CurrentPartyProducts: TArray<TProduct>;
         function CurrentPartyID: int64;
+        function PartyExists: boolean;
         procedure UpdateProductComport(Ordinal: integer; comport: string);
         procedure UpdateProductchecked(Ordinal: integer; checked: boolean);
         procedure UpdateCurrentWorkCheckState(Ordinal: integer;
@@ -353,7 +354,7 @@ begin
     begin
         Connection := FDConnectionProductsDB;
         SQL.Text :=
-          'UPDATE read_var SET checked = :checked WHERE read_var_id = :devicevar;';
+          'UPDATE read_var SET checked = :checked WHERE var = :devicevar;';
         ParamByName('devicevar').Value := devicevar;
         ParamByName('checked').Value := checked;
         ExecSQL;
@@ -373,6 +374,19 @@ begin
         ParamByName('ordinal').Value := Ordinal;
         ParamByName('checked').Value := checked;
         ExecSQL;
+        Free;
+    end;
+
+end;
+
+function TDataModule1.PartyExists: boolean;
+begin
+    with TFDQuery.Create(nil) do
+    begin
+        Connection := FDConnectionProductsDB;
+        SQL.Text := 'select exists( select party_id from party ) as r';
+        Open;
+        result := FieldValues['r'];
         Free;
     end;
 
@@ -456,13 +470,13 @@ begin
     with TFDQuery.Create(nil) do
     begin
         Connection := FDConnectionProductsDB;
-        SQL.Text := 'SELECT * FROM read_var ORDER BY read_var_id;';
+        SQL.Text := 'SELECT * FROM read_var ORDER BY var;';
         Open;
         First;
         while not Eof do
         begin
             v := TDeviceVar.Create;
-            v.FVar := FieldValues['read_var_id'];
+            v.FVar := FieldValues['var'];
             v.FName := FieldValues['name'];
             v.FChecked := FieldValues['checked'];
             v.FDescription := FieldValues['description'];
@@ -521,6 +535,8 @@ begin
         Close;
         Free;
     end;
+    if xs.Count = 0 then
+        xs.Add(YearOf(now));
     result := xs.ToArray;
     xs.Free;
 end;
@@ -825,9 +841,9 @@ begin
         Connection := FDConnectionProductsDB;
         SQL.Text :=
           'SELECT DISTINCT product_serial FROM chart_value_info '
-          + 'WHERE series_id = :series_id AND read_var_id = :read_var_id;';
+          + 'WHERE series_id = :series_id AND var = :var;';
         ParamByName('series_id').Value := seriesID;
-        ParamByName('read_var_id').Value := AVar;
+        ParamByName('var').Value := AVar;
         open;
         First;
         while not Eof do

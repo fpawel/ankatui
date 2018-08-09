@@ -80,7 +80,9 @@ end;
 procedure TFormLog.FormCreate(Sender: TObject);
 var
     d: RTreeData;
+    v:boolean;
 begin
+    v := false;
     VirtualStringTree1.NodeDataSize := SizeOf(RTreeData);
     with DataModule1.FDQueryWorkLogYears do
     begin
@@ -89,10 +91,15 @@ begin
         while not Eof do
         begin
             TNodeYear.Create(VirtualStringTree1, FieldValues['year']);
+            v := true;
             Next;
         end;
         Close;
     end;
+    if not v then
+        TNodeYear.Create(VirtualStringTree1, YearOf(now));
+
+
 end;
 
 procedure TFormLog.RichEdit1ContextPopup(Sender: TObject; MousePos: TPoint;
@@ -180,7 +187,7 @@ begin
     if p.X.FPopulated then
         exit;
     p.X.Populate;
-    p.X.FPopulated := true;
+    p.X.FPopulated := node.ChildCount > 0;
 end;
 
 procedure TFormLog.VirtualStringTree1GetImageIndex(Sender: TBaseVirtualTree;

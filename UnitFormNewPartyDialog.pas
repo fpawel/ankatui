@@ -28,12 +28,12 @@ type
     private
         { Private declarations }
         FConfig: TConfig;
-        FAcceptHandler: TAcceptHandler;
         function Serials: TArray<Integer>;
         procedure Validate(ok: Boolean);
         procedure SetupFrameSettings;
+        procedure DoAccept;
     public
-        property OnAccept: TAcceptHandler write FAcceptHandler;
+
 
         { Public declarations }
     end;
@@ -46,7 +46,43 @@ implementation
 {$R *.dfm}
 
 uses System.Generics.Collections, stringutils, parties, UnitData,
-    FireDAC.Stan.Param;
+    FireDAC.Stan.Param, Unit1;
+
+procedure TFormNewPartyDialog.DoAccept;
+var
+    I, serial: Integer;
+    p: UnitFrameSettings.TConfigValue;
+    s: string;
+begin
+
+    with DataModule1.FDQuery1 do
+    begin
+        SQL.Text := 'INSERT INTO party DEFAULT VALUES;';
+        Execute;
+
+        for p in FConfig.FItems[0].FItems do
+        begin
+            SQL.Text :=
+              'INSERT OR REPLACE INTO party_value (party_id, var, value)' +
+              'VALUES ((SELECT * FROM current_party_id), :key, :val);';
+            ParamByName('key').Value := p.FVar;
+            p.SetParam(ParamByName('val'));
+            Execute;
+        end;
+
+        for serial in Serials do
+        begin
+            SQL.Text := 'INSERT INTO product (party_id, product_serial) VALUES '
+              + '((SELECT * FROM current_party_id), :serial)';
+            ParamByName('serial').Value := serial;
+            Execute;
+        end;
+        Close;
+    end;
+
+    form1.SetCurrentParty;
+    
+end;
 
 procedure TFormNewPartyDialog.SetupFrameSettings;
 begin
@@ -199,40 +235,13 @@ begin
 end;
 
 procedure TFormNewPartyDialog.Button1Click(Sender: TObject);
-var
-    I, serial: Integer;
-    p: UnitFrameSettings.TConfigValue;
-    s: string;
 begin
+    DoAccept;
+    if fsModal in FormState then
+        ModalResult := mrOk
+    else
+        Hide ;
 
-    with DataModule1.FDQuery1 do
-    begin
-        SQL.Text := 'INSERT INTO party DEFAULT VALUES;';
-        Execute;
-
-        for p in FConfig.FItems[0].FItems do
-        begin
-            SQL.Text :=
-              'INSERT OR REPLACE INTO party_value (party_id, var, value)' +
-              'VALUES ((SELECT * FROM current_party_id), :key, :val);';
-            ParamByName('key').Value := p.FVar;
-            p.SetParam(ParamByName('val'));
-            Execute;
-        end;
-
-        for serial in Serials do
-        begin
-            SQL.Text := 'INSERT INTO product (party_id, product_serial) VALUES '
-              + '((SELECT * FROM current_party_id), :serial)';
-            ParamByName('serial').Value := serial;
-            Execute;
-        end;
-        Close;
-    end;
-    // Form1.SetCurrentParty;
-    Hide;
-    if Assigned(FAcceptHandler) then
-        FAcceptHandler;
 end;
 
 procedure TFormNewPartyDialog.FormDeactivate(Sender: TObject);

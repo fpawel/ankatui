@@ -143,6 +143,7 @@ type
         FIni: TIniFile;
         { Public declarations }
         procedure SetCurrentParty;
+        procedure Init2;
         procedure SetupWorkStarted(work: string; started: boolean);
     end;
 
@@ -164,16 +165,68 @@ var
     ARow: integer;
     i: integer;
 begin
-    FIni := TIniFile.Create(ExtractFileDir(paramstr(0)) + '\main.ini');
-    FReadProduct := -1;
+
+
     FFrameCoef := TFrameCoef.Create(self);
     FFrameCoef.Parent := Panel6;
     FFrameCoef.Align := alclient;
 
     FFrameVar := TFrameVar.Create(self);
-    // FFrameVar.Parent := TabSheet1;
     FFrameVar.Align := alclient;
 
+    FIni := TIniFile.Create(ExtractFileDir(paramstr(0)) + '\main.ini');
+    FReadProduct := -1;
+    
+
+    ToolBar2.Width := 58;
+    ComboBox1DropDown(ComboBox1);
+
+    ComboBox1.ItemHeight := 18;
+    ComboBox1.Visible := false;
+
+    with CheckBox1 do
+    begin
+        Visible := false;
+        Caption := '';
+        Width := 15;
+        Height := 15;
+    end;
+
+    with StringGrid1 do
+    begin
+        Cells[0, 0] := '¹ ï/ï';
+        Cells[1, 0] := 'COM ïîðò';
+        Cells[2, 0] := 'Çàâ.¹';
+        Cells[3, 0] := 'Ñâÿçü';
+
+        ColWidths[0] := 70;
+        ColWidths[1] := 90;
+        ColWidths[2] := 75;
+    end;
+
+
+    FPipe := TPipe.Create;
+    // FCurrentWork := TCurrentWork.Create(FPipe, Panel5, VirtualStringTree1);
+
+    FPipe.Handle('READ_COEFFICIENT', HandleReadCoefficient);
+    FPipe.Handle('READ_VAR', HandleReadVar);
+
+    FPipe.Handle('CURRENT_WORK_MESSAGE', HandleCurentWorkMessage);
+
+    FPipe.Handle('PRODUCT_CONNECTED', HandleProductConnected);
+
+    FPipe.Handle('READ_PRODUCT', HandleReadProduct);
+
+    FPipe.Handle('END_WORK', HandleEndWork);
+
+    FPipe.Handle('PROMPT_ERROR_STOP_WORK', HandlePromptErrorStopWork);
+
+    DataModule1.PrintLastMessages(RichEdit1, 500);
+
+end;
+
+procedure TForm1.Init2;
+begin
     FFormParties := TFormParties.Create(self);
     with TFormParties.Create(self) do
     begin
@@ -206,53 +259,9 @@ begin
                 end;
             end;
     end;
-
-    ToolBar2.Width := 58;
-    ComboBox1DropDown(ComboBox1);
-
-    ComboBox1.ItemHeight := 18;
-    ComboBox1.Visible := false;
-
-    with CheckBox1 do
-    begin
-        Visible := false;
-        Caption := '';
-        Width := 15;
-        Height := 15;
-    end;
-
-    with StringGrid1 do
-    begin
-        Cells[0, 0] := '¹ ï/ï';
-        Cells[1, 0] := 'COM ïîðò';
-        Cells[2, 0] := 'Çàâ.¹';
-        Cells[3, 0] := 'Ñâÿçü';
-
-        ColWidths[0] := 70;
-        ColWidths[1] := 90;
-        ColWidths[2] := 75;
-    end;
-    SetCurrentParty;
-
-    FPipe := TPipe.Create;
-    // FCurrentWork := TCurrentWork.Create(FPipe, Panel5, VirtualStringTree1);
-
-    FPipe.Handle('READ_COEFFICIENT', HandleReadCoefficient);
-    FPipe.Handle('READ_VAR', HandleReadVar);
-
-    FPipe.Handle('CURRENT_WORK_MESSAGE', HandleCurentWorkMessage);
-
-    FPipe.Handle('PRODUCT_CONNECTED', HandleProductConnected);
-
-    FPipe.Handle('READ_PRODUCT', HandleReadProduct);
-
-    FPipe.Handle('END_WORK', HandleEndWork);
-
-    FPipe.Handle('PROMPT_ERROR_STOP_WORK', HandlePromptErrorStopWork);
-
-    DataModule1.PrintLastMessages(RichEdit1, 500);
-
 end;
+
+
 
 function TForm1.HandleEndWork(content: string):string;
 var
@@ -447,6 +456,22 @@ var
     fs: TFileStream;
     FileName: string;
 begin
+    OnActivate := nil;
+
+    if not DataModule1.PartyExists then
+    begin
+        WindowState := wsMaximized;
+        FormNewPartyDialog.WindowState := wsMaximized;
+        FormNewPartyDialog.ShowModal;
+        if not DataModule1.PartyExists then
+        begin
+            Close;
+            exit;
+        end;
+    end else
+        SetCurrentParty;
+    Init2;
+
     FileName := TPath.Combine(ExtractFilePath(paramstr(0)), 'window.position');
     if FileExists(FileName) then
     begin
@@ -455,7 +480,7 @@ begin
         fs.Free;
         SetWindowPlacement(Handle, wp);
     end;
-    self.OnActivate := nil;
+
 
     PanelConsolePlaceholderRight.Width := FIni.ReadInteger('positions',
       'console_right_width', 300);
@@ -467,6 +492,11 @@ begin
         ToolButtonConsoleHide.Click;
     RichEdit1.SetFocus;
     SendMessage(RichEdit1.Handle, EM_SCROLL, SB_LINEDOWN, 0);
+
+
+
+
+
 end;
 
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -501,9 +531,6 @@ begin
     CurrentPartyID := DataModule1.CurrentPartyID;
     TabSheet3.Caption := Format('Ïàðòèÿ %d', [CurrentPartyID]);
 
-    // TCategoryPanel(FSettings.FFrameSettings.CategoryPanelGroup1.Panels.First)
-    // .Caption := Format('˜˜˜˜˜˜˜˜˜ ˜˜˜˜˜˜ ˜ %d', [CurrentPartyID]);
-
     with StringGrid1 do
     begin
         RowCount := Length(FProducts) + 1;
@@ -518,7 +545,6 @@ begin
     end;
     FFrameVar.SetCurrentParty(FProducts);
     FFrameCoef.SetCurrentParty(FProducts);
-    FFormParties.refresh;
 end;
 
 procedure TForm1.N1Click(Sender: TObject);
@@ -843,7 +869,6 @@ end;
 procedure TForm1.ToolButton1Click(Sender: TObject);
 begin
     FormNewPartyDialog.Show;
-    FormNewPartyDialog.OnAccept := SetCurrentParty;
 end;
 
 procedure TForm1.ToolButton2Click(Sender: TObject);

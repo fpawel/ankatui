@@ -13,6 +13,7 @@ object FormSettings: TFormSettings
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
+  OnActivate = FormActivate
   OnCreate = FormCreate
   OnDeactivate = FormDeactivate
   OnMouseWheel = FormMouseWheel

@@ -224,6 +224,10 @@ begin
             Next;
         end;
     end;
+    if (FNode.ChildCount = 0) and (FYear = YearOf(now)) then
+    begin
+        TNodeMonth.Create(FTreeView, FNode, FYear, MonthOf(now));
+    end;
 end;
 
 procedure TNodeMonth.Populate;
@@ -241,7 +245,10 @@ begin
             Next;
         end;
         close;
-
+    end;
+    if (FNode.ChildCount = 0) and (FYear = YearOf(now)) and (FMonth = MonthOf(now))  then
+    begin
+        TNodeDay.Create(FTreeView, FNode, FYear, MonthOf(now), DayOf(now));
     end;
 end;
 

@@ -80,9 +80,9 @@ begin
         Connection := DataModule1.FDConnectionProductsDB;
         SQL.Text :=
           'SELECT x,y FROM chart_value_info WHERE product_serial = :product_serial '
-          + 'AND read_var_id = :read_var_id AND series_id = :series_id;';
+          + 'AND var = :var AND series_id = :series_id;';
         ParamByName('product_serial').Value := product_serial;
-        ParamByName('read_var_id').Value := AVar;
+        ParamByName('var').Value := AVar;
         ParamByName('series_id').Value := SeriesID;
         open;
         First;
@@ -182,7 +182,7 @@ begin
                   product_serial);
                 Chart1.AddSeries(ser);
             end;
-            
+
             with Chart1 do
             begin
                 Title.Caption := FVarName;
@@ -216,7 +216,7 @@ begin
 
     with Chart1 do
     begin
-        Legend.Visible := Visible AND (seriescount > 1);
+        Legend.Visible := Visible AND (SeriesCount > 1);
         if SeriesCount = 1 then
             Title.Caption := Title.Caption + ': ' + Series[0].Title;
 
@@ -241,12 +241,13 @@ var
     p: PTreeData;
     d: RTreeData;
     v: variant;
+    node_day: TNodeDay;
 begin
     p := Sender.GetNodeData(Node);
     if p.X.FPopulated then
         exit;
     p.X.Populate;
-    p.X.FPopulated := true;
+    p.X.FPopulated := node.ChildCount > 0;
 end;
 
 procedure TFormChart.VirtualStringTree1GetImageIndex(Sender: TBaseVirtualTree;

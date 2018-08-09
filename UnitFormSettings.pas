@@ -13,6 +13,7 @@ type
     procedure FormMouseWheel(Sender: TObject; Shift: TShiftState;
       WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
     procedure FormDeactivate(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
     private
         { Private declarations }
         FSettings: TSettingsControl;
@@ -26,6 +27,11 @@ var
 implementation
 
 {$R *.dfm}
+
+procedure TFormSettings.FormActivate(Sender: TObject);
+begin
+    FSettings.Validate;
+end;
 
 procedure TFormSettings.FormCreate(Sender: TObject);
 begin

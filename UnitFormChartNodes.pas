@@ -229,6 +229,11 @@ begin
         end;
         Close;
     end;
+    if (FNode.ChildCount = 0) and (FYear = YearOf(now)) then
+    begin
+        TNodeMonth.Create(FTreeView, FNode, FYear, MonthOf(now));
+    end;
+
 end;
 
 procedure TNodeMonth.Populate;
@@ -249,6 +254,10 @@ begin
             Next;
         end;
         Free;
+    end;
+    if (FNode.ChildCount = 0) and (FYear = YearOf(now)) and (FMonth = MonthOf(now))  then
+    begin
+        TNodeDay.Create(FTreeView, FNode, FYear, MonthOf(now), DayOf(now));
     end;
 end;
 
@@ -281,6 +290,8 @@ begin
         end;
         Free;
     end;
+
+    
 end;
 
 procedure TNodeSeries.Populate;
@@ -291,14 +302,14 @@ begin
     begin
         Connection := DataModule1.FDConnectionProductsDB;
         SQL.Text :=
-          'SELECT DISTINCT read_var_id, var_name FROM chart_value_info WHERE series_id = :series_id;';
+          'SELECT DISTINCT var, var_name FROM chart_value_info WHERE series_id = :series_id;';
         ParamByName('series_id').Value := FSeriesInfo.SeriesID;
         open;
         First;
         while not Eof do
         begin
             TNodeVar.Create(FTreeView, FNode, FSeriesInfo,
-              FieldValues['read_var_id'], FieldValues['var_name']);
+              FieldValues['var'], FieldValues['var_name']);
             Next;
         end;
         Free;

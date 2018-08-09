@@ -52,7 +52,6 @@ object FormChart: TFormChart
     OnGetText = VirtualStringTree1GetText
     OnPaintText = VirtualStringTree1PaintText
     OnGetImageIndex = VirtualStringTree1GetImageIndex
-    ExplicitLeft = -1
     Columns = <
       item
         Position = 0
@@ -102,7 +101,6 @@ object FormChart: TFormChart
     BevelOuter = bvNone
     Color = clWindow
     TabOrder = 1
-    ExplicitLeft = 495
     DefaultCanvas = 'TGDIPlusCanvas'
     ColorPaletteIndex = 13
   end
@@ -114,7 +112,7 @@ object FormChart: TFormChart
     Left = 128
     Top = 168
     Bitmap = {
-      494C010106009C00540110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010106009C00580110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       000000000000000000000000000000000000B5794DFFB5794DFFB5794DFFB579
       4DFFB5794DFFB5794DFFB5794DFFB5794DFFB5794DFFB5794DFFB5794DFFB579

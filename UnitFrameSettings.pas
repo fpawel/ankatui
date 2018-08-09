@@ -370,9 +370,9 @@ begin
             begin
                 Parent := panel_param_container;
                 Align := alLeft;
-                Constraints.MinWidth := 300;
-                Constraints.MaxWidth := 300;
-                Width := 300;
+                Constraints.MinWidth := 400;
+                Constraints.MaxWidth := 400;
+                Width := 400;
                 BevelOuter := bvNone;
 
                 with TPanel.Create(self) do
