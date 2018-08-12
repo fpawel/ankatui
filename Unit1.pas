@@ -156,7 +156,7 @@ uses dateutils, rest.json, Winapi.uxtheme, System.Math, UnitFormNewPartyDialog,
     stringgridutils,
     listports, System.IOUtils,
     CurrentWorkTreeData, stringutils, vclutils, UnitFormChart, UnitFormSettings,
-    UnitFormCurrentWork;
+    UnitFormCurrentWork, UnitFormDelay;
 
 {$R *.dfm}
 
@@ -205,23 +205,7 @@ begin
     end;
 
 
-    FPipe := TPipe.Create;
-    // FCurrentWork := TCurrentWork.Create(FPipe, Panel5, VirtualStringTree1);
 
-    FPipe.Handle('READ_COEFFICIENT', HandleReadCoefficient);
-    FPipe.Handle('READ_VAR', HandleReadVar);
-
-    FPipe.Handle('CURRENT_WORK_MESSAGE', HandleCurentWorkMessage);
-
-    FPipe.Handle('PRODUCT_CONNECTED', HandleProductConnected);
-
-    FPipe.Handle('READ_PRODUCT', HandleReadProduct);
-
-    FPipe.Handle('END_WORK', HandleEndWork);
-
-    FPipe.Handle('PROMPT_ERROR_STOP_WORK', HandlePromptErrorStopWork);
-
-    DataModule1.PrintLastMessages(RichEdit1, 500);
 
 end;
 
@@ -259,6 +243,29 @@ begin
                 end;
             end;
     end;
+
+    FPipe := TPipe.Create;
+    // FCurrentWork := TCurrentWork.Create(FPipe, Panel5, VirtualStringTree1);
+
+    FPipe.Handle('READ_COEFFICIENT', HandleReadCoefficient);
+    FPipe.Handle('READ_VAR', HandleReadVar);
+
+    FPipe.Handle('CURRENT_WORK_MESSAGE', HandleCurentWorkMessage);
+
+    FPipe.Handle('PRODUCT_CONNECTED', HandleProductConnected);
+
+    FPipe.Handle('READ_PRODUCT', HandleReadProduct);
+
+    FPipe.Handle('END_WORK', HandleEndWork);
+
+    FPipe.Handle('PROMPT_ERROR_STOP_WORK', HandlePromptErrorStopWork);
+
+    FormCurrentWork.init2;
+    FormDelay.init2;
+
+    FPipe.Connect('ANKAT');
+
+    DataModule1.PrintLastMessages(RichEdit1, 500);
 end;
 
 
@@ -569,6 +576,7 @@ end;
 
 procedure TForm1.N4Click(Sender: TObject);
 begin
+    FPipe.WriteMsgJSON('CURRENT_WORKS', nil);
     FormCurrentWork.VirtualStringTree1.Parent := FormCurrentWork;
     FormCurrentWork.ShowModal;
 end;

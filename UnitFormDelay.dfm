@@ -11,7 +11,6 @@ object FormDelay: TFormDelay
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
-  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 18
   object PanelPlaceHolder: TPanel

@@ -42,6 +42,7 @@ type
     public
         { Public declarations }
         procedure SetRunError;
+        procedure Init2;
         function SelectedOperation: TOperationInfo;
     end;
 
@@ -150,7 +151,13 @@ begin
     defstyle := GetWindowLong(Button1.Handle, GWL_STYLE);
     SetWindowLong(Button1.Handle, GWL_STYLE, defstyle or BS_LEFT );
 
-    Form1.FPipe.Handle('SETUP_CURRENT_WORKS',
+
+
+end;
+
+procedure TFormCurrentWork.Init2;
+begin
+   Form1.FPipe.Handle('SETUP_CURRENT_WORKS',
         function(content: string):string
         var
             Node: PVirtualNode;
@@ -206,6 +213,7 @@ begin
         end);
 
 end;
+
 
 procedure TFormCurrentWork.VirtualStringTree1BeforeCellPaint
   (Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;

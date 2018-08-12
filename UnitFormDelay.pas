@@ -25,13 +25,13 @@ type
     Panel4: TPanel;
     Panel5: TPanel;
     procedure Timer1Timer(Sender: TObject);
-    procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
   private
     { Private declarations }
   public
     { Public declarations }
     procedure Stop;
+    procedure Init2;
   end;
 
 var
@@ -53,7 +53,7 @@ begin
     Form1.FPipe.WriteMsgJSON('SKIP_DELAY', nil);
 end;
 
-procedure TFormDelay.FormCreate(Sender: TObject);
+procedure TFormDelay.Init2;
 begin
     Form1.FPipe.Handle('DELAY',
         function(content: string):string
@@ -77,10 +77,8 @@ begin
             end;
 
         end);
-
-    Form1.FPipe.Connect('ANKAT');
-
 end;
+
 
 procedure TFormDelay.Timer1Timer(Sender: TObject);
 var s:string; v: TDateTime;
