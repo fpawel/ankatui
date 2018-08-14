@@ -30,17 +30,14 @@ object DataModule1: TDataModule1
         'work_id) AS has_children,'
       '       ('
       '       WITH RECURSIVE a(work_id, parent_work_id, level) AS ('
-      '         SELECT c.work_id, parent_work_id, level'
-      
-        '         FROM work c INNER JOIN work_log ON c.work_id = work_log' +
-        '.work_id'
-      '         WHERE c.work_id = w.work_id'
+      '         SELECT work_id, parent_work_id, level'
+      '         FROM work_log2'
+      '         WHERE work_id = w.work_id OR parent_work_id = w.work_id'
       '         UNION'
-      '         SELECT b.work_id, b.parent_work_id, l.level'
+      '         SELECT l.work_id, l.parent_work_id, l.level'
       
-        '         FROM a INNER JOIN work b ON b.parent_work_id = a.work_i' +
-        'd'
-      '                INNER JOIN work_log l ON l.work_id = a.work_id'
+        '         FROM a INNER JOIN work_log2 l ON l.parent_work_id = a.w' +
+        'ork_id'
       '       ) SELECT EXISTS(SELECT * FROM a WHERE level >= 4)'
       '       ) AS has_error'
       'FROM work w'
@@ -116,25 +113,19 @@ object DataModule1: TDataModule1
   object FDQueryWorkMessages: TFDQuery
     Connection = FDConnectionProductsDB
     SQL.Strings = (
+      'WITH RECURSIVE a(work_id, parent_work_id) AS ('
+      '    SELECT work_id, parent_work_id'
       
-        'WITH RECURSIVE a(record_id, work_id, parent_work_id, created_at,' +
-        ' work_name, work_index, level, message, product_serial) AS ('
-      
-        '    SELECT record_id, work_id, parent_work_id, created_at, work_' +
-        'name, work_index, level, message, product_serial'
-      
-        '    FROM work_log2 b WHERE b.work_id = :work_id OR b.parent_work' +
-        '_id = :work_id'
+        '    FROM work b WHERE b.work_id = :work_id OR b.parent_work_id =' +
+        ' :work_id'
       '  UNION'
+      '    SELECT w.work_id, w.parent_work_id'
+      '    FROM a INNER JOIN work w ON w.parent_work_id = a.work_id'
+      '    )'
       
-        '    SELECT w.record_id, w.work_id, w.parent_work_id, w.created_a' +
-        't, w.work_name, w.work_index, w.level, w.message, w.product_seri' +
-        'al'
-      
-        '    FROM a INNER JOIN work_log2 w ON w.parent_work_id = a.work_i' +
-        'd'
-      ')'
-      'SELECT * FROM a;')
+        'SELECT record_id, l.work_id, l.parent_work_id, created_at, work_' +
+        'name, work_index, level, message, product_serial'
+      'FROM a INNER JOIN work_log2 l ON l.work_id = a.work_id;')
     Left = 224
     Top = 112
     ParamData = <
@@ -382,8 +373,8 @@ object DataModule1: TDataModule1
         '_id) AS has_children,'
       '    ('
       '       WITH RECURSIVE a(work_id, parent_work_id, level) AS ('
-      '         SELECT work_id, parent_work_id, level'
-      '         FROM work_log2'
+      '         SELECT work_id, parent_work_id, 0'
+      '         FROM work'
       '         WHERE work_id = w.work_id OR parent_work_id = w.work_id'
       '         UNION'
       '         SELECT l.work_id, l.parent_work_id, l.level'
@@ -398,8 +389,8 @@ object DataModule1: TDataModule1
       '    cast(strftime('#39'%Y'#39', created_at) AS INT) = :year AND'
       '    cast(strftime('#39'%m'#39', created_at) AS INT) = :month AND'
       '    cast(strftime('#39'%d'#39', created_at) AS INT) = :day;')
-    Left = 336
-    Top = 396
+    Left = 712
+    Top = 300
     ParamData = <
       item
         Name = 'YEAR'
