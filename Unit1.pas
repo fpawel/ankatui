@@ -415,6 +415,7 @@ end;
 
 procedure TForm1.SetupWorkStarted(work: string; started: boolean);
 begin
+
     Panel5.Caption := work;
     Panel13.Caption := '   ' + work;
 
@@ -430,6 +431,7 @@ begin
     ToolBar1.Width := 178;
     if started then
     begin
+        FormCurrentWork.Setup;
         ToolBar1.Width := 58;
         if ToolBar5.Visible then
             ToolButton7.Click;
@@ -437,7 +439,7 @@ begin
     else
     begin
 
-        if Panel6.Controls[0] = FormCurrentWork.VirtualStringTree1 then
+        if (Panel6.ControlCount > 0) AND (Panel6.Controls[0] = FormCurrentWork.VirtualStringTree1) then
         begin
             Toolbar5.Visible := true;
         end
@@ -576,8 +578,7 @@ end;
 
 procedure TForm1.N4Click(Sender: TObject);
 begin
-    FPipe.WriteMsgJSON('CURRENT_WORKS', nil);
-    FormCurrentWork.VirtualStringTree1.Parent := FormCurrentWork;
+    FormCurrentWork.Setup;
     FormCurrentWork.ShowModal;
 end;
 

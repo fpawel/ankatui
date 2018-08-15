@@ -44,6 +44,7 @@ type
         procedure SetRunError;
         procedure Init2;
         function SelectedOperation: TOperationInfo;
+        procedure Setup;
     end;
 
 var
@@ -61,7 +62,7 @@ implementation
 
 {$R *.dfm}
 
-uses rest.json, stringutils,  Unit1, unitdata;
+uses rest.json, stringutils, Unit1, unitdata;
 
 type
     TOperationCheckState = class
@@ -148,8 +149,38 @@ procedure TFormCurrentWork.FormCreate(Sender: TObject);
 var
     defstyle: dWord;
 begin
+    VirtualStringTree1.NodeDataSize := SizeOf(RTreeData);
     defstyle := GetWindowLong(Button1.Handle, GWL_STYLE);
-    SetWindowLong(Button1.Handle, GWL_STYLE, defstyle or BS_LEFT );
+    SetWindowLong(Button1.Handle, GWL_STYLE, defstyle or BS_LEFT);
+
+end;
+
+procedure TFormCurrentWork.Setup;
+var
+    Node: PVirtualNode;
+    p: PTreeData;
+begin
+    VirtualStringTree1.Parent := Self;
+    Node := VirtualStringTree1.GetFirst;
+    while Assigned(Node) do
+    begin
+        p := VirtualStringTree1.GetNodeData(Node);
+        p.x.Free;
+        Node := VirtualStringTree1.GetNext(Node);
+    end;
+    VirtualStringTree1.Clear;
+
+    AddNode(nil, TJson.JsonToObject<TOperationInfo>(Form1.FPipe.Fetch('CURRENT_WORKS', nil)));
+
+    Node := VirtualStringTree1.GetFirst;
+    Node := VirtualStringTree1.GetNext(Node);
+    if Assigned(Node) then
+        VirtualStringTree1.TreeOptions.MiscOptions :=
+          VirtualStringTree1.TreeOptions.MiscOptions + [toCheckSupport]
+    else
+        VirtualStringTree1.TreeOptions.MiscOptions :=
+          VirtualStringTree1.TreeOptions.MiscOptions - [toCheckSupport];
+
 
 
 
@@ -157,40 +188,15 @@ end;
 
 procedure TFormCurrentWork.Init2;
 begin
-   Form1.FPipe.Handle('SETUP_CURRENT_WORKS',
-        function(content: string):string
-        var
-            Node: PVirtualNode;
-            p: PTreeData;
-        begin
-            Result := '';
-            Node := VirtualStringTree1.GetFirst;
-            while Assigned(Node) do
-            begin
-                p := VirtualStringTree1.GetNodeData(Node);
-                p.x.Free;
-                Node := VirtualStringTree1.GetNext(Node);
-            end;
-            VirtualStringTree1.Clear;
-            AddNode(nil, TJson.JsonToObject<TOperationInfo>(content));
-
-            Node := VirtualStringTree1.GetFirst;
-            Node := VirtualStringTree1.GetNext(Node);
-            if Assigned(Node) then
-                VirtualStringTree1.TreeOptions.MiscOptions :=
-                  VirtualStringTree1.TreeOptions.MiscOptions + [toCheckSupport]
-            else
-                VirtualStringTree1.TreeOptions.MiscOptions :=
-                  VirtualStringTree1.TreeOptions.MiscOptions - [toCheckSupport];
-        end);
 
     Form1.FPipe.Handle('CURRENT_WORK',
-        function(content: string):string
+        function(content: string): string
         var
             d: TNodeData;
             op: TNotifyOperation;
         begin
             Result := '';
+
             op := TJson.JsonToObject<TNotifyOperation>(content);
             d := RootNodeData.FDescendants[op.FOrdinal];
             if op.FName <> d.FInfo.FName then
@@ -199,14 +205,14 @@ begin
             if op.FRun then
             begin
                 // VirtualStringTree1.Selected[d.FNode] := true;
-                VirtualStringTree1.Expanded[d.FNode] := True;
-                d.FInfo.FHasMessage := True;
+                VirtualStringTree1.Expanded[d.FNode] := true;
+                d.FInfo.FHasMessage := true;
                 d.FInfo.FHasError := false;
             end;
             if (d.FChildren.Count = 0) and op.FRun then
             begin
-                form1.Panel5.Caption := d.text;
-                form1.Panel5.Font.Color := clNavy;
+                Form1.Panel5.Caption := d.text;
+                Form1.Panel5.Font.Color := clNavy;
             end;
             d.FRun := op.FRun;
             VirtualStringTree1.RepaintNode(d.FNode);
@@ -214,11 +220,10 @@ begin
 
 end;
 
-
 procedure TFormCurrentWork.VirtualStringTree1BeforeCellPaint
   (Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;
-  Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect;
-  var ContentRect: TRect);
+Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect;
+var ContentRect: TRect);
 var
     p: PTreeData;
     d: TNodeData;
@@ -258,17 +263,17 @@ begin
 end;
 
 procedure TFormCurrentWork.VirtualStringTree1Change(Sender: TBaseVirtualTree;
-  Node: PVirtualNode);
+Node: PVirtualNode);
 begin
     Button1.Caption := '   Запустить: [0] Настройка Анкат';
     if SelectedOperation <> nil then
         Button1.Caption := Format('   Запустить: [%d] %s',
-         [ SelectedOperation.FOrdinal, AnsiLowerCase(SelectedOperation.FName)]);
+          [SelectedOperation.FOrdinal, AnsiLowerCase(SelectedOperation.FName)]);
 
 end;
 
 procedure TFormCurrentWork.VirtualStringTree1Checked(Sender: TBaseVirtualTree;
-  Node: PVirtualNode);
+Node: PVirtualNode);
 var
     p: PTreeData;
     d: TNodeData;
@@ -284,7 +289,7 @@ end;
 
 procedure TFormCurrentWork.VirtualStringTree1GetImageIndex
   (Sender: TBaseVirtualTree; Node: PVirtualNode; Kind: TVTImageKind;
-  Column: TColumnIndex; var Ghosted: Boolean; var ImageIndex: TImageIndex);
+Column: TColumnIndex; var Ghosted: Boolean; var ImageIndex: TImageIndex);
 var
     p: PTreeData;
     d: TNodeData;
@@ -307,8 +312,8 @@ begin
 end;
 
 procedure TFormCurrentWork.VirtualStringTree1GetText(Sender: TBaseVirtualTree;
-  Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
-  var CellText: string);
+Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
+var CellText: string);
 var
     p: PTreeData;
     d: TNodeData;
@@ -326,8 +331,8 @@ begin
 end;
 
 procedure TFormCurrentWork.VirtualStringTree1PaintText(Sender: TBaseVirtualTree;
-  const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-  TextType: TVSTTextType);
+const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
+TextType: TVSTTextType);
 var
     p: PTreeData;
     d: TNodeData;

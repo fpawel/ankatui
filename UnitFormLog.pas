@@ -7,7 +7,7 @@ uses
     System.Classes, Vcl.Graphics,
     Vcl.Controls, Vcl.Forms, Vcl.Dialogs, FireDAC.Comp.Client, UnitData,
     VirtualTrees, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.ComCtrls, HTMLUn2, HtmlView,
-    System.ImageList, UnitFormLogNodes, Vcl.ImgList;
+    System.ImageList, UnitFormLogNodes, Vcl.ImgList, virtual_tree_node;
 
 type
     TOnRenderMessages = reference to procedure;
@@ -63,18 +63,6 @@ begin
     result := inttostr(n);
     if n < 10 then
         result := '0' + result;
-end;
-
-procedure freeNodeData(t: TVirtualStringTree; n: PVirtualNode);
-var
-    p: PTreeData;
-begin
-    if not Assigned(n) then
-        exit;
-    p := t.GetNodeData(n);
-    p.X.Free;
-    freeNodeData(t, n.FirstChild);
-    freeNodeData(t, n.NextSibling);
 end;
 
 procedure TFormLog.FormCreate(Sender: TObject);

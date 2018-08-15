@@ -57,25 +57,13 @@ implementation
 {$R *.dfm}
 
 uses dateutils, FireDAC.Stan.PAram, stringutils, richeditutils,
-    variantutils, stringgridutils;
+    variantutils, stringgridutils, virtual_tree_node;
 
 function inttostr2(n: integer): string;
 begin
     result := inttostr(n);
     if n < 10 then
         result := '0' + result;
-end;
-
-procedure freeNodeData(t: TVirtualStringTree; n: PVirtualNode);
-var
-    p: PTreeData;
-begin
-    if not Assigned(n) then
-        exit;
-    p := t.GetNodeData(n);
-    p.X.Free;
-    freeNodeData(t, n.FirstChild);
-    freeNodeData(t, n.NextSibling);
 end;
 
 procedure TFormParties.FormCreate(Sender: TObject);

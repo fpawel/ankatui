@@ -64,25 +64,26 @@ object DataModule1: TDataModule1
   object FDQueryPartyWorks: TFDQuery
     Connection = FDConnectionProductsDB
     SQL.Strings = (
-      'SELECT a.work_id, a.created_at, a.work_name, a.work_index, ('
-      '  WITH RECURSIVE acc(work_id, parent_work_id, level) AS ('
-      '    SELECT work_id, parent_work_id, level'
+      'SELECT a.work_id, a.created_at, a.work_name, a.work_index,'
+      ' ('
+      '   WITH RECURSIVE acc(work_id, parent_work_id) AS ('
+      '     SELECT work_id, parent_work_id'
       
-        '    FROM work_log2 WHERE work_log2.work_id = a.work_id OR work_l' +
-        'og2.parent_work_id = a.work_id'
-      '  UNION'
-      '    SELECT w.work_id, w.parent_work_id, w2.level'
-      '    FROM acc'
-      '           INNER JOIN work w ON w.parent_work_id = acc.work_id'
-      '           INNER JOIN work_log w2 ON w2.work_id = w.work_id'
-      '  )'
+        '     FROM work WHERE work.work_id = a.work_id OR work.parent_wor' +
+        'k_id = a.work_id'
+      '     UNION'
+      '     SELECT w.work_id, w.parent_work_id'
       
-        '  SELECT EXISTS( SELECT * FROM acc WHERE level >= 4)) as has_err' +
-        'or, ('
+        '     FROM acc INNER JOIN work w ON w.parent_work_id = acc.work_i' +
+        'd'
+      '   )'
       
-        '    SELECT exists( SELECT * FROM  work b WHERE b.parent_work_id ' +
-        '= a.work_id )'
-      '  ) as has_children'
+        '   SELECT EXISTS( SELECT * FROM acc INNER JOIN work_log ON acc.w' +
+        'ork_id = work_log.work_id WHERE level >= 4)'
+      ' ) as has_error,'
+      
+        ' ( SELECT exists( SELECT * FROM  work b WHERE b.parent_work_id =' +
+        ' a.work_id ) ) as has_children'
       'FROM work a'
       'WHERE'
       '    a.party_id = :party_id AND'
