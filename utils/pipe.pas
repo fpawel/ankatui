@@ -67,8 +67,9 @@ type
         procedure WriteMsgStr(Msg: string; str: string);
         procedure Close;
 
-        function Fetch(Msg: string; obj: TObject): string;
-
+        function Fetch1(Msg: string; obj: TObject): string;
+        function Fetch2(Msg: string; str: string): string;
+        
     end;
 
 procedure ClosePipe(pipe: TPipe);
@@ -420,11 +421,15 @@ begin
     FPipePeerToMasterConn.WriteStrMsg(m);
 end;
 
-
-function TPipe.Fetch(Msg: string; obj: TObject): string;
-var s:string;
+function TPipe.Fetch1(Msg: string; obj: TObject): string;
 begin
     WriteMsgJSON(msg,obj);
+    result := FPipePeerToMasterConn.ReadString;
+end;
+
+function TPipe.Fetch2(Msg: string; str: string): string;
+begin
+    WriteMsgStr(msg, str );
     result := FPipePeerToMasterConn.ReadString;
 end;
 

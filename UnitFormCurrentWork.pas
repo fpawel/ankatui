@@ -170,7 +170,7 @@ begin
     end;
     VirtualStringTree1.Clear;
 
-    AddNode(nil, TJson.JsonToObject<TOperationInfo>(Form1.FPipe.Fetch('CURRENT_WORKS', nil)));
+    AddNode(nil, TJson.JsonToObject<TOperationInfo>(Form1.FPipe.Fetch1('CURRENT_WORKS', nil)));
 
     Node := VirtualStringTree1.GetFirst;
     Node := VirtualStringTree1.GetNext(Node);

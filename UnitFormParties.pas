@@ -57,7 +57,7 @@ implementation
 {$R *.dfm}
 
 uses dateutils, FireDAC.Stan.PAram, stringutils, richeditutils,
-    variantutils, stringgridutils, virtual_tree_node;
+    variantutils, stringgridutils, virtual_tree_node, Unit1;
 
 function inttostr2(n: integer): string;
 begin
@@ -197,7 +197,9 @@ begin
     p := Sender.GetNodeData(Node);
     if p.X is TNodeParty then
     begin
-        HtmlViewer1.LoadFromString(PartyHTML(p.X as TNodeParty));
+        HtmlViewer1.LoadFromString(
+            Form1.FPipe.Fetch2('PARTY_INFO',
+                IntToStr((p.X as TNodeParty).FPartyID)) );
         HtmlViewer1.Align := alClient;
         HtmlViewer1.Visible := True;
         exit;
