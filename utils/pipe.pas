@@ -2,32 +2,36 @@ unit pipe;
 
 interface
 
-uses System.Classes, REST.Json, System.SyncObjs, System.Generics.Collections;
+uses System.Classes, REST.Json, System.SyncObjs, System.Generics.Collections, sysutils;
 
 const
     BUF_SIZE = 200000;
 
 type
-    TPipeErrorHandler = reference to procedure(err: string);
+
+    EPipeHostError = class(Exception);
 
     TStrMsg = record
         Msg: string;
         Str: string;
     end;
 
+    type RaiseExceptionHandler = procedure(s:string) of object;
+
+
     TPipeConnection = class
     private
         { Private declarations }
         hPipe: THANDLE; // дескриптор
-
-        FErrorHandler: TPipeErrorHandler;
-
+        FName: string;
+        FRaiseException : RaiseExceptionHandler;
+        procedure raise_exception(error: string);
     public
-        procedure RaiseError(error: string);
+        function FormatError(error: string): string;
+
 
         { Public declarations }
-        Constructor Create(pipe_server: string;
-          ErrorHandler: TPipeErrorHandler);
+        Constructor Create(pipe_server: string;ARaiseException : RaiseExceptionHandler);
         procedure WriteInt32(v: LONGWORD);
         function ReadInt32: LONGWORD;
 
@@ -46,7 +50,7 @@ type
         procedure WriteStrMsg(m: TStrMsg);
     end;
 
-    TReadPipeHandler = reference to function(content: string):string;
+    TReadPipeHandler = reference to function(content: string): string;
 
     TPipe = class(TThread)
     private
@@ -55,30 +59,27 @@ type
         FHandlers: TDictionary<string, TReadPipeHandler>;
         FConnected: boolean;
         procedure Execute; override;
-        procedure RaiseError(error: string);
-
+        procedure raise_exception(error: string);
     public
         { Public declarations }
         Constructor Create;
         procedure Connect(pipe_server: string);
-        procedure Handle(msg: string; h: TReadPipeHandler);
+        procedure Handle(Msg: string; h: TReadPipeHandler);
 
         procedure WriteMsgJSON(Msg: string; obj: TObject);
-        procedure WriteMsgStr(Msg: string; str: string);
+        procedure WriteMsgStr(Msg: string; Str: string);
         procedure Close;
 
         function Fetch1(Msg: string; obj: TObject): string;
-        function Fetch2(Msg: string; str: string): string;
-        
+        function Fetch2(Msg: string; Str: string): string;
+
     end;
 
-procedure ClosePipe(pipe: TPipe);
 
 implementation
 
-uses sysutils, Winapi.Windows, System.WideStrUtils, System.dateutils, vcl.forms,
-    math;
-
+uses Winapi.Windows, System.WideStrUtils, System.dateutils, vcl.forms,
+    math, inifiles;
 
 type
     _LONGWORD_BYTES = record
@@ -103,43 +104,60 @@ type
                 (value_double: double);
     end;
 
+
 function millis_to_datetime(x_millis: int64): TDateTime;
 begin
     result := IncHour(IncMilliSecond(EncodeDateTime(1970, 1, 1, 0, 0, 0, 0),
       x_millis), 3);
 end;
 
-procedure ClosePipe(pipe: TPipe);
-begin
-    pipe.Close;
 
+procedure TPipe.raise_exception(error: string);
+begin
+
+
+    Synchronize(
+        procedure
+        begin
+            if FConnected then
+            begin
+                FConnected := false;
+                raise EPipeHostError.Create(error);
+            end;
+        end);
 end;
 
-Constructor TPipeConnection.Create(pipe_server: string;
-  ErrorHandler: TPipeErrorHandler);
+Constructor TPipeConnection.Create(pipe_server: string; ARaiseException : RaiseExceptionHandler);
 var
     s: string;
 begin
-    FErrorHandler := ErrorHandler;
+    FName := pipe_server;
     s := '\\.\pipe\$' + pipe_server + '$';
     hPipe := CreateFileW(PWideChar(s), GENERIC_READ or GENERIC_WRITE,
       FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0);
     if hPipe = INVALID_HANDLE_VALUE then
-        RaiseError(s);
-
+        raise Exception.Create( FormatError('INVALID_HANDLE_VALUE') );
+    FRaiseException := ARaiseException;
 end;
 
-procedure TPipeConnection.RaiseError(error: string);
+procedure TPipeConnection.raise_exception(error: string);
+begin
+    FRaiseException(self.FormatError(error));
+end;
+
+
+
+function TPipeConnection.FormatError(error: string): string;
 var
     Buffer: array [0 .. 2047] of Char;
 begin
     FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, nil, GetLastError, $400, @Buffer,
       SizeOf(Buffer), nil);
     if error <> '' then
-        error := error + ': ' + string(Buffer)
+        result := error + ': ' + string(Buffer)
     else
-        error := string(Buffer);
-    FErrorHandler(LowerCase(error));
+        result := string(Buffer);
+    result := FName + ': ' + result;
 end;
 
 function TPipeConnection.ReadFloat64: double;
@@ -149,13 +167,11 @@ var
 begin
     if not ReadFile(hPipe, x.bytes, 8, readed_count, nil) then
     begin
-        RaiseError('ReadFloat64: ReadFile error');
-        exit;
+        raise_exception('ReadFloat64');
     end;
     if readed_count <> 8 then
     begin
-        RaiseError('ReadFloat64: readed_count <> 8');
-        exit;
+        raise_exception('ReadFloat64: readed_count <> 8');
     end;
     result := x.value_double;
 
@@ -170,13 +186,11 @@ begin
     x.value_double := value;
     if not(WriteFile(hPipe, x.bytes, 8, writen_count, nil)) then
     begin
-        RaiseError('WriteFloat64: WriteFile error');
-        exit;
+        raise_exception('WriteFloat64: WriteFile error');
     end;
     if writen_count <> 8 then
     begin
-        RaiseError('WriteFloat64: writen_count <>8');
-        exit;
+        raise_exception('WriteFloat64: writen_count <>8');
     end;
 end;
 
@@ -187,13 +201,11 @@ var
 begin
     if not ReadFile(hPipe, x.bytes, 8, readed_count, nil) then
     begin
-        RaiseError('ReadInt64: ReadFile error');
-        exit;
+        raise_exception( Self.FormatError('ReadInt64'));
     end;
     if readed_count <> 8 then
     begin
-        RaiseError('ReadInt64: readed_count <> 8: ' + inttostr(readed_count));
-        exit;
+        raise_exception('ReadInt64: readed_count <> 8: ' + inttostr(readed_count));
     end;
     result := x.value_int64;
 
@@ -208,13 +220,11 @@ begin
     x.value_int64 := value;
     if not(WriteFile(hPipe, x.bytes, 8, writen_count, nil)) then
     begin
-        RaiseError('WriteInt64: WriteFile error');
-        exit;
+        raise_exception('WriteInt64: WriteFile error');
     end;
     if writen_count <> 8 then
     begin
-        RaiseError('WriteInt64: writen_count <>8');
-        exit;
+        raise_exception('WriteInt64: writen_count <>8');
     end;
 end;
 
@@ -225,13 +235,11 @@ var
 begin
     if not ReadFile(hPipe, x.bytes, 4, readed_count, nil) then
     begin
-        RaiseError('ReadInt32: ReadFile error');
-        exit;
+        raise_exception('ReadInt32');
     end;
     if readed_count <> 4 then
     begin
-        RaiseError('ReadInt32: readed_count <> 4:' + inttostr(readed_count));
-        exit;
+        raise_exception('ReadInt32: readed_count <> 4:' + inttostr(readed_count));
     end;
     result := x.value;
 end;
@@ -245,13 +253,11 @@ begin
     x.value := v;
     if not(WriteFile(hPipe, x.bytes, 4, writen_count, nil)) then
     begin
-        RaiseError('WriteInt: WriteFile error');
-        exit;
+        raise_exception('WriteInt: WriteFile error');
     end;
     if writen_count <> 4 then
     begin
-        RaiseError('WriteInt: writen_count <> 4');
-        exit;
+        raise_exception('WriteInt: writen_count <> 4');
     end;
 end;
 
@@ -281,8 +287,7 @@ begin
 
         if not(WriteFile(hPipe, Buffer, n, tmp, nil)) then
         begin
-            RaiseError('WriteString: WriteFile error');
-            exit;
+            raise_exception('WriteString: WriteFile error');
         end;
         pos := pos + n;
     end;
@@ -303,8 +308,7 @@ begin
         if not ReadFile(hPipe, Buffer, min(BUF_SIZE, len - pos),
           readed_count, nil) then
         begin
-            RaiseError('ReadString: ReadFile error');
-            exit;
+            raise_exception(Self.FormatError('ReadString'));
         end;
         pos := pos + readed_count;
         SetString(Str, PAnsiChar(@Buffer[0]), readed_count);
@@ -323,8 +327,7 @@ function TPipeConnection.ReadStrMsg: TStrMsg;
 begin
     if ReadInt32 <> $5555 then
     begin
-        RaiseError('error while reading 0x5555');
-        exit;
+        raise_exception('error while reading 0x5555');
     end;
     result.Msg := ReadString;
     result.Str := ReadString;
@@ -340,41 +343,26 @@ end;
 Constructor TPipe.Create;
 begin
     inherited Create(true);
-    FHandlers := TDictionary<string, TReadPipeHandler>.create;
+    FHandlers := TDictionary<string, TReadPipeHandler>.Create;
 end;
 
-procedure TPipe.connect(pipe_server: string);
+procedure TPipe.Connect(pipe_server: string);
 begin
-    try
-    FConnected := true;
     FPipePeerToMasterConn := TPipeConnection.Create
-      (pipe_server + '_PEER_TO_MASTER', RaiseError);
+      (pipe_server + '_PEER_TO_MASTER', self.raise_exception);
     FPipeMasterToPeerConn := TPipeConnection.Create
-      (pipe_server + '_MASTER_TO_PEER', RaiseError);
-      except
-        FConnected := false;
-        raise;
-      end;
-    Self.Suspended := false;
+      (pipe_server + '_MASTER_TO_PEER', self.raise_exception);
+    FConnected := true;
+    self.Suspended := false;
 end;
 
-procedure TPipe.Handle(msg: string; h: TReadPipeHandler);
+procedure TPipe.Handle(Msg: string; h: TReadPipeHandler);
 begin
-    if  FConnected then
-        RaiseError('connected');
-    if FHandlers.ContainsKey(msg) then
-        RaiseError(msg + ': handler elready exits');
-    FHandlers.Add(msg, h);
-end;
-
-procedure TPipe.RaiseError(error: string);
-begin
-    Synchronize(
-        procedure
-        begin
-            if FConnected then
-                raise Exception.Create(error);
-        end);
+    if FConnected then
+        self.raise_exception('connected');
+    if FHandlers.ContainsKey(Msg) then
+        self.raise_exception(Msg + ': handler elready exits');
+    FHandlers.Add(Msg, h);
 end;
 
 procedure TPipe.Execute;
@@ -386,16 +374,16 @@ begin
         m := FPipeMasterToPeerConn.ReadStrMsg;
         Synchronize(
             procedure
-            var s:string;
+            var
+                s: string;
             begin
                 if (not terminated) and FConnected then
                 begin
                     if not FHandlers.ContainsKey(m.Msg) then
-                        RaiseError(m.Msg + ': not found handler');
+                        self.raise_exception(m.Msg + ': not found handler');
                     s := FHandlers[m.Msg](m.Str);
                     if s <> '' then
                         FPipeMasterToPeerConn.WriteString(s);
-
 
                 end;
             end);
@@ -410,30 +398,28 @@ begin
         WriteMsgStr(Msg, '');
 end;
 
-procedure TPipe.WriteMsgStr(Msg: string; str: string);
+procedure TPipe.WriteMsgStr(Msg: string; Str: string);
 var
     m: TStrMsg;
 begin
     if not FConnected then
-        RaiseError('not connected');
+        self.raise_exception('not connected');
     m.Msg := Msg;
-    m.Str := str;
+    m.Str := Str;
     FPipePeerToMasterConn.WriteStrMsg(m);
 end;
 
 function TPipe.Fetch1(Msg: string; obj: TObject): string;
 begin
-    WriteMsgJSON(msg,obj);
+    WriteMsgJSON(Msg, obj);
     result := FPipePeerToMasterConn.ReadString;
 end;
 
-function TPipe.Fetch2(Msg: string; str: string): string;
+function TPipe.Fetch2(Msg: string; Str: string): string;
 begin
-    WriteMsgStr(msg, str );
+    WriteMsgStr(Msg, Str);
     result := FPipePeerToMasterConn.ReadString;
 end;
-
-
 
 procedure TPipe.Close;
 begin
@@ -447,6 +433,8 @@ begin
     CloseHandle(FPipePeerToMasterConn.hPipe);
     Terminate;
 end;
+
+
 
 
 end.

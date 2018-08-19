@@ -9,9 +9,9 @@ uses
     Vcl.ExtCtrls, Vcl.ComCtrls, Vcl.ToolWin,
     parties, System.Generics.Collections,
     System.ImageList, UnitData, Vcl.ImgList, Vcl.Menus, VirtualTrees, pipe,
-     msglevel, UnitFormLog, settings, UnitFormPopup, UnitFrameCoef,
+    msglevel, UnitFormLog, settings, UnitFormPopup, UnitFrameCoef,
     UnitFrameVar, UnitFormParties,
-    UnitFormManualControl, inifiles;
+    UnitFormManualControl, inifiles, System.SyncObjs, DebugEngine.Core;
 
 type
 
@@ -83,12 +83,12 @@ type
         SplitterConsoleHoriz: TSplitter;
         SplitterConsoleVert: TSplitter;
         Panel2: TPanel;
-    Panel9: TPanel;
-    Panel11: TPanel;
-    Panel12: TPanel;
-    Panel13: TPanel;
-    ToolBar5: TToolBar;
-    ToolButton7: TToolButton;
+        Panel9: TPanel;
+        Panel11: TPanel;
+        Panel12: TPanel;
+        Panel13: TPanel;
+        ToolBar5: TToolBar;
+        ToolButton7: TToolButton;
         procedure FormCreate(Sender: TObject);
         procedure ComboBox1CloseUp(Sender: TObject);
         procedure StringGrid1SelectCell(Sender: TObject; ACol, ARow: integer;
@@ -124,13 +124,15 @@ type
     private
         { Private declarations }
 
-        function HandleReadVar(content: string):string;
-        function HandleReadCoefficient(content: string):string;
-        function HandleCurentWorkMessage(content: string):string;
-        function HandleProductConnected(content: string):string;
-        function HandleReadProduct(content: string):string;
-        function HandleEndWork(content: string):string;
-        function HandlePromptErrorStopWork(content: string):string;
+        function HandleReadVar(content: string): string;
+        function HandleReadCoefficient(content: string): string;
+        function HandleCurentWorkMessage(content: string): string;
+        function HandleProductConnected(content: string): string;
+        function HandleReadProduct(content: string): string;
+        function HandleEndWork(content: string): string;
+        function HandlePromptErrorStopWork(content: string): string;
+
+        procedure OnException(Sender: TObject; E: Exception);
 
     public
         FPipe: TPipe;
@@ -141,6 +143,7 @@ type
         FFormLog: TFormLog;
         FFormParties: TFormParties;
         FIni: TIniFile;
+        FFErrorLogMutex: TCriticalSection;
         { Public declarations }
         procedure SetCurrentParty;
         procedure Init2;
@@ -166,6 +169,9 @@ var
     i: integer;
 begin
 
+    FFErrorLogMutex := TCriticalSection.Create;
+
+    Application.OnException := OnException;
 
     FFrameCoef := TFrameCoef.Create(self);
     FFrameCoef.Parent := Panel6;
@@ -176,7 +182,6 @@ begin
 
     FIni := TIniFile.Create(ExtractFileDir(paramstr(0)) + '\main.ini');
     FReadProduct := -1;
-    
 
     ToolBar2.Width := 58;
     ComboBox1DropDown(ComboBox1);
@@ -203,9 +208,58 @@ begin
         ColWidths[1] := 90;
         ColWidths[2] := 75;
     end;
+end;
 
+procedure TForm1.OnException(Sender: TObject; E: Exception);
+var
+    FErrorLog, FStackTrace: TextFile;
+    ErrorLogFileName: string;
+    StackTraceFileName: string;
+    StackTraceFileDir: string;
+    StackTraceFileName1:string;
+    time_now: TDAteTime;
+begin
+    FFErrorLogMutex.Acquire;
+    time_now := now;
+    StackTraceFileDir := ExtractFileDir(paramstr(0)) + '\stack_trace';
 
+    if not ForceDirectories(StackTraceFileDir) then
+    begin
+        Application.MessageBox('Не удалось создать каталог stack_trace', 'Анкат: критический сбой',
+            MB_OK or MB_ICONERROR);
+        Close;
+        Exit;
+    end;
 
+    StackTraceFileName1 := formatDateTime('dd_mm_yyyy_hh_nn_ss_zzz', time_now) + '.stacktrace';
+    StackTraceFileName := StackTraceFileDir + '\' + StackTraceFileName1;
+    ErrorLogFileName := ExtractFileDir(paramstr(0)) + '\errors.log';
+
+    AssignFile(FErrorLog, ErrorLogFileName, CP_UTF8);
+    if FileExists(ErrorLogFileName) then
+        Append(FErrorLog)
+    else
+        Rewrite(FErrorLog);
+    Writeln(FErrorLog,formatDateTime('dd.mm.yyyy.hh:nn:ss.zzz', time_now), 'MSK ',
+        E.ClassName, ' ', stringreplace(Trim(e.Message), #13, ' ', [rfReplaceAll, rfIgnoreCase])  );
+    Flush(FErrorLog);
+    CloseFile(FErrorLog);
+
+    AssignFile(FStackTrace, StackTraceFileName, CP_UTF8);
+    Rewrite(FStackTrace);
+    Writeln(FStackTrace, E.ClassName);
+    Writeln(FStackTrace, E.Message);
+    Writeln(FStackTrace, E.StackTrace);
+    Flush(FStackTrace);
+    CloseFile(FStackTrace);
+
+    FFErrorLogMutex.Release;
+
+    Application.MessageBox(PChar(E.Message), 'Анкат: произошла ошибка',
+      MB_OK or MB_ICONERROR);
+
+    if E is EPipeHostError then
+        Close;
 
 end;
 
@@ -260,21 +314,19 @@ begin
 
     FPipe.Handle('PROMPT_ERROR_STOP_WORK', HandlePromptErrorStopWork);
 
-    FormCurrentWork.init2;
-    FormDelay.init2;
+    FormCurrentWork.Init2;
+    FormDelay.Init2;
 
     FPipe.Connect('ANKAT');
 
     DataModule1.PrintLastMessages(RichEdit1, 500);
 end;
 
-
-
-function TForm1.HandleEndWork(content: string):string;
+function TForm1.HandleEndWork(content: string): string;
 var
     X: TEndWorkInfo;
 begin
-    Result:='';
+    Result := '';
     FFrameVar.reset;
     FFrameCoef.reset;
     X := TJson.JsonToObject<TEndWorkInfo>(content);
@@ -289,24 +341,25 @@ begin
 
 end;
 
-function TForm1.HandlePromptErrorStopWork(content: string):string;
-var s:string;
+function TForm1.HandlePromptErrorStopWork(content: string): string;
+var
+    s: string;
 begin
     s := content + #10#13#10#13;
     s := s + 'Нажмите OK чтобы игнорировать ошибку и продолжить автоматическую настройку.'#10#13;
     s := s + 'Нажмите ОТМЕНА чтобы прервать автоматическую настройку.';
-    if  MessageDlg(s, mtWarning, mbOKCancel,0 ) = IDOK  then
-        Result:='IGNORE'
+    if MessageDlg(s, mtWarning, mbOKCancel, 0) = IDOK then
+        Result := 'IGNORE'
     else
-        Result:='ABORT';
+        Result := 'ABORT';
 
 end;
 
-function TForm1.HandleProductConnected(content: string):string;
+function TForm1.HandleProductConnected(content: string): string;
 var
     X: TProductConnected;
 begin
-    Result:='';
+    Result := '';
     X := TJson.JsonToObject<TProductConnected>(content);
     FProducts[X.FProduct].FConnectionError := not X.FOk;
     FProducts[X.FProduct].FConnection := X.FText;
@@ -315,13 +368,13 @@ begin
     X.Free;
 end;
 
-function TForm1.HandleCurentWorkMessage(content: string):string;
+function TForm1.HandleCurentWorkMessage(content: string): string;
 var
     m: TWorkMsg;
     i: integer;
 
 begin
-    Result:='';
+    Result := '';
     m := TJson.JsonToObject<TWorkMsg>(content);
 
     Panel2.Caption := Format('[%d] %s: %s', [m.FWorkIndex, m.FWork, m.FText]);
@@ -342,12 +395,12 @@ begin
     m.Free;
 end;
 
-function TForm1.HandleReadProduct(content: string):string;
+function TForm1.HandleReadProduct(content: string): string;
 var
     X: TReadProduct;
     PrevProduct: integer;
 begin
-    Result:='';
+    Result := '';
     X := TJson.JsonToObject<TReadProduct>(content);
     PrevProduct := FReadProduct;
     FReadProduct := X.FProduct;
@@ -359,14 +412,14 @@ begin
     X.Free;
 end;
 
-function TForm1.HandleReadVar(content: string):string;
+function TForm1.HandleReadVar(content: string): string;
 var
     i: integer;
     X: TReadVar;
     p: TProduct;
     v: TDeviceVar;
 begin
-    Result:='';
+    Result := '';
     X := TJson.JsonToObject<TReadVar>(content);
     p := FProducts[X.FProduct];
     v := FFrameVar.FVars[X.FVar];
@@ -386,14 +439,14 @@ begin
     X.Free;
 end;
 
-function TForm1.HandleReadCoefficient(content: string):string;
+function TForm1.HandleReadCoefficient(content: string): string;
 var
     i: integer;
     X: TReadVar;
     p: TProduct;
     v: TDeviceVar;
 begin
-    Result:='';
+    Result := '';
     X := TJson.JsonToObject<TReadVar>(content);
     p := FProducts[X.FProduct];
     v := FFrameCoef.FCoefs[X.FVar];
@@ -439,9 +492,10 @@ begin
     else
     begin
 
-        if (Panel6.ControlCount > 0) AND (Panel6.Controls[0] = FormCurrentWork.VirtualStringTree1) then
+        if (Panel6.ControlCount > 0) AND
+          (Panel6.Controls[0] = FormCurrentWork.VirtualStringTree1) then
         begin
-            Toolbar5.Visible := true;
+            ToolBar5.Visible := true;
         end
         else
         begin
@@ -477,7 +531,8 @@ begin
             Close;
             exit;
         end;
-    end else
+    end
+    else
         SetCurrentParty;
     Init2;
 
@@ -490,7 +545,6 @@ begin
         SetWindowPlacement(Handle, wp);
     end;
 
-
     PanelConsolePlaceholderRight.Width := FIni.ReadInteger('positions',
       'console_right_width', 300);
     PanelConsolePlaceholderBottom.Height := FIni.ReadInteger('positions',
@@ -501,10 +555,6 @@ begin
         ToolButtonConsoleHide.Click;
     RichEdit1.SetFocus;
     SendMessage(RichEdit1.Handle, EM_SCROLL, SB_LINEDOWN, 0);
-
-
-
-
 
 end;
 
@@ -894,7 +944,7 @@ end;
 
 procedure TForm1.ToolButton7Click(Sender: TObject);
 begin
-    Toolbar5.Visible := false;
+    ToolBar5.Visible := false;
     if Panel6.ControlCount > 0 then
         Panel6.Controls[0].Parent := nil;
     FFrameCoef.StringGrid3.Parent := Panel6;
