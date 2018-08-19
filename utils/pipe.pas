@@ -201,7 +201,7 @@ var
 begin
     if not ReadFile(hPipe, x.bytes, 8, readed_count, nil) then
     begin
-        raise_exception( Self.FormatError('ReadInt64'));
+        raise_exception( 'ReadInt64');
     end;
     if readed_count <> 8 then
     begin
@@ -308,7 +308,7 @@ begin
         if not ReadFile(hPipe, Buffer, min(BUF_SIZE, len - pos),
           readed_count, nil) then
         begin
-            raise_exception(Self.FormatError('ReadString'));
+            raise_exception('ReadString');
         end;
         pos := pos + readed_count;
         SetString(Str, PAnsiChar(@Buffer[0]), readed_count);
