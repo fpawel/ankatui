@@ -55,7 +55,7 @@ end;
 
 procedure TFrameVar.SetCurrentParty(Products: TArray<TProduct>);
 var
-    i, ARow, ACol: Integer;
+    i, ARow: Integer;
     v: TDeviceVar;
 begin
     for i := 0 to length(FVars) - 1 do
@@ -102,13 +102,11 @@ end;
 
 procedure TFrameVar.HandleReadVar(x: TReadVar);
 var
-    i: Integer;
     PrevProductVar: RProductVar;
-    v: TDeviceVar;
+
 begin
     PrevProductVar := FCurentProductVar;
     FCurentProductVar := x.ProductVar;
-    v := FVars[x.FVar];
 
     FCurentProductVar.FProduct := x.FProduct;
     FCurentProductVar.FVar := x.FVar;
@@ -173,6 +171,7 @@ begin
         cnv.Font.Color := clNavy;
     end;
 
+    Checked := false;
     if ARow > 0 then
         Checked := FVars[ARow - 1].FChecked;
 
@@ -247,13 +246,11 @@ end;
 procedure TFrameVar.StringGrid2KeyPress(Sender: TObject; var Key: Char);
 var
     g: TStringGrid;
-    c: TCheckBox;
     i: Integer;
     v: Boolean;
 
 begin
     g := Sender as TStringGrid;
-    c := CheckBox2;
     if (g.Row > 0) AND (ord(Key) in [32, 27]) then
     begin
         v := FVars[g.Selection.Top - 1].FChecked;

@@ -23,7 +23,6 @@ begin
 end;
 
 function str_replace_unicode_chars(s: string): string;
-var i:integer;
 begin
     s := StringReplace(s, '₄', '_4_', [rfReplaceAll]);
     s := StringReplace(s, '₂', '_2_', [rfReplaceAll]);

@@ -70,7 +70,7 @@ var
     X: string;
     y: double;
 begin
-    GetLocaleFormatSettings(GetThreadLocale, FmtStngs);
+    FmtStngs := TFormatSettings.Create(GetThreadLocale);
     FmtStngs.DateSeparator := '.';
     FmtStngs.ShortDateFormat := 'dd/MM/yyyy';
     FmtStngs.TimeSeparator := ':';
@@ -112,7 +112,6 @@ end;
 
 procedure TFormChart.FormCreate(Sender: TObject);
 var
-    d: RTreeData;
     year: integer;
 
 begin
@@ -132,14 +131,7 @@ end;
 procedure TFormChart.VirtualStringTree1BeforeCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
-var
-    p: PTreeData;
-    d: TNodeData;
-    node_var_product: TNodeVarProduct;
 begin
-    p := Sender.GetNodeData(Node);
-    d := p.X;
-
     if Sender.Selected[Node] then
     begin
         TargetCanvas.Brush.Color := clSkyBlue;
@@ -202,7 +194,7 @@ begin
 
             ser := TFastLineSeries.Create(nil);
             ser.XValues.DateTime := true;
-            ser.Title := inttostr(product_serial);
+            ser.Title := inttostr(FSerial);
             GetSeriesValues(ser, FSeriesInfo.SeriesID, FVar, FSerial);
 
             with Chart1 do
@@ -239,9 +231,6 @@ procedure TFormChart.VirtualStringTree1Expanding(Sender: TBaseVirtualTree;
   Node: PVirtualNode; var Allowed: boolean);
 var
     p: PTreeData;
-    d: RTreeData;
-    v: variant;
-    node_day: TNodeDay;
 begin
     p := Sender.GetNodeData(Node);
     if p.X.FPopulated then
@@ -282,8 +271,6 @@ procedure TFormChart.VirtualStringTree1PaintText(Sender: TBaseVirtualTree;
   TextType: TVSTTextType);
 var
     p: PTreeData;
-    node_var_product: TNodeVarProduct;
-
 begin
     p := Sender.GetNodeData(Node);
     if not Column in [0, 1, 2] then

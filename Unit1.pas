@@ -159,14 +159,11 @@ uses dateutils, rest.json, Winapi.uxtheme, System.Math, UnitFormNewPartyDialog,
     stringgridutils,
     listports, System.IOUtils,
     CurrentWorkTreeData, stringutils, vclutils, UnitFormChart, UnitFormSettings,
-    UnitFormCurrentWork, UnitFormDelay;
+    UnitFormCurrentWork, UnitFormDelay, system.Types, system.UITypes;
 
 {$R *.dfm}
 
 procedure TForm1.FormCreate(Sender: TObject);
-var
-    ARow: integer;
-    i: integer;
 begin
 
     FFErrorLogMutex := TCriticalSection.Create;
@@ -371,8 +368,6 @@ end;
 function TForm1.HandleCurentWorkMessage(content: string): string;
 var
     m: TWorkMsg;
-    i: integer;
-
 begin
     Result := '';
     m := TJson.JsonToObject<TWorkMsg>(content);
@@ -414,7 +409,6 @@ end;
 
 function TForm1.HandleReadVar(content: string): string;
 var
-    i: integer;
     X: TReadVar;
     p: TProduct;
     v: TDeviceVar;
@@ -441,7 +435,6 @@ end;
 
 function TForm1.HandleReadCoefficient(content: string): string;
 var
-    i: integer;
     X: TReadVar;
     p: TProduct;
     v: TDeviceVar;
@@ -575,9 +568,7 @@ end;
 
 procedure TForm1.SetCurrentParty;
 var
-    i, ARow, ACol: integer;
-    v: TDeviceVar;
-    c: RProductCoefValue;
+    i: integer;
     CurrentPartyID: int64;
 
 begin
@@ -718,6 +709,7 @@ begin
     cnv := grd.Canvas;
     cnv.Font := grd.Font;
 
+    Checked := false;
     if ARow > 0 then
         Checked := FProducts[ARow - 1].FChecked;
 
@@ -788,14 +780,11 @@ end;
 procedure TForm1.StringGrid1KeyPress(Sender: TObject; var Key: Char);
 var
     g: TStringGrid;
-    c: TCheckBox;
     i: integer;
     v: boolean;
 
 begin
     g := Sender as TStringGrid;
-    c := CheckBox1;
-
     if (g.Row > 0) AND (ord(Key) in [32, 27]) then
     begin
         v := FProducts[g.Selection.Top - 1].FChecked;

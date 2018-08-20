@@ -86,11 +86,10 @@ end;
 
 function TFormParties.PartyHTML(n: TNodeParty): string;
 var
-    i, j: integer;
+    i: integer;
     v1, v2: TKeyValue;
     coef, serial: integer;
     coefs, coefs_products: TArray<integer>;
-    s: string;
 begin
     coefs := DataModule1.PartyCoefsWithProducts(n.FPartyID);
     coefs_products := DataModule1.PartyProductsWithCoefs(n.FPartyID);
@@ -165,13 +164,7 @@ procedure TFormParties.VirtualStringTree1BeforeCellPaint
   (Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;
   Column: TColumnIndex; CellPaintMode: TVTCellPaintMode; CellRect: TRect;
   var ContentRect: TRect);
-var
-    p: PTreeData;
-    d: TNodeData;
 begin
-    p := Sender.GetNodeData(Node);
-    d := p.X;
-
     if Sender.Selected[Node] then
     begin
         TargetCanvas.Brush.Color := clSkyBlue;
@@ -184,11 +177,6 @@ procedure TFormParties.VirtualStringTree1Change(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 var
     p: PTreeData;
-    s, str_message: string;
-    product_serial: variant;
-
-    created_at: TDateTime;
-    i, level, work_index: integer;
 begin
     RichEdit1.Visible := false;
     HtmlViewer1.Visible := false;
@@ -239,8 +227,6 @@ procedure TFormParties.VirtualStringTree1Expanding(Sender: TBaseVirtualTree;
   Node: PVirtualNode; var Allowed: boolean);
 var
     p: PTreeData;
-    d: RTreeData;
-    v: variant;
 begin
     p := Sender.GetNodeData(Node);
     if p.X.FPopulated then

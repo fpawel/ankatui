@@ -120,7 +120,6 @@ constructor TNodeData.Create(ATreeView: TVirtualStringTree;
   ANode: PVirtualNode);
 var
     d: RTreeData;
-    c: RColumn;
     i: integer;
 begin
     inherited Create;
@@ -295,8 +294,6 @@ begin
 end;
 
 procedure TNodeSeries.Populate;
-var
-    r: RSeriesInfo;
 begin
     with TFDQuery.Create(nil) do
     begin

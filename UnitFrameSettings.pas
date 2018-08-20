@@ -59,8 +59,6 @@ type
         FOnValueChanged: TValueChangedHandler;
         FOnValidate: TValidateHandler;
 
-        procedure on_pipe_msg(msg, content: string);
-
         procedure ComboBox1Change(Sender: TObject);
         procedure Edit1Change(Sender: TObject);
         procedure ComboBox1DropDown(Sender: TObject);
@@ -113,7 +111,7 @@ end;
 procedure TConfigValue.SetStr(str: string);
 var
     v: double;
-    vInt, i: integer;
+    vInt: integer;
     ok: boolean;
 begin
     FError := '';
@@ -151,6 +149,7 @@ begin
             for j := 0 to length(cfg.FItems[i].FItems) - 1 do
                 if cfg.FItems[i].FItems[j].FName = name then
                     exit(cfg.FItems[i].FItems[j]);
+    raise Exception.Create('param not found: sect:"' + sect + '" name:"' +name+'"');
 
 end;
 
@@ -205,7 +204,6 @@ end;
 
 procedure TFrameSettings.Validate;
 var
-    p: TLabel;
     v:boolean;
 begin
     if Assigned(FOnValidate) then
@@ -213,34 +211,6 @@ begin
         v := Valid;
         FOnValidate(v);
     end;
-
-end;
-
-procedure TFrameSettings.on_pipe_msg(msg, content: string);
-begin
-    msg := UpperCase(msg);
-
-    if msg = 'CONFIG' then
-    begin
-        SetConfig(TJson.JsonToObject<TConfig>(content));
-        Validate;
-        exit;
-    end;
-
-    if msg = 'PARAM' then
-    begin
-        SetParam(TJson.JsonToObject<TConfigValue>(content));
-        Validate;
-        exit;
-    end;
-
-    MessageBox(Handle, Pchar(format('Неожиданное сообщение: %s [%d] %s',
-      [msg, length(content), content.Substring(1, min(2000, length(content)))])
-      ), 'Ошибка', MB_ICONERROR);
-
-    ExitProcess(1);
-
-    // raise Exception.Create('Wron msg: ' + msg + ', ' + content);
 
 end;
 
@@ -290,6 +260,7 @@ var
     Param: TConfigValue;
 begin
     Height := 50;
+    panel_section_container := nil;
 
     TArray.Sort<TConfigSection>(h.FItems,
       TDelegatedComparer<TConfigSection>.Construct(
@@ -474,7 +445,7 @@ begin
         end;
     end;
 
-    if length(h.FItems) = 1 then
+    if (length(h.FItems) = 1) AND Assigned(panel_section_container) then
         panel_section_container.Expand
 
 

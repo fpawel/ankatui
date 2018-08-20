@@ -90,6 +90,7 @@ function TNodeData.Ordinal: integer;
 var
     i: integer;
 begin
+    result := 0;
     for i := 0 to Root.FDescendants.Count - 1 do
     begin
         if Root.FDescendants[i] = self then
@@ -111,8 +112,6 @@ begin
 end;
 
 function TNodeData.NotifyOperation: TNotifyOperation;
-var
-    i: integer;
 begin
     result := TNotifyOperation.Create;
     result.FRun := True;

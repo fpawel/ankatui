@@ -9,13 +9,12 @@ function PartyValuesSection(FDQueryProducts, FDQueryConfig: TFDQuery)
 
 implementation
 
-uses System.Generics.Collections, System.variants;
+uses System.Generics.Collections, System.variants, FireDAC.Stan.Param;
 
 function PartyValuesSection(FDQueryProducts, FDQueryConfig: TFDQuery)
   : TConfigSection;
 var
     p: UnitFrameSettings.TConfigValue;
-    I: Integer;
     vars: TList<TConfigValue>;
     value_list: TList<string>;
 begin

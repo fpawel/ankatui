@@ -62,13 +62,10 @@ end;
 
 procedure TFrameCoef.HandleReadCoef(x: TReadVar);
 var
-    i: Integer;
     PrevProductCoef: RProductVar;
-    v: TDeviceVar;
 begin
     PrevProductCoef := FCurentProductCoef;
     FCurentProductCoef := x.ProductVar;
-    v := FCoefs[x.FVar];
 
     FCurentProductCoef.FProduct := x.FProduct;
     FCurentProductCoef.FVar := x.FVar;
@@ -188,6 +185,7 @@ var
 const
     lineColor: TColor = $00BCBCBC;
 begin
+    Checked := false;
 
     grd := TStringGrid(Sender);
     s := grd.Cells[ACol, ARow];

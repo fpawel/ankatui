@@ -38,7 +38,6 @@ type
         function RootNodeData: TNodeData;
 
         procedure Reset;
-        procedure ResetError;
     public
         { Public declarations }
         procedure SetRunError;
@@ -358,18 +357,6 @@ begin
           (VirtualStringTree1.FocusedNode)).x.FInfo
     else
         Result := nil;
-end;
-
-procedure TFormCurrentWork.ResetError;
-var
-    n: TNodeData;
-begin
-    for n in RootNodeData.FDescendants do
-        if n.FInfo.FHasError then
-        begin
-            n.FInfo.FHasError := false;
-            VirtualStringTree1.RepaintNode(n.FNode);
-        end;
 end;
 
 procedure TFormCurrentWork.SetRunError;

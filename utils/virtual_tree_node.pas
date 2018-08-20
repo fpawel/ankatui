@@ -55,7 +55,6 @@ constructor TNodeData.Create(ATreeView: TVirtualStringTree;
   ANode: PVirtualNode);
 var
     d: RTreeData;
-    c: RColumn;
     i: integer;
 begin
     inherited Create;

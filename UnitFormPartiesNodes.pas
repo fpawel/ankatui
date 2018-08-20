@@ -10,12 +10,12 @@ uses
 
 type
 
-
     TNodeYear = class(TNodeData)
     public
         FYear: integer;
         procedure Populate; override;
-        constructor Create(ATreeView: TVirtualStringTree; AYear: integer);
+        constructor Create(ATreeView: TVirtualStringTree;
+          AYear: integer);
     end;
 
     TNodeMonth = class(TNodeData)
@@ -65,7 +65,6 @@ type
         procedure Populate; override;
     end;
 
-
     TNodePartyDayLog = class(TNodeData)
     public
         FDay, FMonth, FYear: integer;
@@ -87,8 +86,6 @@ type
           FDQuery: TFDQuery);
         procedure Populate; override;
     end;
-
-    
 
 implementation
 
@@ -203,8 +200,8 @@ begin
     FPartyID := APartyID;
 end;
 
-constructor TNodeWorkLog.Create(ATreeView: TVirtualStringTree; ANode: PVirtualNode;
-  FDQuery: TFDQuery);
+constructor TNodeWorkLog.Create(ATreeView: TVirtualStringTree;
+  ANode: PVirtualNode; FDQuery: TFDQuery);
 begin
     inherited Create(ATreeView, ATreeView.AddChild(ANode));
     with FDQuery do
@@ -228,9 +225,6 @@ begin
 
 end;
 
-
-
-
 procedure TNodePartyDayLog.Populate;
 begin
     with DataModule1.FDQueryPartyWorks do
@@ -243,7 +237,8 @@ begin
         First;
         while not Eof do
         begin
-            TNodeWorkLog.Create(FTreeView, FNode, DataModule1.FDQueryPartyWorks);
+            TNodeWorkLog.Create(FTreeView, FNode,
+              DataModule1.FDQueryPartyWorks);
             Next;
         end;
         Close;
@@ -344,31 +339,30 @@ begin
 end;
 
 (*
-TNodePartyLogsRoot = class(TNodeData)
-    public
-        FPartyID: int64;
-        constructor Create(ATreeView: TVirtualStringTree; ANode: PVirtualNode;
-          APartyID: int64;);
-        procedure Populate; override;
-    end;
+  TNodePartyLogsRoot = class(TNodeData)
+  public
+  FPartyID: int64;
+  constructor Create(ATreeView: TVirtualStringTree; ANode: PVirtualNode;
+  APartyID: int64;);
+  procedure Populate; override;
+  end;
 *)
 
 procedure TNodePartyLogsRoot.Populate;
 begin
-   with DataModule1.FDQueryPartyWorksDays do
+    with DataModule1.FDQueryPartyWorksDays do
+    begin
+        ParamByName('party_id').Value := FPartyID;
+        open;
+        First;
+        while not Eof do
         begin
-            ParamByName('party_id').Value := FPartyID;
-            open;
-            First;
-            while not Eof do
-            begin
-                TNodePartyDayLog.Create(FTreeView, FNode, FPartyID,
-                  FieldValues['day'], FieldValues['month'],
-                  FieldValues['year']);
-                Next;
-            end;
-            Close;
+            TNodePartyDayLog.Create(FTreeView, FNode, FPartyID,
+              FieldValues['day'], FieldValues['month'], FieldValues['year']);
+            Next;
         end;
+        Close;
+    end;
 end;
 
 end.

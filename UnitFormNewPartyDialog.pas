@@ -50,9 +50,8 @@ uses System.Generics.Collections, stringutils, parties, UnitData,
 
 procedure TFormNewPartyDialog.DoAccept;
 var
-    I, serial: Integer;
+    serial: Integer;
     p: UnitFrameSettings.TConfigValue;
-    s: string;
 begin
 
     with DataModule1.FDQuery1 do
@@ -149,10 +148,7 @@ end;
 
 procedure TFormNewPartyDialog.FormCreate(Sender: TObject);
 var
-    p: UnitFrameSettings.TConfigValue;
     I: Integer;
-    vars: TList<TConfigValue>;
-    value_list: TList<string>;
 begin
 
     if Assigned(FConfig) then

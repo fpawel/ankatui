@@ -86,7 +86,7 @@ begin
     s := Panel3.Caption;
     if TryStrToTime(s,v) then
         Panel3.Caption := FormatDateTime('HH:mm:ss', IncSecond(v));
-    ProgressBar1.Position := ProgressBar1.Position + timer1.Interval;
+    ProgressBar1.Position := ProgressBar1.Position + integer(timer1.Interval);
 
 end;
 

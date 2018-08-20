@@ -259,7 +259,6 @@ end;
 function TDataModule1.InvertProductsChecked: boolean;
 var
     count, I: integer;
-    xs: TArray<TProduct>;
 
 begin
     with TFDQuery.Create(nil) do
@@ -407,7 +406,6 @@ end;
 function TDataModule1.CurrentPartyProducts: TArray<TProduct>;
 var
     xs: TList<TProduct>;
-    I, Serial: integer;
 
 begin
     xs := TList<TProduct>.Create;
@@ -744,8 +742,6 @@ end;
 
 procedure TDataModule1.PrintCurrentWorkMessages(ARichEdit: TRichEdit;
   work_index: integer);
-var
-    s: string;
 begin
     ARichEdit.Lines.Clear;
     with FDQueryCurrentWorkMessages do

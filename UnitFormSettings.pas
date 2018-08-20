@@ -49,8 +49,6 @@ procedure TFormSettings.FormMouseWheel(Sender: TObject; Shift: TShiftState;
   WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
 var
     CursorPos: TPoint;
-    FormPos: TPoint;
-
 const
     AllowDisabled = true;
     AllowWinControls = true;

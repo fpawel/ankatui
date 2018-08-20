@@ -246,6 +246,7 @@ var
     Node: PVirtualNode;
     d: TNodeWorkLog;
 begin
+    Node := nil;
     with DataModule1.FDQueryWorksByParentRecordID do
     begin
         ParamByName('parent_work_id').Value := FWorkID;
