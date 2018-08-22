@@ -159,7 +159,7 @@ uses dateutils, rest.json, Winapi.uxtheme, System.Math, UnitFormNewPartyDialog,
     stringgridutils,
     listports, System.IOUtils,
     CurrentWorkTreeData, stringutils, vclutils, UnitFormChart, UnitFormSettings,
-    UnitFormCurrentWork, UnitFormDelay, system.Types, system.UITypes;
+    UnitFormCurrentWork, UnitFormDelay, system.Types, system.UITypes, findproc;
 
 {$R *.dfm}
 

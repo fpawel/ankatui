@@ -52,6 +52,7 @@ type
         Panel4: TPanel;
         Panel7: TPanel;
     CategoryPanelGroup1: TCategoryPanelGroup;
+    procedure CheckBox1Click(Sender: TObject);
     private
         { Private declarations }
         FCtrlParam: TDictionary<TWinControl, TConfigValue>;
@@ -88,6 +89,7 @@ const
     VtcString = 'text';
     VtcComportName = 'comport_name';
     VtcBaud = 'baud';
+    VtcBool = 'bool';
 
 function GetParam(cfg: TConfig; sect, name: string): TConfigValue;
 
@@ -99,7 +101,7 @@ uses listports, RTTI, math, REST.Json, System.Generics.defaults, stringutils;
 
 procedure TConfigValue.SetParam(p: TFDParam);
 begin
-    if (FType = VtcInt) or (FType = VtcBaud) then
+    if (FType = VtcInt) or (FType = VtcBaud) or (FType = VtcBool) then
         p.AsInteger := strtoint(FValue)
     else if FType = VtcFloat then
         p.AsFloat := str_to_float(FValue)
@@ -121,7 +123,7 @@ begin
     else
     begin
         ok := true;
-        if (FType = VtcInt) or (FType = VtcBaud) then
+        if (FType = VtcInt) or (FType = VtcBaud) or (FType = VtcBool) then
         begin
             ok := TryStrToInt(str, vInt);
             v := vInt;
@@ -183,10 +185,12 @@ begin
         begin
             cb := pp.Key as TComboBox;
             cb.ItemIndex := cb.Items.IndexOf(pp.Value.FValue);
+        end
+        else if pp.Key is TCheckBox then
+        begin
+            (pp.Key as TCheckBox).Checked := (pp.Value.FValue <> '0');
         end;
-
     end;
-
 end;
 
 
@@ -407,6 +411,36 @@ begin
                     Constraints.MaxHeight := 30;
                 end;
             end
+
+
+            else if (Param.FType = VtcBool) then
+            begin
+                with TPanel.Create(self) do
+                begin
+                    Parent := panel_param_container;
+                    Align := alLeft;
+                    Width := 5;
+                    BevelOuter := bvNone;
+                end;
+
+                with TPanel.Create(self) do
+                begin
+                    Parent := panel_param_container;
+                    Align := alBottom;
+                    Height := 10;
+                    BevelOuter := bvNone;
+                end;
+
+                ctrl := TCheckBox.Create(self);
+                with ctrl as TCheckBox do
+                begin
+                    Parent := panel_param_container;
+                    checked := Param.FValue <> '0';
+                    OnClick := CheckBox1Click;
+                    Constraints.MaxHeight := 30;
+                end;
+            end
+
             else
                 raise Exception.Create('Unknown ' + h.FItems[i].FItems
                   [j].FType);
@@ -449,6 +483,28 @@ begin
         panel_section_container.Expand
 
 
+end;
+
+procedure TFrameSettings.CheckBox1Click(Sender: TObject);
+var
+    pv: TConfigValue;
+    errorLabel: TLabel;
+    s:string;
+begin
+    pv := FCtrlParam[Sender as TWinControl];
+
+    if (Sender as TCheckBox).Checked then
+        s := '1'
+    else
+        s := '0';
+
+
+    pv.SetStr(s );
+    errorLabel := FErrorLabel[Sender as TWinControl];
+    errorLabel.Caption := pv.FError;
+    Validate;
+    if (pv.FError = '') and Assigned(FOnValueChanged) then
+        FOnValueChanged(pv);
 end;
 
 procedure TFrameSettings.ComboBox1Change(Sender: TObject);

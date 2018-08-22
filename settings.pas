@@ -127,7 +127,7 @@ begin
                       'INSERT OR REPLACE INTO party_value (var, party_id, value) '
                       + 'VALUES (:var, (SELECT * FROM current_party_id), :value);';
                     ParamByName('var').Value := p.FVar;
-                    p.SetParam(ParamByName('value'));
+                    ParamByName('value').Value := p.FValue;
                     ExecSQL;
                     Close;
                 end
@@ -137,7 +137,8 @@ begin
                     SQL.Text :=
                       'UPDATE config SET value = :value where var = :var;';
                     ParamByName('var').Value := p.FVar;
-                    p.SetParam(ParamByName('value'));
+                    ParamByName('value').Value := p.FValue;
+
                     ExecSQL;
                     Close;
                 end;
