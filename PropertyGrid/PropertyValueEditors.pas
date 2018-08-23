@@ -189,7 +189,14 @@ begin
     Data := FTree.GetNodeData(FNode);
     if FEdit is TComboBox then
         S := TComboBox(FEdit).Text
-    else
+    else if FEdit is TCheckBox then
+    begin
+        if (FEdit as TCheckBox).Checked then
+            S := '1'
+        else
+            s := '0';
+
+    end else
     begin
         GetWindowText(FEdit.Handle, Buffer, 1024);
         S := Buffer;
@@ -266,6 +273,7 @@ begin
             OnKeyDown := EditKeyDown;
             OnKeyUp := EditKeyUp;
             style := csOwnerDrawFixed;
+            ItemHeight := 19;
             ItemIndex := Items.IndexOf(Data.FValue);
         end;
     end
@@ -317,21 +325,7 @@ begin
             Text := Data.FValue;
             OnKeyDown := EditKeyDown;
             OnKeyUp := EditKeyUp;
-        end;
-    end
-    else if Data.FType = VtcMemo then
-    begin
-        FEdit := TComboBox.Create(nil);
-        // In reality this should be a drop down memo but this requires
-        // a special control.
-        with FEdit as TComboBox do
-        begin
-            Visible := False;
-            Parent := Tree;
-            Text := Data.FValue;
-            Items.Add(Data.FValue);
-            OnKeyDown := EditKeyDown;
-            OnKeyUp := EditKeyUp;
+            
         end;
     end
     else if Data.FType = VtcDateTime then
@@ -358,8 +352,13 @@ begin
         begin
             Visible := False;
             Parent := Tree;
-            Checked := Data.FValue <> '0';
+            if Data.FValue = '0' then
+                Data.FValue := '1'
+            else
+                Data.FValue := '0';
 
+            Checked := Data.FValue <> '0';
+            Caption := '---';
         end;
     end
     else

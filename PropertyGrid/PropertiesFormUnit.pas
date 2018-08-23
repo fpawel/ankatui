@@ -64,6 +64,10 @@ type
         procedure VST3DrawText(Sender: TBaseVirtualTree; TargetCanvas: TCanvas;
           Node: PVirtualNode; Column: TColumnIndex; const Text: string;
           const CellRect: TRect; var DefaultDraw: Boolean);
+        procedure VST3BeforeCellPaint(Sender: TBaseVirtualTree;
+          TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
+          CellPaintMode: TVTCellPaintMode; CellRect: TRect;
+          var ContentRect: TRect);
     private
         FSections: TSections;
         procedure WMStartEditing(var Message: TMessage);
@@ -278,10 +282,7 @@ begin
                     if Node.Parent <> Sender.RootNode then
                     begin
                         Data := Sender.GetNodeData(Node);
-                        if Data.FType = VtcBool then
-                            CellText := '___________'
-                        else
-                            CellText := Data.FValue;
+                        CellText := Data.FValue;
                     end;
                 end;
         end;
@@ -320,14 +321,14 @@ begin
     if (Kind in [ikNormal, ikSelected]) and (Column = 0) then
     begin
         if Node.Parent = Sender.RootNode then
-            Index := 12 // root nodes, this is an open folder
+            Index := 1 // root nodes, this is an open folder
         else
         begin
             Data := Sender.GetNodeData(Node);
             if Data.FType <> '' then
-                Index := 14
+                Index := 3
             else
-                Index := 13;
+                Index := 2;
         end;
     end;
 end;
@@ -351,6 +352,24 @@ begin
 end;
 
 // ----------------------------------------------------------------------------------------------------------------------
+
+procedure TPropertiesForm.VST3BeforeCellPaint(Sender: TBaseVirtualTree;
+  TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
+  CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
+begin
+    with TargetCanvas do
+    begin
+        if not(vsSelected in Node.States) then
+        begin
+            if Odd(Node.Index) then
+                Brush.Color := cl3DLight
+            else
+                Brush.Color := clWhite;
+            FillRect(CellRect);
+        end;
+
+    end;
+end;
 
 procedure TPropertiesForm.VST3Change(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
@@ -396,7 +415,10 @@ begin
     Data := Sender.GetNodeData(Node);
     if (Column = 1) and (Data.FType = VtcBool) then
     begin
-        DrawCheckbox(Sender, TargetCanvas, CellRect, Data.FValue <> '0', '');
+        R := CellRect;
+        R.Left := R.Left - 9;
+        R.Right := R.Right - 9;
+        DrawCheckbox(Sender, TargetCanvas, R, Data.FValue <> '0', '');
         DefaultDraw := false;
     end
 
@@ -410,7 +432,6 @@ procedure TPropertiesForm.VST3PaintText(Sender: TBaseVirtualTree;
 
 var
     Data: PPropertyData;
-
 
 begin
     // Make the root nodes underlined and draw changed nodes in bold style.
