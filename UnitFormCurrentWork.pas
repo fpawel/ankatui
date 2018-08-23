@@ -267,7 +267,7 @@ begin
     Button1.Caption := '   Запустить: [0] Настройка Анкат';
     if SelectedOperation <> nil then
         Button1.Caption := Format('   Запустить: [%d] %s',
-          [SelectedOperation.FOrdinal, AnsiLowerCase(SelectedOperation.FName)]);
+          [SelectedOperation.FOrdinal, SelectedOperation.FName]);
 
 end;
 

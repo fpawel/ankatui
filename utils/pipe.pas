@@ -2,11 +2,10 @@ unit pipe;
 
 interface
 
-uses System.Classes, REST.Json, System.SyncObjs, System.Generics.Collections,
+uses System.Classes, Winapi.Windows, REST.Json, System.SyncObjs,
+    System.Generics.Collections,
     sysutils;
 
-const
-    BUF_SIZE = 200000;
 
 type
 
@@ -26,13 +25,18 @@ type
         hPipe: THANDLE; // дескриптор
         FName: string;
         FRaiseException: RaiseExceptionHandler;
+        FConnected: boolean;
         procedure raise_exception(error: string);
+        procedure thisReadFile(var Buffer; numberOfbytesToRead: DWORD);
+        procedure thisWriteFile(var Buffer; numberOfbytesToWrite: DWORD);
     public
         function FormatError(error: string): string;
 
         { Public declarations }
-        Constructor Create(pipe_server: string;
-          ARaiseException: RaiseExceptionHandler);
+        Constructor Create(ARaiseException: RaiseExceptionHandler);
+
+        function Connect(pipe_server: string): boolean;
+
         procedure WriteInt32(v: LONGWORD);
         function ReadInt32: LONGWORD;
 
@@ -65,7 +69,7 @@ type
         { Public declarations }
         Constructor Create;
         procedure Execute; override;
-        procedure Connect(pipe_server: string);
+        function Connect(pipe_server: string): boolean;
         procedure Handle(Msg: string; h: TReadPipeHandler);
 
         procedure WriteMsgJSON(Msg: string; obj: TObject);
@@ -79,7 +83,7 @@ type
 
 implementation
 
-uses Winapi.Windows, System.WideStrUtils, System.dateutils, vcl.forms,
+uses System.WideStrUtils, System.dateutils, vcl.forms,
     math, inifiles;
 
 type
@@ -125,8 +129,12 @@ begin
         end);
 end;
 
-Constructor TPipeConnection.Create(pipe_server: string;
-ARaiseException: RaiseExceptionHandler);
+Constructor TPipeConnection.Create(ARaiseException: RaiseExceptionHandler);
+begin
+    FRaiseException := ARaiseException;
+end;
+
+function TPipeConnection.Connect(pipe_server: string): boolean;
 var
     s: string;
 begin
@@ -134,9 +142,49 @@ begin
     s := '\\.\pipe\$' + pipe_server + '$';
     hPipe := CreateFileW(PWideChar(s), GENERIC_READ or GENERIC_WRITE,
       FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, 0, 0);
-    if hPipe = INVALID_HANDLE_VALUE then
-        raise Exception.Create(FormatError('INVALID_HANDLE_VALUE'));
-    FRaiseException := ARaiseException;
+    result := hPipe <> INVALID_HANDLE_VALUE;
+    if result then
+    begin
+        FConnected := true;
+    end;
+
+end;
+
+procedure TPipeConnection.thisReadFile(var Buffer;
+numberOfbytesToRead: DWORD);
+var
+    readed_count: DWORD;
+begin
+    if not ReadFile(hPipe, Buffer, numberOfbytesToRead, readed_count, nil) then
+    begin
+        raise_exception('ReadFile');
+    end;
+
+    if readed_count <> numberOfbytesToRead then
+    begin
+        raise_exception(Format('ReadFile: readed_count=%d, must be %d',
+          [readed_count, numberOfbytesToRead]));
+    end;
+end;
+
+procedure TPipeConnection.thisWriteFile(var Buffer; numberOfbytesToWrite: DWORD);
+var
+    writen_count: DWORD;
+begin
+    if not FConnected then
+    begin
+        raise_exception('not connected');
+    end;
+
+    if not(WriteFile(hPipe, Buffer, numberOfbytesToWrite, writen_count, nil)) then
+    begin
+        raise_exception('WriteFile');
+    end;
+    if writen_count <> numberOfbytesToWrite then
+    begin
+        raise_exception(Format('WriteFile: writen_count=%d, must be %d',
+          [writen_count, numberOfbytesToWrite]));
+    end;
 end;
 
 procedure TPipeConnection.raise_exception(error: string);
@@ -147,177 +195,82 @@ end;
 function TPipeConnection.FormatError(error: string): string;
 var
     Buffer: array [0 .. 2047] of Char;
+    strWinError:string;
 begin
     FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, nil, GetLastError, $400, @Buffer,
       SizeOf(Buffer), nil);
+    strWinError := Trim(string(Buffer));
     if error <> '' then
-        result := error + ': ' + string(Buffer)
+        if strWinError <> '' then
+            result := error + ': ' + strWinError
     else
-        result := string(Buffer);
-    result := FName + ': ' + result;
+        if strWinError <> '' then
+            result := strWinError;
+    if result <> '' then
+        result := FName + ': ' + result
+    else
+        result := FName + ': failed';
 end;
 
 function TPipeConnection.ReadFloat64: double;
 var
     x: _INT64_BYTES;
-    readed_count: DWORD;
 begin
-    if not ReadFile(hPipe, x.bytes, 8, readed_count, nil) then
-    begin
-        raise_exception('ReadFloat64');
-    end;
-    if readed_count <> 8 then
-    begin
-        raise_exception('ReadFloat64: readed_count <> 8');
-    end;
+    thisReadFile(x.bytes[0], 8);
     result := x.value_double;
-
 end;
 
 procedure TPipeConnection.WriteFloat64(value: double);
 var
-    writen_count: DWORD;
     x: _INT64_BYTES;
-
 begin
     x.value_double := value;
-    if not(WriteFile(hPipe, x.bytes, 8, writen_count, nil)) then
-    begin
-        raise_exception('WriteFloat64: WriteFile error');
-    end;
-    if writen_count <> 8 then
-    begin
-        raise_exception('WriteFloat64: writen_count <>8');
-    end;
+    thisWriteFile(x.bytes, 8);
 end;
 
 function TPipeConnection.ReadInt64: int64;
 var
     x: _INT64_BYTES;
-    readed_count: DWORD;
 begin
-    if not ReadFile(hPipe, x.bytes, 8, readed_count, nil) then
-    begin
-        raise_exception('ReadInt64');
-    end;
-    if readed_count <> 8 then
-    begin
-        raise_exception('ReadInt64: readed_count <> 8: ' +
-          inttostr(readed_count));
-    end;
+    thisReadFile(x.bytes, 8);
     result := x.value_int64;
-
 end;
 
 procedure TPipeConnection.WriteInt64(value: int64);
 var
-    writen_count: DWORD;
     x: _INT64_BYTES;
-
 begin
     x.value_int64 := value;
-    if not(WriteFile(hPipe, x.bytes, 8, writen_count, nil)) then
-    begin
-        raise_exception('WriteInt64: WriteFile error');
-    end;
-    if writen_count <> 8 then
-    begin
-        raise_exception('WriteInt64: writen_count <>8');
-    end;
+    thisWriteFile(x.bytes, 8);
 end;
 
 function TPipeConnection.ReadInt32: LONGWORD;
 var
     x: _LONGWORD_BYTES;
-    readed_count: DWORD;
 begin
-    if not ReadFile(hPipe, x.bytes, 4, readed_count, nil) then
-    begin
-        raise_exception('ReadInt32');
-    end;
-    if readed_count <> 4 then
-    begin
-        raise_exception('ReadInt32: readed_count <> 4:' +
-          inttostr(readed_count));
-    end;
+    thisReadFile(x.bytes, 4);
     result := x.value;
 end;
 
 procedure TPipeConnection.WriteInt32(v: LONGWORD);
 var
-    writen_count: DWORD;
     x: _LONGWORD_BYTES;
-
 begin
     x.value := v;
-    if not(WriteFile(hPipe, x.bytes, 4, writen_count, nil)) then
-    begin
-        raise_exception('WriteInt: WriteFile error');
-    end;
-    if writen_count <> 4 then
-    begin
-        raise_exception('WriteInt: writen_count <> 4');
-    end;
+    thisWriteFile(x.bytes, 4);
 end;
 
 procedure TPipeConnection.WriteString(s: string);
 var
-    tmp: DWORD;
-    pos, len, n: Integer;
-    Buffer: array [0 .. BUF_SIZE - 1] of byte;
+    len: Integer;
     ptr_bytes: TBytes;
-    i: Integer;
 
 begin
     ptr_bytes := WideBytesOf(s);
     len := Length(ptr_bytes);
     WriteInt32(len);
-
-    if len = 0 then
-        exit;
-
-    pos := 0;
-    while pos < len do
-    begin
-        n := min(len - pos, BUF_SIZE);
-
-        for i := 0 to n - 1 do
-            Buffer[i] := ptr_bytes[pos + i];
-
-        if not(WriteFile(hPipe, Buffer, n, tmp, nil)) then
-        begin
-            raise_exception('WriteString: WriteFile error');
-        end;
-        pos := pos + n;
-    end;
+    thisWriteFile(ptr_bytes[0], len);
 end;
-
-(*
-  function TPipeConnection.ReadString: string;
-  var
-  readed_count: DWORD;
-  pos, len: LONGWORD;
-  Buffer: array [0 .. BUF_SIZE - 1] of byte;
-  Str: string;
-  bytes: TBytes;
-  begin
-  len := ReadInt32;
-  pos := 0;
-  while pos < len do
-  begin
-  if not ReadFile(hPipe, Buffer, min(BUF_SIZE, len - pos),
-  readed_count, nil) then
-  begin
-  raise_exception('ReadString');
-  end;
-  pos := pos + readed_count;
-  SetLength(bytes, readed_count);
-  Move(Buffer[0], bytes[0], readed_count);
-  str := StringOf(bytes);
-  result := result + Str;
-  end;
-  end;
-*)
 
 function TPipeConnection.ReadString: string;
 var
@@ -328,11 +281,11 @@ var
     Str: string;
 begin
     len := ReadInt32;
-    SetLength(Buffer, len );
-    if not ReadFile(hPipe, Buffer[0], len, readed_count, nil) then
-        raise_exception('ReadString');
-    Str := WideStringOf(Buffer);
-    result := Str;
+    if len = 0 then
+        exit('');
+    SetLength(Buffer, len);
+    thisReadFile(Buffer[0], len);
+    result := WideStringOf(Buffer);
 end;
 
 function TPipeConnection.ReadDateTime: TDateTime;
@@ -361,16 +314,19 @@ Constructor TPipe.Create;
 begin
     inherited Create(true);
     FHandlers := TDictionary<string, TReadPipeHandler>.Create;
+    FPipePeerToMasterConn := TPipeConnection.Create(self.raise_exception);
+    FPipeMasterToPeerConn := TPipeConnection.Create(self.raise_exception);
 end;
 
-procedure TPipe.Connect(pipe_server: string);
+function TPipe.Connect(pipe_server: string): boolean;
 begin
-    FPipePeerToMasterConn := TPipeConnection.Create
-      (pipe_server + '_PEER_TO_MASTER', self.raise_exception);
-    FPipeMasterToPeerConn := TPipeConnection.Create
-      (pipe_server + '_MASTER_TO_PEER', self.raise_exception);
+    if not FPipePeerToMasterConn.Connect(pipe_server + '_PEER_TO_MASTER') then
+        exit(false);
+    if not FPipeMasterToPeerConn.Connect(pipe_server + '_MASTER_TO_PEER') then
+        exit(false);
     FConnected := true;
     self.Suspended := false;
+    Result := true;
 end;
 
 procedure TPipe.Handle(Msg: string; h: TReadPipeHandler);

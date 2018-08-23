@@ -51,8 +51,8 @@ type
         Panel2: TPanel;
         Panel4: TPanel;
         Panel7: TPanel;
-    CategoryPanelGroup1: TCategoryPanelGroup;
-    procedure CheckBox1Click(Sender: TObject);
+        CategoryPanelGroup1: TCategoryPanelGroup;
+        procedure CheckBox1Click(Sender: TObject);
     private
         { Private declarations }
         FCtrlParam: TDictionary<TWinControl, TConfigValue>;
@@ -151,7 +151,8 @@ begin
             for j := 0 to length(cfg.FItems[i].FItems) - 1 do
                 if cfg.FItems[i].FItems[j].FName = name then
                     exit(cfg.FItems[i].FItems[j]);
-    raise Exception.Create('param not found: sect:"' + sect + '" name:"' +name+'"');
+    raise Exception.Create('param not found: sect:"' + sect + '" name:"' +
+      name + '"');
 
 end;
 
@@ -193,8 +194,6 @@ begin
     end;
 end;
 
-
-
 function TFrameSettings.Valid: boolean;
 var
     p: TLabel;
@@ -208,7 +207,7 @@ end;
 
 procedure TFrameSettings.Validate;
 var
-    v:boolean;
+    v: boolean;
 begin
     if Assigned(FOnValidate) then
     begin
@@ -258,7 +257,7 @@ procedure TFrameSettings.SetConfig(h: TConfig);
 var
     i, j, k: integer;
     panel_param_container, tmp_pn: TPanel;
-    panel_section_container : TCategoryPanel;
+    panel_section_container: TCategoryPanel;
     ctrl: TWinControl;
     error_label: TLabel;
     Param: TConfigValue;
@@ -270,7 +269,8 @@ begin
       TDelegatedComparer<TConfigSection>.Construct(
         function(const a, b: TConfigSection): integer
         begin
-            Result := TComparer<integer>.Default.Compare(a.FSortOrder, b.FSortOrder);
+            Result := TComparer<integer>.Default.Compare(a.FSortOrder,
+              b.FSortOrder);
         end));
 
     for i := 0 to length(h.FItems) - 1 do
@@ -285,7 +285,7 @@ begin
             end));
 
         panel_section_container := TCategoryPanel.Create(self);
-        with  panel_section_container do
+        with panel_section_container do
         begin
             Caption := h.FItems[i].FName;
             PanelGroup := CategoryPanelGroup1;
@@ -352,6 +352,15 @@ begin
 
                 with TPanel.Create(self) do
                 begin
+                    Align := alClient;
+                    Parent := tmp_pn;
+                    BevelOuter := bvNone;
+                    Caption := Param.FName + ':';
+                    Alignment := taRightJustify;
+                end;
+
+                with TPanel.Create(self) do
+                begin
                     Align := alBottom;
                     Parent := tmp_pn;
                     Height := 10;
@@ -360,12 +369,16 @@ begin
 
                 with TPanel.Create(self) do
                 begin
-                    Align := alClient;
+                    Align := alLeft;
+                    Width := 50;
                     Parent := tmp_pn;
                     BevelOuter := bvNone;
-                    Caption := Param.FName + ':';
-                    Alignment := taRightJustify;
+                    Color := clRed;
                 end;
+
+
+
+
             end;
 
             if Param.FType = VtcComportName then
@@ -412,14 +425,13 @@ begin
                 end;
             end
 
-
             else if (Param.FType = VtcBool) then
             begin
                 with TPanel.Create(self) do
                 begin
                     Parent := panel_param_container;
                     Align := alLeft;
-                    Width := 5;
+                    Width := 15;
                     BevelOuter := bvNone;
                 end;
 
@@ -435,7 +447,7 @@ begin
                 with ctrl as TCheckBox do
                 begin
                     Parent := panel_param_container;
-                    checked := Param.FValue <> '0';
+                    Checked := Param.FValue <> '0';
                     OnClick := CheckBox1Click;
                     Constraints.MaxHeight := 30;
                 end;
@@ -449,17 +461,8 @@ begin
             with ctrl do
             begin
                 Align := alLeft;
-                width := 150;
+                Width := 150;
                 Left := 100500;
-            end;
-
-            with TPanel.Create(self) do
-            begin
-                Align := alLeft;
-                width := 5;
-                Left := 100500;
-                Parent := panel_param_container;
-                BevelOuter := bvNone;
             end;
 
             error_label := TLabel.Create(self);
@@ -482,14 +485,13 @@ begin
     if (length(h.FItems) = 1) AND Assigned(panel_section_container) then
         panel_section_container.Expand
 
-
 end;
 
 procedure TFrameSettings.CheckBox1Click(Sender: TObject);
 var
     pv: TConfigValue;
     errorLabel: TLabel;
-    s:string;
+    s: string;
 begin
     pv := FCtrlParam[Sender as TWinControl];
 
@@ -498,8 +500,7 @@ begin
     else
         s := '0';
 
-
-    pv.SetStr(s );
+    pv.SetStr(s);
     errorLabel := FErrorLabel[Sender as TWinControl];
     errorLabel.Caption := pv.FError;
     Validate;

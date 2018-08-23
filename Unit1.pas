@@ -313,10 +313,13 @@ begin
 
     FormCurrentWork.Init2;
     FormDelay.Init2;
-
-    FPipe.Connect('ANKAT');
-
     DataModule1.PrintLastMessages(RichEdit1, 500);
+
+    if not FPipe.Connect('ANKAT') then
+    begin
+        Panel5.Caption := 'Нет хост-процеса';
+        Panel5.Font.Color := clRed;
+    end;
 end;
 
 function TForm1.HandleEndWork(content: string): string;
