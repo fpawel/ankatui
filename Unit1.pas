@@ -159,7 +159,8 @@ uses dateutils, rest.json, Winapi.uxtheme, System.Math, UnitFormNewPartyDialog,
     stringgridutils,
     listports, System.IOUtils,
     CurrentWorkTreeData, stringutils, vclutils, UnitFormChart, UnitFormSettings,
-    UnitFormCurrentWork, UnitFormDelay, system.Types, system.UITypes, findproc;
+    UnitFormCurrentWork, UnitFormDelay, system.Types, system.UITypes, findproc,
+  PropertiesFormUnit;
 
 {$R *.dfm}
 
@@ -930,8 +931,9 @@ end;
 
 procedure TForm1.ToolButton3Click(Sender: TObject);
 begin
-    FormSettings.Position := poScreenCenter;
-    FormSettings.Show;
+    //FormSettings.Position := poScreenCenter;
+    //FormSettings.Show;
+    PropertiesForm.Show;
 end;
 
 procedure TForm1.ToolButton7Click(Sender: TObject);

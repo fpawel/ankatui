@@ -56,7 +56,10 @@ uses
   UnivDisasm.Syntax.Utils in 'Common\UnivDisasm\UnivDisasm.Syntax.Utils.pas',
   UnivDisasm.SyntaxManager in 'Common\UnivDisasm\UnivDisasm.SyntaxManager.pas',
   UnivDisasm.Utils in 'Common\UnivDisasm\UnivDisasm.Utils.pas',
-  findproc in 'utils\findproc.pas';
+  findproc in 'utils\findproc.pas',
+  PropertiesFormUnit in 'PropertyGrid\PropertiesFormUnit.pas' {PropertiesForm},
+  PropertyValueEditors in 'PropertyGrid\PropertyValueEditors.pas',
+  PropertyUtils in 'PropertyGrid\PropertyUtils.pas';
 
 {$R *.res}
 
@@ -74,5 +77,6 @@ begin
   Application.CreateForm(TFormCurrentWork, FormCurrentWork);
   Application.CreateForm(TFormDelay, FormDelay);
   Application.CreateForm(TFormParties, FormParties);
+  Application.CreateForm(TPropertiesForm, PropertiesForm);
   Application.Run;
 end.
