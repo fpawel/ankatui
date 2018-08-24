@@ -58,16 +58,13 @@ type
         procedure VST3IncrementalSearch(Sender: TBaseVirtualTree;
           Node: PVirtualNode; const SearchText: string; var Result: Integer);
         procedure RadioGroup1Click(Sender: TObject);
-        procedure VST3StateChange(Sender: TBaseVirtualTree;
-          Enter, Leave: TVirtualTreeStates);
         procedure VST3FreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
         procedure VST3DrawText(Sender: TBaseVirtualTree; TargetCanvas: TCanvas;
           Node: PVirtualNode; Column: TColumnIndex; const Text: string;
           const CellRect: TRect; var DefaultDraw: Boolean);
-        procedure VST3BeforeCellPaint(Sender: TBaseVirtualTree;
-          TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-          CellPaintMode: TVTCellPaintMode; CellRect: TRect;
-          var ContentRect: TRect);
+    procedure VST3BeforeCellPaint(Sender: TBaseVirtualTree;
+      TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
+      CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
     private
         FSections: TSections;
         procedure WMStartEditing(var Message: TMessage);
@@ -359,14 +356,14 @@ procedure TPropertiesForm.VST3BeforeCellPaint(Sender: TBaseVirtualTree;
 begin
     with TargetCanvas do
     begin
-        if not(vsSelected in Node.States) then
-        begin
-            if Odd(Node.Index) then
-                Brush.Color := cl3DLight
-            else
-                Brush.Color := clWhite;
-            FillRect(CellRect);
-        end;
+        if Node.Parent = Sender.RootNode then
+            Brush.Color := clWebHoneydew
+        else if Odd(Node.Index) then
+            Brush.Color := clWebAzure
+        else
+            Brush.Color := clWhite;
+
+        FillRect(CellRect);
 
     end;
 end;
@@ -478,14 +475,6 @@ end;
 
 procedure TPropertiesForm.RadioGroup1Click(Sender: TObject);
 
-begin
-
-end;
-
-// ----------------------------------------------------------------------------------------------------------------------
-
-procedure TPropertiesForm.VST3StateChange(Sender: TBaseVirtualTree;
-  Enter, Leave: TVirtualTreeStates);
 begin
 
 end;

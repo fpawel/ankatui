@@ -61,7 +61,7 @@ implementation
 
 {$R *.dfm}
 
-uses rest.json, stringutils, Unit1, unitdata;
+uses rest.json, stringutils, Unit1, unitdata, UnitHostAppData;
 
 type
     TOperationCheckState = class
@@ -136,7 +136,7 @@ begin
     if o = nil then
         o := RootNodeData.FInfo;
     Reset;
-    Form1.FPipe.WriteMsgStr('RUN_MAIN_WORK', inttostr(o.FOrdinal));
+    HostAppData.FPipe.WriteMsgStr('RUN_MAIN_WORK', inttostr(o.FOrdinal));
     Form1.SetupWorkStarted(o.FName, true);
     while Form1.Panel6.ControlCount > 0 do
         Form1.Panel6.Controls[0].Parent := nil;
@@ -169,7 +169,7 @@ begin
     end;
     VirtualStringTree1.Clear;
 
-    AddNode(nil, TJson.JsonToObject<TOperationInfo>(Form1.FPipe.Fetch1('CURRENT_WORKS', nil)));
+    AddNode(nil, TJson.JsonToObject<TOperationInfo>(HostAppData.FPipe.Fetch1('CURRENT_WORKS', nil)));
 
     Node := VirtualStringTree1.GetFirst;
     Node := VirtualStringTree1.GetNext(Node);
@@ -188,7 +188,7 @@ end;
 procedure TFormCurrentWork.Init2;
 begin
 
-    Form1.FPipe.Handle('CURRENT_WORK',
+    HostAppData.FPipe.Handle('CURRENT_WORK',
         function(content: string): string
         var
             d: TNodeData;
@@ -283,7 +283,7 @@ begin
     x := TOperationCheckState.Create;
     x.FOrdinal := d.FInfo.FOrdinal;
     x.FCheckState := checkStateToStr(VirtualStringTree1.CheckState[Node]);
-    Form1.FPipe.WriteMsgJSON('CURRENT_WORK_CHECKED_CHANGED', x);
+    HostAppData.FPipe.WriteMsgJSON('CURRENT_WORK_CHECKED_CHANGED', x);
 end;
 
 procedure TFormCurrentWork.VirtualStringTree1GetImageIndex

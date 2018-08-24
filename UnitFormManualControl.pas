@@ -45,8 +45,6 @@ type
         procedure InvalidateModbusCommand;
 
     public
-        FPipe: TPipe;
-        { Public declarations }
         function GetModbusCommand(var cmd: integer; var arg: extended): boolean;
     end;
 
@@ -57,7 +55,7 @@ implementation
 
 {$R *.dfm}
 
-uses stringutils, Unit1, stringgridutils;
+uses stringutils, Unit1, stringgridutils, UnitHostAppData;
 
 procedure TFormManualControl.Button1Click(Sender: TObject);
 var
@@ -65,14 +63,14 @@ var
 begin
     X := TSendModbusCmd.Create;
     if GetModbusCommand(X.FCmd, X.FArg) then
-        FPipe.WriteMsgJSON('MODBUS_CMD', X);
+        HostAppData.FPipe.WriteMsgJSON('MODBUS_CMD', X);
     X.Free;
     Form1.SetupWorkStarted('отправка команды', true);
 end;
 
 procedure TFormManualControl.Button6Click(Sender: TObject);
 begin
-    FPipe.WriteMsgStr('SEND_SET_WORK_MODE',  Edit3.Text);
+    HostAppData.FPipe.WriteMsgStr('SEND_SET_WORK_MODE',  Edit3.Text);
     Form1.SetupWorkStarted('установкарежима работы', true);
 end;
 

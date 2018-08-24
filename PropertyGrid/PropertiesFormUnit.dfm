@@ -21,7 +21,7 @@ object PropertiesForm: TPropertiesForm
     Align = alClient
     Colors.BorderColor = clWindowText
     Colors.HotColor = clBlack
-    DefaultNodeHeight = 30
+    DefaultNodeHeight = 28
     Header.AutoSizeIndex = 1
     Header.Font.Charset = DEFAULT_CHARSET
     Header.Font.Color = clWindowText
@@ -39,10 +39,9 @@ object PropertiesForm: TPropertiesForm
     ParentShowHint = False
     ShowHint = True
     TabOrder = 0
-    TreeOptions.AnimationOptions = [toAnimatedToggle]
-    TreeOptions.AutoOptions = [toAutoDropExpand, toAutoTristateTracking, toAutoDeleteMovedNodes]
     TreeOptions.MiscOptions = [toAcceptOLEDrop, toEditable, toGridExtensions, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
-    TreeOptions.SelectionOptions = [toCenterScrollIntoView]
+    TreeOptions.PaintOptions = [toShowButtons, toShowDropmark, toShowHorzGridLines, toShowRoot, toShowTreeLines, toThemeAware, toUseBlendedImages]
+    TreeOptions.SelectionOptions = [toFullRowSelect]
     TreeOptions.StringOptions = [toAutoAcceptEditChange]
     OnBeforeCellPaint = VST3BeforeCellPaint
     OnChange = VST3Change
@@ -57,27 +56,24 @@ object PropertiesForm: TPropertiesForm
     OnIncrementalSearch = VST3IncrementalSearch
     OnInitChildren = VST3InitChildren
     OnInitNode = VST3InitNode
-    OnStateChange = VST3StateChange
     Columns = <
       item
         Color = clWindow
         Options = [coDraggable, coEnabled, coParentBidiMode, coResizable, coShowDropMark, coVisible, coAutoSpring]
         Position = 0
         Width = 314
-        WideText = 'Properties'
       end
       item
         Options = [coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coResizable, coShowDropMark, coVisible, coAutoSpring]
         Position = 1
         Width = 303
-        WideText = 'Values'
       end>
   end
   object TreeImages: TImageList
     Left = 422
     Top = 224
     Bitmap = {
-      494C010107001300200010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010107001300240010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

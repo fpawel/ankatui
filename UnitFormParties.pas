@@ -40,8 +40,6 @@ type
           TextType: TVSTTextType);
         procedure RichEdit1ContextPopup(Sender: TObject; MousePos: TPoint;
           var Handled: boolean);
-
-        function PartyHTML(n: TNodeParty): string;
     private
         { Private declarations }
         procedure Refresh;
@@ -57,7 +55,7 @@ implementation
 {$R *.dfm}
 
 uses dateutils, FireDAC.Stan.PAram, stringutils, richeditutils,
-    variantutils, stringgridutils, virtual_tree_node, Unit1;
+    variantutils, stringgridutils, virtual_tree_node, UnitHostAppData;
 
 function inttostr2(n: integer): string;
 begin
@@ -84,74 +82,6 @@ begin
 
 end;
 
-function TFormParties.PartyHTML(n: TNodeParty): string;
-var
-    i: integer;
-    v1, v2: TKeyValue;
-    coef, serial: integer;
-    coefs, coefs_products: TArray<integer>;
-begin
-    coefs := DataModule1.PartyCoefsWithProducts(n.FPartyID);
-    coefs_products := DataModule1.PartyProductsWithCoefs(n.FPartyID);
-
-    result := '<html> <head> <title> Партия</title> ' +
-      '<style TYPE="text/css"> ' +
-      'table, th, td { border-collapse: collapse; }' +
-      'th, td { font-size: 14px; padding: 5px 8px;} ' +
-      '.col2 { color: #000080; font-weight: bold; } </style> </head> <body>';
-
-    result := result + Format('<h3>Параметры партии №%d от %s</h3>',
-      [n.FPartyID, DateToStr(n.FCreatedAt)]);
-    result := result + '<table border="0" > ';
-
-    i := 0;
-    while i < length(n.FValues) do
-    begin
-        v1 := n.FValues[i];
-        if i = length(n.FValues) - 1 then
-        begin
-            result := result +
-              Format('<tr><td align="right">%s:</td><td align="left" class="col2">%s</td></tr>',
-              [v1.Key, v1.Value]);
-        end
-        else
-        begin
-            i := i + 1;
-            v2 := n.FValues[i];
-            result := result +
-              Format('<tr><td align="right">%s:</td><td align="left" class="col2">%s</td>'
-              + '<td align="right">%s:</td><td align="left" class="col2">%s</td></tr>',
-              [v1.Key, v1.Value, v2.Key, v2.Value]);
-        end;
-        i := i + 1;
-    end;
-    result := result + '</table>';
-
-    if length(coefs_products) > 0 then
-    begin
-        result := result + '<h3>Коэффициенты</h3>';
-        result := result + '<table border="1" > ';
-
-        result := result + '<tr>';
-        result := result + '<th>№</th>';
-        for serial in coefs_products do
-            result := result + Format('<th>%s</th>', [inttostr2(serial)]);
-        result := result + '</tr>';
-
-        for coef in coefs do
-        begin
-            result := result + '<tr>';
-            result := result + Format('<th>%s</th>', [inttostr2(coef)]);
-            for serial in coefs_products do
-                result := result + Format('<td align="right">%s</td>',
-                  [DataModule1.ProductCoeffValue(n.FPartyID, serial, coef)]);
-            result := result + '</tr>';
-
-        end;
-        result := result + '</table> ';
-    end;
-    result := result + '</body></html>';
-end;
 
 procedure TFormParties.RichEdit1ContextPopup(Sender: TObject; MousePos: TPoint;
   var Handled: boolean);
@@ -186,7 +116,7 @@ begin
     if p.X is TNodeParty then
     begin
         HtmlViewer1.LoadFromString(
-            Form1.FPipe.Fetch2('PARTY_INFO',
+            HostAppData.FPipe.Fetch2('PARTY_INFO',
                 IntToStr((p.X as TNodeParty).FPartyID)) );
         HtmlViewer1.Align := alClient;
         HtmlViewer1.Visible := True;

@@ -33,8 +33,11 @@ begin
     begin
 
         SQL.Text :=
-          'SELECT * FROM config WHERE section_name = :section ORDER BY sort_order;';
-        ParamByName('section').Value := sect.FName;
+          'SELECT * FROM config '+
+          'INNER JOIN property p on config.property_name = p.property_name '+
+          'WHERE section_name = :section_name '+
+          'ORDER BY sort_order;';
+        ParamByName('section_name').Value := sect.FName;
         Open;
         First;
         while not Eof do
@@ -45,8 +48,8 @@ begin
                 FSection := sect.FName;
                 FType := FieldValues['type'];
                 FValue := VarToStr(FieldValues['value']);
-                FVar := FieldValues['var'];
-                FName := FieldValues['name'];
+                FVar := FieldValues['property_name'];
+                FName := FieldValues['hint'];
                 FSortOrder := FieldValues['sort_order'];
                 FMinSet := FieldValues['min'] <> System.Variants.Null;
                 FMaxSet := FieldValues['max'] <> System.Variants.Null;
@@ -59,8 +62,8 @@ begin
                 with DataModule1.FDQueryConfig3 do
                 begin
                     SQL.Text :=
-                      'select value from value_list where var = :var;';
-                    ParamByName('var').Value := FVar;
+                      'select value from value_list where property_name = :property_name;';
+                    ParamByName('property_name').Value := FVar;
                     Open;
                     First;
                     while not Eof do
@@ -103,7 +106,7 @@ begin
         while not Eof do
         begin
             sect := TConfigSection.Create;
-            sect.FName := FieldByName('name').Value;
+            sect.FName := FieldByName('section_name').Value;
             sect.FSortOrder := FieldByName('sort_order').Value;
             readSectionItems(sect);
             sections.add(sect);

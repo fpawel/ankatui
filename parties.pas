@@ -53,8 +53,8 @@ begin
             with FDQueryConfig do
             begin
                 SQL.Text :=
-                  'select value from value_list where var = :var;';
-                ParamByName('var').Value := p.FVar;
+                  'select value from value_list where property_name = :property_name;';
+                ParamByName('property_name').Value := p.FVar;
                 Open;
                 First;
                 value_list := TList<string>.Create;

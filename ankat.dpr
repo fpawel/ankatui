@@ -59,7 +59,8 @@ uses
   findproc in 'utils\findproc.pas',
   PropertiesFormUnit in 'PropertyGrid\PropertiesFormUnit.pas' {PropertiesForm},
   PropertyValueEditors in 'PropertyGrid\PropertyValueEditors.pas',
-  PropertyUtils in 'PropertyGrid\PropertyUtils.pas';
+  PropertyUtils in 'PropertyGrid\PropertyUtils.pas',
+  UnitHostAppData in 'UnitHostAppData.pas' {HostAppData: TDataModule};
 
 {$R *.res}
 
@@ -78,5 +79,6 @@ begin
   Application.CreateForm(TFormDelay, FormDelay);
   Application.CreateForm(TFormParties, FormParties);
   Application.CreateForm(TPropertiesForm, PropertiesForm);
+  Application.CreateForm(THostAppData, HostAppData);
   Application.Run;
 end.

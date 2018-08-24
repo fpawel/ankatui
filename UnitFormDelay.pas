@@ -41,7 +41,7 @@ implementation
 
 {$R *.dfm}
 
-uses rest.json, system.DateUtils, Unit1;
+uses rest.json, system.DateUtils, Unit1, UnitHostAppData;
 
 procedure TFormDelay.Stop;
 begin
@@ -50,12 +50,12 @@ end;
 
 procedure TFormDelay.Button1Click(Sender: TObject);
 begin
-    Form1.FPipe.WriteMsgJSON('SKIP_DELAY', nil);
+    HostAppData.FPipe.WriteMsgJSON('SKIP_DELAY', nil);
 end;
 
 procedure TFormDelay.Init2;
 begin
-    Form1.FPipe.Handle('DELAY',
+    HostAppData.FPipe.Handle('DELAY',
         function(content: string):string
         var i : TDelayInfo;
         begin

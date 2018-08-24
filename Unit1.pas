@@ -8,7 +8,7 @@ uses
     Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Grids, Vcl.Buttons,
     Vcl.ExtCtrls, Vcl.ComCtrls, Vcl.ToolWin,
     parties, System.Generics.Collections,
-    System.ImageList, UnitData, Vcl.ImgList, Vcl.Menus, VirtualTrees, pipe,
+    System.ImageList, UnitData, Vcl.ImgList, Vcl.Menus, VirtualTrees,
     msglevel, UnitFormLog, settings, UnitFormPopup, UnitFrameCoef,
     UnitFrameVar, UnitFormParties,
     UnitFormManualControl, inifiles, System.SyncObjs, DebugEngine.Core;
@@ -135,7 +135,7 @@ type
         procedure OnException(Sender: TObject; E: Exception);
 
     public
-        FPipe: TPipe;
+
         FProducts: TArray<TProduct>;
         FFrameCoef: TFrameCoef;
         FFrameVar: TFrameVar;
@@ -155,12 +155,12 @@ var
 
 implementation
 
-uses dateutils, rest.json, Winapi.uxtheme, System.Math, UnitFormNewPartyDialog,
+uses pipe, dateutils, rest.json, Winapi.uxtheme, System.Math, UnitFormNewPartyDialog,
     stringgridutils,
     listports, System.IOUtils,
     CurrentWorkTreeData, stringutils, vclutils, UnitFormChart, UnitFormSettings,
     UnitFormCurrentWork, UnitFormDelay, system.Types, system.UITypes, findproc,
-  PropertiesFormUnit;
+  PropertiesFormUnit, UnitHostAppData;
 
 {$R *.dfm}
 
@@ -296,27 +296,27 @@ begin
             end;
     end;
 
-    FPipe := TPipe.Create;
+
     // FCurrentWork := TCurrentWork.Create(FPipe, Panel5, VirtualStringTree1);
 
-    FPipe.Handle('READ_COEFFICIENT', HandleReadCoefficient);
-    FPipe.Handle('READ_VAR', HandleReadVar);
+    HostAppData.FPipe.Handle('READ_COEFFICIENT', HandleReadCoefficient);
+    HostAppData.FPipe.Handle('READ_VAR', HandleReadVar);
 
-    FPipe.Handle('CURRENT_WORK_MESSAGE', HandleCurentWorkMessage);
+    HostAppData.FPipe.Handle('CURRENT_WORK_MESSAGE', HandleCurentWorkMessage);
 
-    FPipe.Handle('PRODUCT_CONNECTED', HandleProductConnected);
+    HostAppData.FPipe.Handle('PRODUCT_CONNECTED', HandleProductConnected);
 
-    FPipe.Handle('READ_PRODUCT', HandleReadProduct);
+    HostAppData.FPipe.Handle('READ_PRODUCT', HandleReadProduct);
 
-    FPipe.Handle('END_WORK', HandleEndWork);
+    HostAppData.FPipe.Handle('END_WORK', HandleEndWork);
 
-    FPipe.Handle('PROMPT_ERROR_STOP_WORK', HandlePromptErrorStopWork);
+    HostAppData.FPipe.Handle('PROMPT_ERROR_STOP_WORK', HandlePromptErrorStopWork);
 
     FormCurrentWork.Init2;
     FormDelay.Init2;
     DataModule1.PrintLastMessages(RichEdit1, 500);
 
-    if not FPipe.Connect('ANKAT') then
+    if not HostAppData.FPipe.Connect('ANKAT') then
     begin
         Panel5.Caption := 'Нет хост-процеса';
         Panel5.Font.Color := clRed;
@@ -560,7 +560,7 @@ var
     wp: WINDOWPLACEMENT;
     fs: TFileStream;
 begin
-    FPipe.Close;
+    HostAppData.FPipe.Close;
 
     fs := TFileStream.Create(TPath.Combine(ExtractFilePath(paramstr(0)),
       'window.position'), fmOpenWrite or fmCreate);
@@ -603,7 +603,7 @@ end;
 
 procedure TForm1.N1Click(Sender: TObject);
 begin
-    FPipe.WriteMsgJSON('READ_VARS', nil);
+    HostAppData.FPipe.WriteMsgJSON('READ_VARS', nil);
     SetupWorkStarted('Опрос', true);
     Panel6.Controls[0].Parent := nil;
     FFrameVar.StringGrid2.Parent := Form1.Panel6;
@@ -611,13 +611,13 @@ end;
 
 procedure TForm1.N2Click(Sender: TObject);
 begin
-    FPipe.WriteMsgJSON('READ_COEFFICIENTS', nil);
+    HostAppData.FPipe.WriteMsgJSON('READ_COEFFICIENTS', nil);
     SetupWorkStarted('Считывание коэффициентов', true);
 end;
 
 procedure TForm1.N3Click(Sender: TObject);
 begin
-    FPipe.WriteMsgJSON('WRITE_COEFFICIENTS', nil);
+    HostAppData.FPipe.WriteMsgJSON('WRITE_COEFFICIENTS', nil);
     SetupWorkStarted('Запись коэффициентов', true);
 end;
 
@@ -925,7 +925,6 @@ end;
 
 procedure TForm1.ToolButton2Click(Sender: TObject);
 begin
-    FormManualControl.FPipe := FPipe;
     FormManualControl.Show;
 end;
 
@@ -1009,7 +1008,7 @@ end;
 
 procedure TForm1.ToolButtonStopClick(Sender: TObject);
 begin
-    FPipe.WriteMsgJSON('CURRENT_WORK_STOP', nil);
+    HostAppData.FPipe.WriteMsgJSON('CURRENT_WORK_STOP', nil);
     ToolButtonStop.Visible := false;
 
 end;
