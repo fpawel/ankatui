@@ -38,7 +38,7 @@ implementation
 {$R *.dfm}
 
 uses System.Generics.Collections, stringutils, UnitData,
-    FireDAC.Comp.Client, FireDAC.Stan.Param, Unit1;
+    FireDAC.Comp.Client, FireDAC.Stan.Param;
 
 procedure TFormNewPartyDialog.ComboBox1Change(Sender: TObject);
 var
@@ -55,10 +55,10 @@ begin
             with FProperties[i] do
             begin
                 FSortOrder := i;
-                FHint := inttostr(i + 1);
+                FHint := '¹' + inttostr(i + 1);
                 FMin := 1;
                 FMinSet := true;
-                FValue := FHint;
+                FValue := inttostr(i + 1);
                 FType := VtcInt;
             end;
         end;
@@ -73,6 +73,12 @@ var
 begin
     FParty := DataModule1.PartyValuesConfigSection;
     FParty.FSortOrder := 0;
+    for I := 0 to length(FPArty.FProperties)-1 do
+    begin
+        FPArty.FProperties[i].SetStr( FPArty.FProperties[i].FDefaultValue );
+
+    end;
+
 
     FSerials := TConfigSection.Create;
     with FSerials do
@@ -87,10 +93,10 @@ begin
             with FProperties[i] do
             begin
                 FSortOrder := i;
-                FHint := inttostr(i + 1);
+                FHint := '¹' + inttostr(i + 1);
                 FMin := 1;
                 FMinSet := true;
-                FValue := FHint;
+                FValue := inttostr(i + 1);
                 FType := VtcInt;
             end;
         end;
@@ -106,6 +112,7 @@ begin
         SetConfig([FParty, FSerials]);
         SetPropertyValueChanged(Validate);
     end;
+    Validate(nil);
 end;
 
 procedure TFormNewPartyDialog.Validate(p: TConfigProperty);

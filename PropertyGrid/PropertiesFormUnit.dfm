@@ -2,7 +2,7 @@ object PropertiesForm: TPropertiesForm
   Left = 397
   Top = 294
   ClientHeight = 382
-  ClientWidth = 621
+  ClientWidth = 1111
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -11,12 +11,13 @@ object PropertiesForm: TPropertiesForm
   Font.Style = []
   OldCreateOrder = False
   OnCreate = FormCreate
+  OnHide = FormHide
   PixelsPerInch = 96
   TextHeight = 19
   object VST3: TVirtualStringTree
     Left = 0
     Top = 0
-    Width = 621
+    Width = 1111
     Height = 382
     Align = alClient
     Colors.BorderColor = clWindowText
@@ -28,7 +29,7 @@ object PropertiesForm: TPropertiesForm
     Header.Font.Height = -16
     Header.Font.Name = 'Tahoma'
     Header.Font.Style = []
-    Header.Height = 18
+    Header.Height = 25
     Header.Options = [hoAutoResize, hoColumnResize, hoVisible, hoAutoSpring]
     HintAnimation = hatFade
     HintMode = hmHint
@@ -40,7 +41,7 @@ object PropertiesForm: TPropertiesForm
     ShowHint = True
     TabOrder = 0
     TreeOptions.MiscOptions = [toAcceptOLEDrop, toEditable, toGridExtensions, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
-    TreeOptions.PaintOptions = [toShowButtons, toShowDropmark, toShowHorzGridLines, toShowRoot, toShowTreeLines, toThemeAware, toUseBlendedImages]
+    TreeOptions.PaintOptions = [toShowBackground, toShowButtons, toShowDropmark, toShowHorzGridLines, toShowRoot, toShowTreeLines, toShowVertGridLines, toUseBlendedImages, toGhostedIfUnfocused]
     TreeOptions.SelectionOptions = [toFullRowSelect]
     TreeOptions.StringOptions = [toAutoAcceptEditChange]
     OnBeforeCellPaint = VST3BeforeCellPaint
@@ -59,21 +60,51 @@ object PropertiesForm: TPropertiesForm
     Columns = <
       item
         Color = clWindow
-        Options = [coDraggable, coEnabled, coParentBidiMode, coResizable, coShowDropMark, coVisible, coAutoSpring]
+        Options = [coDraggable, coEnabled, coParentBidiMode, coResizable, coShowDropMark, coVisible, coAllowFocus]
         Position = 0
         Width = 314
+        WideText = #1055#1072#1088#1072#1084#1077#1090#1088
       end
       item
+        MaxWidth = 300
+        MinWidth = 100
         Options = [coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coResizable, coShowDropMark, coVisible, coAutoSpring]
         Position = 1
-        Width = 303
+        Width = 100
+        WideText = #1047#1085#1072#1095#1077#1085#1080#1077
+      end
+      item
+        Position = 2
+        Width = 457
+        WideText = #1055#1088#1080#1084#1077#1095#1072#1085#1080#1077
+      end
+      item
+        MaxWidth = 100
+        MinWidth = 100
+        Position = 3
+        Width = 100
+        WideText = #1052#1080#1085#1080#1091#1084
+      end
+      item
+        MaxWidth = 100
+        MinWidth = 100
+        Position = 4
+        Width = 100
+        WideText = #1052#1072#1082#1089#1080#1084#1091#1084
+      end
+      item
+        MaxWidth = 100
+        MinWidth = 100
+        Position = 5
+        Width = 100
+        WideText = #1055#1086' '#1091#1084#1086#1083#1095#1072#1085#1080#1102
       end>
   end
   object TreeImages: TImageList
     Left = 422
     Top = 224
     Bitmap = {
-      494C010107001300240010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010107001300440010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

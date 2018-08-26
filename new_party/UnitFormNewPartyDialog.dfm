@@ -3128,6 +3128,7 @@ object FormNewPartyDialog: TFormNewPartyDialog
     FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
   OldCreateOrder = False
   Position = poScreenCenter
+  WindowState = wsMaximized
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 19
@@ -3139,7 +3140,6 @@ object FormNewPartyDialog: TFormNewPartyDialog
     Align = alRight
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitLeft = 721
     object Label2: TLabel
       Left = 8
       Top = 85
@@ -3153,7 +3153,6 @@ object FormNewPartyDialog: TFormNewPartyDialog
       Width = 213
       Height = 44
       Caption = #1057#1086#1079#1076#1072#1090#1100' '#1085#1086#1074#1091#1102' '#1087#1072#1088#1090#1080#1102
-      Enabled = False
       TabOrder = 0
       OnClick = Button1Click
     end

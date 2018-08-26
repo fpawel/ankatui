@@ -5,18 +5,17 @@ interface
 uses
     Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
     System.Classes, Vcl.Graphics,
-    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, UnitFrameSettings, settings;
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, PropertiesFormUnit;
 
 type
     TFormSettings = class(TForm)
     procedure FormCreate(Sender: TObject);
-    procedure FormMouseWheel(Sender: TObject; Shift: TShiftState;
-      WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
     procedure FormDeactivate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     private
         { Private declarations }
-        FSettings: TSettingsControl;
+        FPropertiesForm : TPropertiesForm;
+
     public
         { Public declarations }
     end;
@@ -28,41 +27,35 @@ implementation
 
 {$R *.dfm}
 
+uses UnitData, config;
+
+
 procedure TFormSettings.FormActivate(Sender: TObject);
 begin
-    FSettings.Validate;
+    FPropertiesForm.SetConfig(DataModule1.GetConfig);
 end;
 
 procedure TFormSettings.FormCreate(Sender: TObject);
 begin
-    FSettings := TSettingsControl.Create;
-    FSettings.FFrameSettings.Parent := self;
-    FSettings.FFrameSettings.Align := alclient;
+
+    FPropertiesForm := TPropertiesForm.Create(self);
+    with FPropertiesForm do
+    begin
+        Parent := self;
+        Align := alClient;
+        BorderStyle := bsNone;
+        Visible := true;
+        SetPropertyValueChanged(procedure(p:TConfigProperty)
+        begin
+            if p.FError = '' then
+                DataModule1.UpdateConfig(p);
+        end);
+    end;
 end;
 
 procedure TFormSettings.FormDeactivate(Sender: TObject);
 begin
     Hide;
-end;
-
-procedure TFormSettings.FormMouseWheel(Sender: TObject; Shift: TShiftState;
-  WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
-var
-    CursorPos: TPoint;
-const
-    AllowDisabled = true;
-    AllowWinControls = true;
-    AllLevels = true;
-begin
-
-    GetCursorPos(CursorPos);
-    CursorPos := ScreenToClient(CursorPos);
-    ActiveControl := nil;
-    if Assigned(ControlAtPos(CursorPos, AllowDisabled,
-      AllowWinControls, AllLevels)) then
-        FSettings.FFrameSettings.CategoryPanelGroup1.VertScrollBar.Position :=
-          FSettings.FFrameSettings.CategoryPanelGroup1.VertScrollBar.Position -
-          WheelDelta div 5;
 end;
 
 end.

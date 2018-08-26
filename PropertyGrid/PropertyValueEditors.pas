@@ -8,41 +8,13 @@ interface
 uses
     Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
     StdCtrls, VirtualTrees, ExtDlgs, ImgList, Buttons, ExtCtrls, ComCtrls,
-    Mask;
-
-const
-
-    VtcInt = 'integer';
-    VtcFloat = 'real';
-    VtcString = 'text';
-    VtcComportName = 'comport_name';
-    VtcBaud = 'baud';
-    VtcBool = 'bool';
-    VtcDateTime = 'date_time';
-    VtcPickNumber = 'pick_number';
-    VtcMemo = 'pick_number';
+    Mask, config;
 
 type
 
+    THandlePropertyValueChanged = reference to procedure(p:TConfigProperty);
+
     // ----------------------------------------------------------------------------------------------------------------------
-
-    // Node data record for the the document properties treeview.
-    PPropertyData = ^TPropertyData;
-
-    TPropertyData = class
-    public
-        FType: string;
-        FName: string;
-        FHint: string;
-        FValue: string;
-        FPickList: TArray<string>;
-        FMin: double;
-        FMax: double;
-        FMinSet: boolean;
-        FMaxSet: boolean;
-        FChanged: boolean;
-    end;
-
     // Our own edit link to implement several different node editors.
     TPropertyEditLink = class(TInterfacedObject, IVTEditLink)
     private
@@ -50,6 +22,7 @@ type
         FTree: TVirtualStringTree; // A back reference to the tree calling.
         FNode: PVirtualNode; // The node being edited.
         FColumn: integer; // The column of the node being edited.
+        FHandlePropertyValueChanged : THandlePropertyValueChanged;
     protected
         procedure EditKeyDown(Sender: TObject; var Key: Word;
           Shift: TShiftState);
@@ -65,6 +38,7 @@ type
           Column: TColumnIndex): boolean; stdcall;
         procedure ProcessMessage(var Message: TMessage); stdcall;
         procedure SetBounds(R: TRect); stdcall;
+        procedure SetPropertyValueChangedHandler(h: THandlePropertyValueChanged); stdcall;
     end;
 
     // ----------------------------------------------------------------------------------------------------------------------
@@ -100,6 +74,12 @@ begin
 end;
 
 // ----------------------------------------------------------------------------------------------------------------------
+
+procedure TPropertyEditLink.SetPropertyValueChangedHandler(h: THandlePropertyValueChanged); stdcall;
+begin
+    FHandlePropertyValueChanged := h;
+end;
+
 
 procedure TPropertyEditLink.EditKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
@@ -179,7 +159,7 @@ end;
 function TPropertyEditLink.EndEdit: boolean;
 
 var
-    Data: PPropertyData;
+    Data: PConfigProperty;
     Buffer: array [0 .. 1024] of Char;
     S: UnicodeString;
 
@@ -204,9 +184,13 @@ begin
 
     if S <> Data.FValue then
     begin
-        Data.FValue := S;
-        Data.FChanged := true;
+        Data.SetStr(S);
+        if Assigned(FHandlePropertyValueChanged) then
+            FHandlePropertyValueChanged(Data^);
+
+        //DataModule1.UpdateConfigPropertyValue(Data.FSectionName, Data.FPropertyName, Data.FValue);
         FTree.InvalidateNode(FNode);
+        FTree.InvalidateNode(FNode.Parent);
     end;
     FEdit.Hide;
     FTree.SetFocus;
@@ -226,7 +210,7 @@ function TPropertyEditLink.PrepareEdit(Tree: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex): boolean;
 
 var
-    Data: PPropertyData;
+    Data: PConfigProperty;
     i: integer;
 
 begin
@@ -240,7 +224,7 @@ begin
     FEdit := nil;
     Data := FTree.GetNodeData(Node);
 
-    if (length(Data.FPickList) > 0) or (Data.FType = VtcComportName) or
+    if (length(Data.FList) > 0) or (Data.FType = VtcComportName) or
       (Data.FType = VtcBaud) then
     begin
         FEdit := TComboBox.Create(nil);
@@ -268,12 +252,12 @@ begin
             end
 
             else
-                for i := 0 to length(Data.FPickList) - 1 do
-                    Items.Add(Data.FPickList[i]);
+                for i := 0 to length(Data.FList) - 1 do
+                    Items.Add(Data.FList[i]);
             OnKeyDown := EditKeyDown;
             OnKeyUp := EditKeyUp;
-            style := csOwnerDrawFixed;
-            ItemHeight := 19;
+            style := csDropDownList;
+            ItemHeight := 22;
             ItemIndex := Items.IndexOf(Data.FValue);
         end;
     end
@@ -315,36 +299,7 @@ begin
             OnKeyUp := EditKeyUp;
         end;
     end
-    else if Data.FType = VtcPickNumber then
-    begin
-        FEdit := TComboBox.Create(nil);
-        with FEdit as TComboBox do
-        begin
-            Visible := False;
-            Parent := Tree;
-            Text := Data.FValue;
-            OnKeyDown := EditKeyDown;
-            OnKeyUp := EditKeyUp;
-            
-        end;
-    end
-    else if Data.FType = VtcDateTime then
-    begin
-        FEdit := TDateTimePicker.Create(nil);
-        with FEdit as TDateTimePicker do
-        begin
-            Visible := False;
-            Parent := Tree;
-            CalColors.MonthBackColor := clWindow;
-            CalColors.TextColor := clBlack;
-            CalColors.TitleBackColor := clBtnShadow;
-            CalColors.TitleTextColor := clBlack;
-            CalColors.TrailingTextColor := clBtnFace;
-            Date := StrToDate(Data.FValue);
-            OnKeyDown := EditKeyDown;
-            OnKeyUp := EditKeyUp;
-        end;
-    end
+
     else if Data.FType = VtcBool then
     begin
         FEdit := TCheckBox.Create(nil);

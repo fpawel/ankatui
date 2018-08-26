@@ -55,7 +55,7 @@ implementation
 
 {$R *.dfm}
 
-uses dateutils, FireDAC.Stan.PAram, stringutils, richeditutils,
+uses dateutils, DataRichEditOutput, FireDAC.Stan.PAram, stringutils, richeditutils,
     variantutils, stringgridutils;
 
 function inttostr2(n: integer): string;
@@ -121,7 +121,7 @@ begin
     begin
         RichEdit1.Align := alClient;
         RichEdit1.Visible := true;
-        DataModule1.PrintWorkLog(RichEdit1, (p.X as TNodeWorkLog).FworkID);
+        PrintWorkLog(RichEdit1, (p.X as TNodeWorkLog).FworkID);
         if Assigned(FOnRenderMessages) then
             FOnRenderMessages;
         exit;
@@ -133,7 +133,7 @@ begin
         RichEdit1.Visible := true;
 
         with p.X as TNodeDay do
-            DataModule1.PrintDayLog(RichEdit1, FDay, FMonth, FYear);
+            PrintDayLog(RichEdit1, FDay, FMonth, FYear);
         if Assigned(FOnRenderMessages) then
             FOnRenderMessages;
         exit;

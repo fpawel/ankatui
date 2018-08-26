@@ -7,9 +7,9 @@ uses
     System.Classes, Vcl.Graphics,
     Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Grids, Vcl.Buttons,
     Vcl.ExtCtrls, Vcl.ComCtrls, Vcl.ToolWin,
-    parties, System.Generics.Collections,
+    System.Generics.Collections,
     System.ImageList, UnitData, Vcl.ImgList, Vcl.Menus, VirtualTrees,
-    msglevel, UnitFormLog, settings, UnitFormPopup, UnitFrameCoef,
+    msglevel, UnitFormLog, UnitFormPopup, UnitFrameCoef,
     UnitFrameVar, UnitFormParties,
     UnitFormManualControl, inifiles, System.SyncObjs, DebugEngine.Core;
 
@@ -155,12 +155,13 @@ var
 
 implementation
 
-uses pipe, dateutils, rest.json, Winapi.uxtheme, System.Math, UnitFormNewPartyDialog,
+uses DataRichEditOutput, pipe, dateutils, rest.json, Winapi.uxtheme,
+    System.Math, UnitFormNewPartyDialog,
     stringgridutils,
     listports, System.IOUtils,
     CurrentWorkTreeData, stringutils, vclutils, UnitFormChart, UnitFormSettings,
-    UnitFormCurrentWork, UnitFormDelay, system.Types, system.UITypes, findproc,
-  PropertiesFormUnit, UnitHostAppData;
+    UnitFormCurrentWork, UnitFormDelay, System.Types, System.UITypes, findproc,
+    PropertiesFormUnit, UnitHostAppData;
 
 {$R *.dfm}
 
@@ -214,7 +215,7 @@ var
     ErrorLogFileName: string;
     StackTraceFileName: string;
     StackTraceFileDir: string;
-    StackTraceFileName1:string;
+    StackTraceFileName1: string;
     time_now: TDAteTime;
 begin
     FFErrorLogMutex.Acquire;
@@ -223,13 +224,14 @@ begin
 
     if not ForceDirectories(StackTraceFileDir) then
     begin
-        Application.MessageBox('Не удалось создать каталог stack_trace', 'Анкат: критический сбой',
-            MB_OK or MB_ICONERROR);
+        Application.MessageBox('Не удалось создать каталог stack_trace',
+          'Анкат: критический сбой', MB_OK or MB_ICONERROR);
         Close;
         Exit;
     end;
 
-    StackTraceFileName1 := formatDateTime('dd_mm_yyyy_hh_nn_ss_zzz', time_now) + '.stacktrace';
+    StackTraceFileName1 := formatDateTime('dd_mm_yyyy_hh_nn_ss_zzz', time_now) +
+      '.stacktrace';
     StackTraceFileName := StackTraceFileDir + '\' + StackTraceFileName1;
     ErrorLogFileName := ExtractFileDir(paramstr(0)) + '\errors.log';
 
@@ -238,8 +240,9 @@ begin
         Append(FErrorLog)
     else
         Rewrite(FErrorLog);
-    Writeln(FErrorLog,formatDateTime('dd.mm.yyyy.hh:nn:ss.zzz', time_now), 'MSK ',
-        E.ClassName, ' ', stringreplace(Trim(e.Message), #13, ' ', [rfReplaceAll, rfIgnoreCase])  );
+    Writeln(FErrorLog, formatDateTime('dd.mm.yyyy.hh:nn:ss.zzz', time_now),
+      'MSK ', E.ClassName, ' ', stringreplace(Trim(E.Message), #13, ' ',
+      [rfReplaceAll, rfIgnoreCase]));
     Flush(FErrorLog);
     CloseFile(FErrorLog);
 
@@ -310,11 +313,12 @@ begin
 
     HostAppData.FPipe.Handle('END_WORK', HandleEndWork);
 
-    HostAppData.FPipe.Handle('PROMPT_ERROR_STOP_WORK', HandlePromptErrorStopWork);
+    HostAppData.FPipe.Handle('PROMPT_ERROR_STOP_WORK',
+      HandlePromptErrorStopWork);
 
     FormCurrentWork.Init2;
     FormDelay.Init2;
-    DataModule1.PrintLastMessages(RichEdit1, 500);
+    PrintLastMessages(RichEdit1, 500);
 
     if not HostAppData.FPipe.Connect('ANKAT') then
     begin
@@ -387,8 +391,8 @@ begin
 
     SendMessage(RichEdit1.Handle, EM_SCROLL, SB_LINEDOWN, 0);
     RichEdit1.SelStart := Length(RichEdit1.Text);
-    PrintWorkMessages(RichEdit1, m.FWorkIndex, m.FWork, m.FProductSerial,
-      m.FCreatedAt, m.FLevel, m.FText);
+    DataRichEditOutput.PrintWorkMessages(RichEdit1, m.FWorkIndex, m.FWork,
+      m.FProductSerial, m.FCreatedAt, m.FLevel, m.FText);
     // FormConsole.RichEdit1.SetFocus;
     SendMessage(RichEdit1.Handle, EM_SCROLL, SB_LINEDOWN, 0);
     m.Free;
@@ -526,7 +530,7 @@ begin
         if not DataModule1.PartyExists then
         begin
             Close;
-            exit;
+            Exit;
         end;
     end
     else
@@ -583,7 +587,8 @@ begin
     FProducts := DataModule1.CurrentPartyProducts;
 
     CurrentPartyID := DataModule1.CurrentPartyID;
-    TabSheet3.Caption := Format('Партия %d', [CurrentPartyID]);
+    TabSheet3.Caption := Format('Партия № %d %s',
+      [CurrentPartyID, DAtetimetostr(IncHour(DataModule1.CurrentPartyDateTime, 3))]);
 
     with StringGrid1 do
     begin
@@ -818,7 +823,7 @@ var
     r: TRect;
 begin
     if not ComboBox1.Visible then
-        exit;
+        Exit;
 
     with Sender as TStringGrid do
     begin
@@ -920,7 +925,10 @@ end;
 
 procedure TForm1.ToolButton1Click(Sender: TObject);
 begin
-    FormNewPartyDialog.Show;
+    FormNewPartyDialog.ShowModal;
+    if FormNewPartyDialog.ModalResult = mrOk then
+        SetCurrentParty;
+
 end;
 
 procedure TForm1.ToolButton2Click(Sender: TObject);
@@ -930,9 +938,9 @@ end;
 
 procedure TForm1.ToolButton3Click(Sender: TObject);
 begin
-    //FormSettings.Position := poScreenCenter;
-    //FormSettings.Show;
-    PropertiesForm.Show;
+    FormSettings.Position := poScreenCenter;
+    FormSettings.Show;
+    // PropertiesForm.Show;
 end;
 
 procedure TForm1.ToolButton7Click(Sender: TObject);

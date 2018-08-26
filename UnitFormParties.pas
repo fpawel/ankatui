@@ -55,7 +55,8 @@ implementation
 {$R *.dfm}
 
 uses dateutils, FireDAC.Stan.PAram, stringutils, richeditutils,
-    variantutils, stringgridutils, virtual_tree_node, UnitHostAppData;
+    variantutils, stringgridutils, virtual_tree_node, UnitHostAppData,
+  DataRichEditOutput;
 
 function inttostr2(n: integer): string;
 begin
@@ -128,7 +129,7 @@ begin
         RichEdit1.Align := alClient;
         RichEdit1.Visible := True;
         with p.X as TNodePartyDayLog do
-            DataModule1.PrintDayLog(RichEdit1, Fday, Fmonth, Fyear);
+            PrintDayLog(RichEdit1, Fday, Fmonth, Fyear);
         exit;
     end;
 
@@ -136,7 +137,7 @@ begin
     begin
         RichEdit1.Align := alClient;
         RichEdit1.Visible := True;
-        DataModule1.PrintWorkLog(RichEdit1, (p.X as TNodeWorkLog).FRecordID);
+        PrintWorkLog(RichEdit1, (p.X as TNodeWorkLog).FRecordID);
         exit;
     end;
 

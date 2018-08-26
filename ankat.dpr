@@ -4,18 +4,16 @@ uses
   Vcl.Forms,
   Vcl.Controls,
   Unit1 in 'Unit1.pas' {Form1},
-  UnitFormNewPartyDialog in 'UnitFormNewPartyDialog.pas' {FormNewPartyDialog},
+  UnitFormNewPartyDialog in 'new_party\UnitFormNewPartyDialog.pas' {FormNewPartyDialog},
   pipe in 'utils\pipe.pas',
   richeditutils in 'utils\richeditutils.pas',
   stringgridutils in 'utils\stringgridutils.pas',
   listports in 'utils\listports.pas',
-  UnitFrameSettings in 'UnitFrameSettings.pas' {FrameSettings: TFrame},
   stringutils in 'utils\stringutils.pas',
   UnitData in 'UnitData.pas' {DataModule1: TDataModule},
   UnitFrameDelay in 'UnitFrameDelay.pas' {FrameDelay: TFrame},
   UnitFormLogNodes in 'UnitFormLogNodes.pas',
   CurrentWorkTreeData in 'CurrentWorkTreeData.pas',
-  settings in 'settings.pas',
   UnitFormPopup in 'UnitFormPopup.pas' {FormPopup},
   UnitFormLog in 'UnitFormLog.pas' {FormLog},
   UnitFrameCoef in 'UnitFrameCoef.pas' {FrameCoef: TFrame},
@@ -24,7 +22,6 @@ uses
   UnitFormChart in 'UnitFormChart.pas' {FormChart},
   UnitFormChartNodes in 'UnitFormChartNodes.pas',
   msglevel in 'msglevel.pas',
-  parties in 'parties.pas',
   variantutils in 'utils\variantutils.pas',
   vclutils in 'utils\vclutils.pas',
   UnitFormPartiesNodes in 'UnitFormPartiesNodes.pas',
@@ -60,7 +57,9 @@ uses
   PropertiesFormUnit in 'PropertyGrid\PropertiesFormUnit.pas' {PropertiesForm},
   PropertyValueEditors in 'PropertyGrid\PropertyValueEditors.pas',
   PropertyUtils in 'PropertyGrid\PropertyUtils.pas',
-  UnitHostAppData in 'UnitHostAppData.pas' {HostAppData: TDataModule};
+  UnitHostAppData in 'UnitHostAppData.pas' {HostAppData: TDataModule},
+  config in 'config\config.pas',
+  DataRichEditOutput in 'DataRichEditOutput.pas';
 
 {$R *.res}
 

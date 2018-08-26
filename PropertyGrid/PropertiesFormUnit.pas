@@ -11,24 +11,13 @@ interface
 uses
     Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
     StdCtrls, VirtualTrees, ImgList, ExtCtrls, UITypes, System.ImageList,
-    PropertyValueEditors;
+    PropertyValueEditors, config;
 
 const
     // Helper message to decouple node change handling from edit handling.
     WM_STARTEDITING = WM_USER + 778;
 
 type
-
-    TSection = class
-        FProperties: array of TPropertyData;
-        FName: string;
-        FHint: string;
-    end;
-
-    TSections = class
-        FSections: array of TSection;
-
-    end;
 
     TPropertiesForm = class(TForm)
         VST3: TVirtualStringTree;
@@ -57,18 +46,25 @@ type
           TextType: TVSTTextType);
         procedure VST3IncrementalSearch(Sender: TBaseVirtualTree;
           Node: PVirtualNode; const SearchText: string; var Result: Integer);
-        procedure RadioGroup1Click(Sender: TObject);
         procedure VST3FreeNode(Sender: TBaseVirtualTree; Node: PVirtualNode);
         procedure VST3DrawText(Sender: TBaseVirtualTree; TargetCanvas: TCanvas;
           Node: PVirtualNode; Column: TColumnIndex; const Text: string;
           const CellRect: TRect; var DefaultDraw: Boolean);
-    procedure VST3BeforeCellPaint(Sender: TBaseVirtualTree;
-      TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
-      CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
+        procedure VST3BeforeCellPaint(Sender: TBaseVirtualTree;
+          TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
+          CellPaintMode: TVTCellPaintMode; CellRect: TRect;
+          var ContentRect: TRect);
+        procedure FormHide(Sender: TObject);
+
     private
-        FSections: TSections;
+        FConfig: TConfig;
+        FHandlePropertyValueChanged: THandlePropertyValueChanged;
         procedure WMStartEditing(var Message: TMessage);
           message WM_STARTEDITING;
+    public
+
+        procedure SetConfig(AConfig: TConfig);
+        procedure SetPropertyValueChanged(AHandlePropertyValueChanged:THandlePropertyValueChanged);
     end;
 
 var
@@ -94,122 +90,24 @@ begin
 
     // Always tell the tree how much data space per node it must allocated for us. We can do this here, in the
     // object inspector or in the OnGetNodeDataSize event.
-    VST3.NodeDataSize := SizeOf(TPropertyData);
+    VST3.NodeDataSize := SizeOf(PConfigProperty);
     // The VCL (D7 and lower) still uses 16 color image lists. We create a high color version explicitely because it
     // looks so much nicer.
     ConvertToHighColor(TreeImages);
 
-    FSections := TSections.Create;
-    setlength(FSections.FSections, 3);
+end;
 
-    FSections.FSections[0] := TSection.Create;
-    FSections.FSections[1] := TSection.Create;
-    FSections.FSections[2] := TSection.Create;
-    setlength(FSections.FSections[0].FProperties, 3);
-    setlength(FSections.FSections[1].FProperties, 3);
-    setlength(FSections.FSections[2].FProperties, 3);
+procedure TPropertiesForm.SetConfig(AConfig: TConfig);
+begin
+    VST3.Clear;
+    VST3.RootNodeCount := 0;
+    FConfig := AConfig;
+    VST3.RootNodeCount := Length(FConfig);
+end;
 
-    FSections.FSections[0].FName := 'Sect1';
-    FSections.FSections[1].FName := 'Sect2';
-    FSections.FSections[2].FName := 'Sect3';
-
-    FSections.FSections[0].FProperties[0] := TPropertyData.Create;
-    with FSections.FSections[0].FProperties[0] do
-    begin
-        FType := VtcString;
-        FName := 'PARAM1';
-        FHint := 'Hint Parama 1';
-        FValue := 'value1';
-        FChanged := false;
-    end;
-
-    FSections.FSections[0].FProperties[1] := TPropertyData.Create;
-    with FSections.FSections[0].FProperties[1] do
-    begin
-        FType := VtcInt;
-        FName := 'Param 2 int';
-        FHint := 'Hint Parama 2';
-        FValue := '2';
-        FChanged := false;
-    end;
-
-    FSections.FSections[0].FProperties[2] := TPropertyData.Create;
-    with FSections.FSections[0].FProperties[2] do
-    begin
-        FType := VtcFloat;
-        FName := 'Param 3 float';
-        FHint := 'Hint Parama 3';
-        FValue := '3';
-        FChanged := false;
-    end;
-
-    FSections.FSections[1].FProperties[0] := TPropertyData.Create;
-    with FSections.FSections[1].FProperties[0] do
-    begin
-        FType := VtcString;
-        FName := 'PARAM4';
-        FHint := 'Hint Parama ';
-        FValue := 'value4';
-        setlength(FPickList, 5);
-        FPickList[0] := 'value4';
-        FPickList[1] := 'value5';
-        FPickList[2] := 'value6';
-        FPickList[3] := 'value7';
-        FPickList[4] := 'value8';
-        FChanged := false;
-    end;
-
-    FSections.FSections[1].FProperties[1] := TPropertyData.Create;
-    with FSections.FSections[1].FProperties[1] do
-    begin
-        FType := VtcComportName;
-        FName := 'Com Port';
-        FHint := 'Hint Parama 2';
-        FValue := 'COM1';
-        FChanged := false;
-    end;
-
-    FSections.FSections[1].FProperties[2] := TPropertyData.Create;
-    with FSections.FSections[1].FProperties[2] do
-    begin
-        FType := VtcBaud;
-        FName := 'Param baud';
-        FHint := 'Hint Parama 2';
-        FValue := '9600';
-        FChanged := false;
-    end;
-
-    FSections.FSections[2].FProperties[0] := TPropertyData.Create;
-    with FSections.FSections[2].FProperties[0] do
-    begin
-        FType := VtcBool;
-        FName := 'PARAM1';
-        FHint := 'Hint Parama 1';
-        FValue := '0';
-        FChanged := false;
-    end;
-
-    FSections.FSections[2].FProperties[1] := TPropertyData.Create;
-    with FSections.FSections[2].FProperties[1] do
-    begin
-        FType := VtcBool;
-        FName := 'PARAM1';
-        FHint := 'Hint Parama 1';
-        FValue := '1';
-        FChanged := false;
-    end;
-
-    FSections.FSections[2].FProperties[2] := TPropertyData.Create;
-    with FSections.FSections[2].FProperties[2] do
-    begin
-        FType := VtcFloat;
-        FName := 'Param 3 float';
-        FHint := 'Hint Parama 3';
-        FValue := '3';
-        FChanged := false;
-    end;
-
-    VST3.RootNodeCount := length(FSections.FSections);
+procedure TPropertiesForm.SetPropertyValueChanged(AHandlePropertyValueChanged:THandlePropertyValueChanged);
+begin
+    FHandlePropertyValueChanged := AHandlePropertyValueChanged;
 end;
 
 // ----------------------------------------------------------------------------------------------------------------------
@@ -217,11 +115,11 @@ end;
 procedure TPropertiesForm.VST3InitChildren(Sender: TBaseVirtualTree;
   Node: PVirtualNode; var ChildCount: Cardinal);
 var
-    Data: PPropertyData;
+    Data: PConfigProperty;
 begin
     Data := Sender.GetNodeData(Node);
     if Node.Parent = Sender.RootNode then
-        ChildCount := length(FSections.FSections[Node.Index].FProperties)
+        ChildCount := Length(FConfig[Node.Index].FProperties)
     else
         ChildCount := 0;
 end;
@@ -232,7 +130,7 @@ procedure TPropertiesForm.VST3InitNode(Sender: TBaseVirtualTree;
   ParentNode, Node: PVirtualNode; var InitialStates: TVirtualNodeInitStates);
 
 var
-    Data: PPropertyData;
+    Data: PConfigProperty;
     section_index: Integer;
 
 begin
@@ -240,15 +138,15 @@ begin
     if ParentNode = nil then
     begin
         InitialStates := InitialStates + [ivsHasChildren, ivsExpanded];
-        Sender.SetNodeData(Node, TPropertyData.Create);
+        Sender.SetNodeData(Node, TConfigProperty.Create);
         Data := Sender.GetNodeData(Node);
-        Data.FValue := FSections.FSections[Node.Index].FName;
+        Data.FValue := FConfig[Node.Index].FSectionName;
     end
     else
     begin
 
-        Sender.SetNodeData(Node, FSections.FSections[Node.Parent.Index]
-          .FProperties[Node.Index]);
+        Sender.SetNodeData(Node, FConfig[Node.Parent.Index].FProperties
+          [Node.Index]);
 
     end;
 end;
@@ -260,29 +158,53 @@ procedure TPropertiesForm.VST3GetText(Sender: TBaseVirtualTree;
   var CellText: string);
 
 var
-    Data: PPropertyData;
+    Data: PConfigProperty;
 
 begin
-    if TextType = ttNormal then
-        case Column of
-            0:
-                if Node.Parent = Sender.RootNode then
-                begin
-                    // root nodes
-                    CellText := FSections.FSections[Node.Index].FName;
-                end
-                else
-                    CellText := FSections.FSections[Node.Parent.Index]
-                      .FProperties[Node.Index].FName;
-            1:
-                begin
-                    if Node.Parent <> Sender.RootNode then
-                    begin
-                        Data := Sender.GetNodeData(Node);
-                        CellText := Data.FValue;
-                    end;
-                end;
-        end;
+    if TextType <> ttNormal then
+        exit;
+
+    Data := Sender.GetNodeData(Node);
+
+    if (Node.Parent = Sender.RootNode) then
+    begin
+        if Column = 0 then
+            CellText := FConfig[Node.Index].FHint;
+        exit;
+    end;
+
+    case Column of
+        0:
+            begin
+                CellText := FConfig[Node.Parent.Index].FProperties
+                  [Node.Index].FHint;
+            end;
+        1:
+            begin
+                CellText := Data.FValue;
+            end;
+        2:
+            begin
+                CellText := Data.FError;
+            end;
+        3:
+            if Data.FMinSet then
+            begin
+
+                CellText := Floattostr(Data.FMin);
+            end;
+        4:
+            if Data.FMaxSet then
+            begin
+
+                CellText := Floattostr(Data.FMax);
+            end;
+        5:
+            begin
+                CellText := Data.FDefaultValue;
+            end;
+    end;
+
 end;
 
 // ----------------------------------------------------------------------------------------------------------------------
@@ -292,16 +214,27 @@ procedure TPropertiesForm.VST3GetHint(Sender: TBaseVirtualTree;
   var LineBreakStyle: TVTTooltipLineBreakStyle; var HintText: string);
 
 var
-    Data: PPropertyData;
+    Data: PConfigProperty;
 
 begin
-    // Add a dummy hint to the normal hint to demonstrate multiline hints.
-    if (Column = 0) and (Node.Parent <> Sender.RootNode) then
+
+    if Node.Parent <> Sender.RootNode then
     begin
         Data := Sender.GetNodeData(Node);
         HintText := Data.FHint;
-        if (Sender as TVirtualStringTree).Hintmode <> hmTooltip then
-            HintText := HintText + #13 + '(Multiline hints are supported too).';
+
+        if Data.FMinSet  then
+            HintText := HintText + #13 + 'минимум: ' + floattostr(Data.FMin);
+
+        if Data.FMaxSet  then
+            HintText := HintText + #13 + 'максимум: ' + floattostr(Data.FMax);
+
+        HintText := HintText + #13 + 'по умолчанию: ' + Data.FDefaultValue;
+
+        if Data.FError <> '' then
+            HintText := HintText + #13#13 + '"' + Data.FValue + '": ' +
+              Data.FError;
+
     end;
 end;
 
@@ -312,7 +245,7 @@ procedure TPropertiesForm.VST3GetImageIndex(Sender: TBaseVirtualTree;
   var Ghosted: Boolean; var Index: TImageIndex);
 
 var
-    Data: PPropertyData;
+    Data: PConfigProperty;
 
 begin
     if (Kind in [ikNormal, ikSelected]) and (Column = 0) then
@@ -337,7 +270,7 @@ procedure TPropertiesForm.VST3Editing(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex; var Allowed: Boolean);
 
 var
-    Data: PPropertyData;
+    Data: PConfigProperty;
 
 begin
     with Sender do
@@ -353,15 +286,18 @@ end;
 procedure TPropertiesForm.VST3BeforeCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
+var
+    Data: PConfigProperty;
 begin
     with TargetCanvas do
     begin
-        if Node.Parent = Sender.RootNode then
-            Brush.Color := clWebHoneydew
-        else if Odd(Node.Index) then
-            Brush.Color := clWebAzure
-        else
-            Brush.Color := clWhite;
+        Data := Sender.GetNodeData(Node);
+
+        if (Node.Parent = Sender.RootNode) and FConfig[Node.Index].HasError or
+          (Data.FError <> '') then
+        begin
+            Brush.Color := cl3dlight;
+        end;
 
         FillRect(CellRect);
 
@@ -397,16 +333,18 @@ procedure TPropertiesForm.VST3CreateEditor(Sender: TBaseVirtualTree;
 // us to control the editing process up to which actual control will be created.
 // TPropertyEditLink implements an interface and hence benefits from reference counting. We don't need to keep a
 // reference to free it. As soon as the tree finished editing the class will be destroyed automatically.
-
+var x : TPropertyEditLink;
 begin
-    EditLink := TPropertyEditLink.Create;
+    x := TPropertyEditLink.Create;
+    x.SetPropertyValueChangedHandler(self.FHandlePropertyValueChanged);
+    EditLink := x;
 end;
 
 procedure TPropertiesForm.VST3DrawText(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   const Text: string; const CellRect: TRect; var DefaultDraw: Boolean);
 var
-    Data: PPropertyData;
+    Data: PConfigProperty;
     R: TRect;
 begin
     Data := Sender.GetNodeData(Node);
@@ -417,7 +355,7 @@ begin
         R.Right := R.Right - 9;
         DrawCheckbox(Sender, TargetCanvas, R, Data.FValue <> '0', '');
         DefaultDraw := false;
-    end
+    end;
 
 end;
 
@@ -428,21 +366,19 @@ procedure TPropertiesForm.VST3PaintText(Sender: TBaseVirtualTree;
   TextType: TVSTTextType);
 
 var
-    Data: PPropertyData;
+    Data: PConfigProperty;
 
 begin
     // Make the root nodes underlined and draw changed nodes in bold style.
     if Node.Parent = Sender.RootNode then
-        TargetCanvas.Font.Style := [fsUnderline]
-    else
+        TargetCanvas.Font.Style := [fsUnderline];
+    Data := Sender.GetNodeData(Node);
+    if (Node.Parent = Sender.RootNode) and FConfig[Node.Index].HasError or
+      (Data.FError <> '') then
     begin
-        Data := Sender.GetNodeData(Node);
-        if Data.FChanged then
-            TargetCanvas.Font.Style := [fsBold]
-        else
-            TargetCanvas.Font.Style := [];
-
+        TargetCanvas.Font.Color := clRed;
     end;
+
 end;
 
 // ----------------------------------------------------------------------------------------------------------------------
@@ -459,24 +395,23 @@ begin
     if Node.Parent = Sender.RootNode then
     begin
         // root nodes
-        PropText := FSections.FSections[Node.Index].FName;
+        PropText := FConfig[Node.Index].FHint;
     end
     else
-        PropText := FSections.FSections[Node.Parent.Index].FProperties
-          [Node.Index].FName;
+        PropText := FConfig[Node.Parent.Index].FProperties[Node.Index]
+          .FPropertyName;
 
     // By using StrLIComp we can specify a maximum length to compare. This allows us to find also nodes
     // which match only partially. Don't forget to specify the shorter string length as search length.
     Result := StrLIComp(PChar(S), PChar(PropText),
-      Min(length(S), length(PropText)))
+      Min(Length(S), Length(PropText)))
 end;
 
 // ----------------------------------------------------------------------------------------------------------------------
 
-procedure TPropertiesForm.RadioGroup1Click(Sender: TObject);
-
+procedure TPropertiesForm.FormHide(Sender: TObject);
 begin
-
+    VST3.CancelEditNode;
 end;
 
 // ----------------------------------------------------------------------------------------------------------------------
@@ -501,11 +436,11 @@ end;
 procedure TPropertiesForm.VST3FreeNode(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 var
-    Data: PPropertyData;
+    Data: PConfigProperty;
 
 begin
     Data := Sender.GetNodeData(Node);
-    Finalize(Data^);
+    Finalize(Data);
 end;
 
 end.

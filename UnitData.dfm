@@ -9,6 +9,7 @@ object DataModule1: TDataModule1
       'LockingMode=Normal'
       'Synchronous=Full'
       'JournalMode=WAL'
+      'StringFormat=Unicode'
       'DriverID=SQLite')
     UpdateOptions.AssignedValues = [uvLockWait]
     UpdateOptions.LockWait = True
@@ -50,16 +51,6 @@ object DataModule1: TDataModule1
         Name = 'PARENT_WORK_ID'
         ParamType = ptInput
       end>
-  end
-  object FDQuery1: TFDQuery
-    Connection = FDConnectionProductsDB
-    Left = 152
-    Top = 260
-  end
-  object FDQueryConfig2: TFDQuery
-    Connection = FDConnectionConfig
-    Left = 152
-    Top = 364
   end
   object FDQueryPartyWorks: TFDQuery
     Connection = FDConnectionProductsDB
@@ -141,22 +132,12 @@ object DataModule1: TDataModule1
       'LockingMode=Normal'
       'Synchronous=Full'
       'JournalMode=WAL'
+      'StringFormat=Unicode'
       'DriverID=SQLite')
     UpdateOptions.AssignedValues = [uvLockWait]
     UpdateOptions.LockWait = True
-    Connected = True
     Left = 248
     Top = 24
-  end
-  object FDQueryConfig: TFDQuery
-    Connection = FDConnectionConfig
-    Left = 152
-    Top = 308
-  end
-  object FDQueryConfig3: TFDQuery
-    Connection = FDConnectionConfig
-    Left = 144
-    Top = 420
   end
   object FDQueryUpdateCoefValue: TFDQuery
     Connection = FDConnectionProductsDB
@@ -403,6 +384,23 @@ object DataModule1: TDataModule1
       end
       item
         Name = 'DAY'
+        ParamType = ptInput
+      end>
+  end
+  object FDQuery1: TFDQuery
+    Connection = FDConnectionProductsDB
+    SQL.Strings = (
+      'SELECT DISTINCT'
+      '    cast(strftime('#39'%Y'#39', created_at) AS INT) as year,'
+      '    cast(strftime('#39'%m'#39', created_at) AS INT) as month,'
+      '    cast(strftime('#39'%d'#39', created_at) AS INT) as day'
+      'FROM work a'
+      'WHERE a.party_id = :party_id AND a.parent_work_id ISNULL;')
+    Left = 96
+    Top = 456
+    ParamData = <
+      item
+        Name = 'PARTY_ID'
         ParamType = ptInput
       end>
   end

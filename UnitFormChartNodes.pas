@@ -214,8 +214,9 @@ end;
 
 procedure TNodeYear.Populate;
 begin
-    with DataModule1.FDQuery1 do
+    with TFDQuery.Create(nil) do
     begin
+        Connection := DataModule1.FDConnectionProductsDB;
         SQL.Text :=
           'SELECT DISTINCT month FROM series_info WHERE year = :year;';
         ParamByName('year').Value := FYear;
@@ -227,6 +228,7 @@ begin
             Next;
         end;
         Close;
+        Free;
     end;
     if (FNode.ChildCount = 0) and (FYear = YearOf(now)) then
     begin

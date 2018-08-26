@@ -267,8 +267,9 @@ end;
 
 procedure TNodeYear.Populate;
 begin
-    with DataModule1.FDQuery1 do
+    with TFDQuery.Create(nil) do
     begin
+        Connection := DataModule1.FDConnectionProductsDB;
         SQL.Text := 'SELECT * FROM party_year_month WHERE year = :year;';
         ParamByName('year').Value := FYear;
         open;
@@ -279,6 +280,7 @@ begin
             Next;
         end;
         Close;
+        Free
     end;
 end;
 

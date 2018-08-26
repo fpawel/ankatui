@@ -3131,7 +3131,6 @@ object FormSettings: TFormSettings
   OnActivate = FormActivate
   OnCreate = FormCreate
   OnDeactivate = FormDeactivate
-  OnMouseWheel = FormMouseWheel
   PixelsPerInch = 96
   TextHeight = 13
 end

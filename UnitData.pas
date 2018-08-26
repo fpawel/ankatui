@@ -9,7 +9,7 @@ uses
     FireDAC.Phys.SQLiteDef, FireDAC.Stan.ExprFuncs, FireDAC.VCLUI.Wait, Data.DB,
     FireDAC.Comp.Client, FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf,
     FireDAC.DApt, Vcl.ComCtrls, FireDAC.Comp.DataSet,
-    System.Generics.collections;
+    System.Generics.collections, config;
 
 type
     TKeyValue = TPair<string, variant>;
@@ -70,13 +70,9 @@ type
         FDConnectionProductsDB: TFDConnection;
         FDPhysSQLiteDriverLink1: TFDPhysSQLiteDriverLink;
         FDQueryWorksByParentRecordID: TFDQuery;
-        FDQuery1: TFDQuery;
-        FDQueryConfig2: TFDQuery;
         FDQueryPartyWorks: TFDQuery;
         FDQueryWorkMessages: TFDQuery;
         FDConnectionConfig: TFDConnection;
-        FDQueryConfig: TFDQuery;
-        FDQueryConfig3: TFDQuery;
         FDQueryUpdateCoefValue: TFDQuery;
         FDQueryDeleteCoefValue: TFDQuery;
         FDQueryPartyWorksDays: TFDQuery;
@@ -84,13 +80,15 @@ type
         FDQueryPartyProductsWithCoefs: TFDQuery;
         FDQueryPartyCoefsWithProducts: TFDQuery;
         FDQueryDayLog: TFDQuery;
-    FDQueryWorkLogYears: TFDQuery;
-    FDQueryWorkLogYearMonths: TFDQuery;
-    FDQueryWorkLogYearMonthDays: TFDQuery;
-    FDQueryWorkLogsYearMonthDay: TFDQuery;
+        FDQueryWorkLogYears: TFDQuery;
+        FDQueryWorkLogYearMonths: TFDQuery;
+        FDQueryWorkLogYearMonthDays: TFDQuery;
+        FDQueryWorkLogsYearMonthDay: TFDQuery;
+        FDQuery1: TFDQuery;
         procedure DataModuleCreate(Sender: TObject);
     private
         { Private declarations }
+        procedure read_config_section(sect: TConfigSection);
     public
         { Public declarations }
         function DeviceVars: TArray<TDeviceVar>;
@@ -124,14 +122,24 @@ type
           Serial, Coef: integer): string;
         function PartyProducts(partyID: int64): TArray<integer>;
 
-        procedure PrintCurrentWorkMessages(ARichEdit: TRichEdit;
-          work_index: integer);
-        procedure PrintDayLog(ARichEdit: TRichEdit; day, month, year: integer);
-        procedure PrintWorkLog(ARichEdit: TRichEdit; record_id: longint);
+        function GetSeriesVarProducts(seriesID: int64; AVar: integer)
+          : TArray<integer>;
 
-        procedure PrintLastMessages(ARichEdit: TRichEdit; count: integer);
+        procedure UpdateConfig(p:TConfigProperty);
 
-        function GetSeriesVarProducts(seriesID:int64; AVar:integer): TArray<integer>;
+        function GetConfig: TConfig;
+        function PartyValuesConfigSection: TConfigSection;
+
+        function GetDefaultPartyVarValue(property_name: string): variant;
+        function GetCurrentPartyVarValue(property_name: string): variant;
+
+        function GetConfigPropertyValue(section_name, property_name
+          : string): variant;
+        function GetConfigPropertyDefaultValue(section_name,
+          property_name: string): variant;
+
+        procedure NewParty(AParty:TConfigSection; serials:TArray<integer>);
+        function CurrentPartyDateTime: TDAteTime;
     end;
 
 var
@@ -139,14 +147,9 @@ var
 
 function ProductVarEqual(X, Y: RProductVar): boolean;
 
-procedure PrintWorkMessages(ARichEdit: TRichEdit; work_index: integer;
-  work: string; product_serial: variant; created_at: TDatetime; level: integer;
-  Text: string);
-
 implementation
 
-uses dateutils, Vcl.dialogs, System.Variants, stringutils, variantutils,
-    richeditutils;
+uses dateutils, Vcl.dialogs, System.Variants, stringutils, variantutils;
 
 { %CLASSGROUP 'Vcl.Controls.TControl' }
 
@@ -391,6 +394,18 @@ begin
 
 end;
 
+function TDataModule1.CurrentPartyDateTime: TDAteTime;
+begin
+    with TFDQuery.Create(nil) do
+    begin
+        Connection := FDConnectionProductsDB;
+        SQL.Text := 'select * from current_party';
+        Open;
+        result := FieldValues['created_at'];
+        Free;
+    end;
+end;
+
 function TDataModule1.CurrentPartyID: int64;
 begin
     with TFDQuery.Create(nil) do
@@ -533,7 +548,7 @@ begin
         Close;
         Free;
     end;
-    if xs.Count = 0 then
+    if xs.count = 0 then
         xs.Add(YearOf(now));
     result := xs.ToArray;
     xs.Free;
@@ -724,123 +739,22 @@ begin
     end;
 end;
 
-procedure PrintWorkMessages(ARichEdit: TRichEdit; work_index: integer;
-  work: string; product_serial: variant; created_at: TDatetime; level: integer;
-  Text: string);
-var
-    s: string;
-begin
-    s := Text;
-    if (not VariantIsEmptyOrNull(product_serial)) AND (product_serial <> 0) then
-        s := 'АНКАТ ' + inttostr(product_serial) + ': ' + s;
-    if (work <> '') AND (work_index = 0) then
-        s := work + ': ' + s;
-    if work_index <> 0 then
-        s := '[' + inttostr2(work_index) + ']: ' + s;
-    RichEdit_AddText(ARichEdit, IncHour(created_at, 3), level, s);
-end;
 
-procedure TDataModule1.PrintCurrentWorkMessages(ARichEdit: TRichEdit;
-  work_index: integer);
-begin
-    ARichEdit.Lines.Clear;
-    with FDQueryCurrentWorkMessages do
-    begin
-        ParamByName('work_index').Value := work_index;
-        Open;
-        First;
-        while not Eof do
-        begin
-            PrintWorkMessages(ARichEdit, work_index, '',
-              FieldValues['product_serial'],
-              FieldValues['created_at'],
-              FieldValues['level'],
-              FieldValues['message']);
-            Next;
-        end;
-        Close;
-    end;
-end;
 
-procedure TDataModule1.PrintLastMessages(ARichEdit: TRichEdit; count: integer);
-begin
-   ARichEdit.Lines.Clear;
-    with TFDQuery.Create(nil) do
-    begin
-        Connection := FDConnectionProductsDB;
-        SQL.Text := 'SELECT * FROM work_log2 LIMIT :count;';
-        ParamByName('count').Value := count;
-        Open;
-        First;
-        while not Eof do
-        begin
-            PrintWorkMessages(ARichEdit, FieldValues['work_index'],
-              FieldValues['work_name'], FieldValues['product_serial'],
-              FieldValues['created_at'], FieldValues['level'],
-              FieldValues['message']);
-            Next;
-        end;
-        Close;
-    end;
-end;
-
-procedure TDataModule1.PrintDayLog(ARichEdit: TRichEdit;
-  day, month, year: integer);
-begin
-    ARichEdit.Lines.Clear;
-    with FDQueryDayLog do
-    begin
-        ParamByName('day').Value := day;
-        ParamByName('month').Value := month;
-        ParamByName('year').Value := year;
-        Open;
-        First;
-        while not Eof do
-        begin
-            PrintWorkMessages(ARichEdit, FieldValues['work_index'],
-              FieldValues['work_name'], FieldValues['product_serial'],
-              FieldValues['created_at'], FieldValues['level'],
-              FieldValues['message']);
-            Next;
-        end;
-        Close;
-    end;
-end;
-
-procedure TDataModule1.PrintWorkLog(ARichEdit: TRichEdit; record_id: longint);
-begin
-    ARichEdit.Lines.Clear;
-    with FDQueryWorkMessages do
-    begin
-        ParamByName('work_id').Value := record_id;
-        Open;
-        First;
-        while not Eof do
-        begin
-            PrintWorkMessages(ARichEdit, FieldValues['work_index'],
-              '', FieldValues['product_serial'],
-              FieldValues['created_at'], FieldValues['level'],
-              FieldValues['message']);
-            Next;
-        end;
-        Close;
-    end;
-end;
-
-function TDataModule1.GetSeriesVarProducts(seriesID:int64; AVar:integer): TArray<integer>;
+function TDataModule1.GetSeriesVarProducts(seriesID: int64; AVar: integer)
+  : TArray<integer>;
 var
     xs: TList<integer>;
 begin
-    xs := TList<integer>.create;
+    xs := TList<integer>.Create;
     with TFDQuery.Create(nil) do
     begin
         Connection := FDConnectionProductsDB;
-        SQL.Text :=
-          'SELECT DISTINCT product_serial FROM chart_value_info '
-          + 'WHERE series_id = :series_id AND var = :var;';
+        SQL.Text := 'SELECT DISTINCT product_serial FROM chart_value_info ' +
+          'WHERE series_id = :series_id AND var = :var;';
         ParamByName('series_id').Value := seriesID;
         ParamByName('var').Value := AVar;
-        open;
+        Open;
         First;
         while not Eof do
         begin
@@ -851,6 +765,325 @@ begin
     end;
     result := xs.ToArray;
     xs.Free;
+end;
+
+procedure TDataModule1.UpdateConfig(p:TConfigProperty);
+begin
+    with TFDQuery.Create(nil) do
+    begin
+        Connection := DataModule1.FDConnectionConfig;
+
+        if p.FSectionName = 'party' then
+        begin
+            Connection := DataModule1.FDConnectionProductsDB;
+            SQL.Text :=
+              'INSERT OR REPLACE INTO party_value (var, party_id, value) ' +
+              'VALUES (:var, (SELECT * FROM current_party_id), :value);';
+            ParamByName('var').Value := p.FPropertyName;
+
+        end
+        else
+        begin
+            Connection := DataModule1.FDConnectionConfig;
+            SQL.Text := 'UPDATE config SET value = :value where ' +
+              'section_name = :section_name AND ' +
+              'property_name = :property_name ;';
+            ParamByName('property_name').Value := p.FPropertyName;
+            ParamByName('section_name').Value := p.FSectionName;
+        end;
+
+        if (p.FType = VtcString) or (p.FType = VtcComportName) then
+           ParamByName('value').Value := p.FValue
+        else if (p.FType = VtcInt) or (p.FType = VtcBaud) or (p.FType = VtcBool) then
+            ParamByName('value').Value := strtoint(p.FValue)
+        else if p.FType = VtcFloat then
+            ParamByName('value').Value := Str_To_Float(p.FValue)
+        else
+            raise Exception.Create('unknown value type: "' +p.FType + '"');
+
+        ExecSQL;
+        Close;
+        Free;
+    end;
+end;
+
+function TDataModule1.GetConfigPropertyValue(section_name,
+  property_name: string): variant;
+begin
+    with TFDQuery.Create(nil) do
+    begin
+        Connection := FDConnectionConfig;
+        SQL.Text :=
+          'SELECT value FROM config WHERE section_name = :section_name AND property_name = :property_name;';
+        ParamByName('section_name').Value := section_name;
+        ParamByName('property_name').Value := property_name;
+        Open;
+        First;
+        if not Eof then
+            result := FieldValues['value'];
+        Close;
+        Free;
+    end;
+end;
+
+function TDataModule1.GetConfigPropertyDefaultValue(section_name,
+  property_name: string): variant;
+begin
+    with TFDQuery.Create(nil) do
+    begin
+        Connection := FDConnectionConfig;
+        SQL.Text :=
+          'SELECT default_value FROM config WHERE section_name = :section_name AND property_name = :property_name;';
+        ParamByName('section_name').Value := section_name;
+        ParamByName('property_name').Value := property_name;
+        Open;
+        First;
+        if not Eof then
+            result := FieldValues['default_value'];
+        Close;
+        Free;
+    end;
+end;
+
+function TDataModule1.GetDefaultPartyVarValue(property_name: string): variant;
+begin
+    with TFDQuery.Create(nil) do
+    begin
+        Connection := FDConnectionProductsDB;
+        SQL.Text := 'SELECT def_val FROM party_var WHERE var = :var;';
+        ParamByName('var').Value := property_name;
+        Open;
+        First;
+        if not Eof then
+            result := FieldValues['def_val'];
+        Close;
+        Free;
+    end;
+end;
+
+function TDataModule1.GetCurrentPartyVarValue(property_name: string): variant;
+begin
+    with TFDQuery.Create(nil) do
+    begin
+        Connection := FDConnectionProductsDB;
+        SQL.Text :=
+          'SELECT value FROM current_party_var_value WHERE var = :var;';
+        ParamByName('var').Value := property_name;
+        Open;
+        First;
+        if not Eof then
+            result := FieldValues['value'];
+        Close;
+        Free;
+    end;
+end;
+
+function TDataModule1.PartyValuesConfigSection: TConfigSection;
+var
+    p: TConfigProperty;
+    vars: TList<TConfigProperty>;
+    value_list: TList<string>;
+    s, SQL: string;
+begin
+    result := TConfigSection.Create;
+    vars := TList<TConfigProperty>.Create;
+    result.FSortOrder := -1;
+    result.FSectionName := 'party';
+    result.FHint := 'Параметры партии';
+    with TFDQuery.Create(nil) do
+    begin
+        Connection := FDConnectionProductsDB;
+        SQL.Text := 'SELECT * FROM party_var;';
+        Open;
+        First;
+        while not Eof do
+        begin
+            vars.Add(TConfigProperty.Create);
+            p := vars.Last;
+            p.FPropertyName := FieldValues['var'];
+            p.FHint := FieldValues['name'];
+            p.FSectionName := result.FSectionName;
+            p.FSortOrder := FieldValues['sort_order'];
+            p.FMinSet := FieldValues['min'] <> System.Variants.Null;
+            p.FMaxSet := FieldValues['max'] <> System.Variants.Null;
+            if p.FMinSet then
+                p.FMin := FieldValues['min'];
+            if p.FMaxSet then
+                p.FMax := FieldValues['max'];
+            p.FType := FieldValues['type'];
+            p.FDefaultValue := self.GetDefaultPartyVarValue(p.FPropertyName);
+            p.FValue := self.GetCurrentPartyVarValue(p.FPropertyName);
+
+            Next;
+        end;
+        Close;
+        Free;
+        for p in vars do
+            with TFDQuery.Create(nil) do
+            begin
+                Connection := FDConnectionConfig;
+                SQL.Text :=
+                  'select value from value_list where property_name = :property_name;';
+                s := p.FPropertyName;
+                ParamByName('property_name').Value := s;
+                Open;
+                First;
+                value_list := TList<string>.Create;
+                while not Eof do
+                begin
+                    value_list.Add(FieldValues['value']);
+                    Next;
+                end;
+                Close;
+                Free;
+                p.FList := value_list.ToArray;
+                value_list.Free;
+
+                p.SetStr(p.FValue);
+            end;
+
+    end;
+    result.FProperties := vars.ToArray;
+    vars.Free;
+end;
+
+procedure TDataModule1.read_config_section(sect: TConfigSection);
+var
+    vars: TList<TConfigProperty>;
+    value_list: TList<string>;
+    s: string;
+begin
+    vars := TList<TConfigProperty>.Create;
+    with TFDQuery.Create(nil) do
+    begin
+        Connection := FDConnectionConfig;
+
+        SQL.Text :=
+          'SELECT * FROM config WHERE section_name = :section_name ORDER BY sort_order;';
+        ParamByName('section_name').Value := sect.FSectionName;
+        Open;
+        First;
+        while not Eof do
+        begin
+            vars.Add(TConfigProperty.Create);
+            with vars.Last do
+            begin
+                FSectionName := sect.FSectionName;
+                FType := FieldValues['type'];
+                FPropertyName := FieldValues['property_name'];
+                FHint := FieldValues['hint'];
+                FSortOrder := FieldValues['sort_order'];
+                FMinSet := FieldValues['min'] <> System.Variants.Null;
+                FMaxSet := FieldValues['max'] <> System.Variants.Null;
+                if FMinSet then
+                    FMin := FieldValues['min'];
+                if FMaxSet then
+                    FMax := FieldValues['max'];
+
+                FValue := GetConfigPropertyValue(FSectionName, FPropertyName);
+                FDefaultValue := GetConfigPropertyDefaultValue(FSectionName,
+                  FPropertyName);
+
+                value_list := TList<string>.Create;
+                with TFDQuery.Create(nil) do
+                begin
+                    Connection := FDConnectionConfig;
+                    SQL.Text :=
+                      'select value from value_list where property_name = :property_name;';
+                    s := FPropertyName;
+                    ParamByName('property_name').Value := s;
+                    Open;
+                    First;
+                    while not Eof do
+                    begin
+                        value_list.Add(FieldValues['value']);
+                        Next;
+                    end;
+                    Close;
+                    Free;
+                end;
+                FList := value_list.ToArray;
+                value_list.Free;
+
+                SetStr(FValue);
+            end;
+            Next;
+        end;
+        Close;
+        Free;
+        sect.FProperties := vars.ToArray;
+    end;
+    vars.Free;
+end;
+
+function TDataModule1.GetConfig: TConfig;
+var
+    sections: TList<TConfigSection>;
+    sect: TConfigSection;
+begin
+    sections := TList<TConfigSection>.Create;
+    sections.Add(PartyValuesConfigSection);
+    with TFDQuery.Create(nil) do
+    begin
+        Connection := FDConnectionConfig;
+        SQL.Text := 'SELECT * FROM section;';
+        Open;
+        First;
+        while not Eof do
+        begin
+            sect := TConfigSection.Create;
+            sect.FSectionName := FieldByName('section_name').Value;
+            sect.FSortOrder := FieldByName('sort_order').Value;
+            sect.FHint := FieldByName('hint').Value;
+            read_config_section(sect);
+
+            sections.Add(sect);
+            Next;
+        end;
+        Close;
+        Free;
+    end;
+
+    result := sections.ToArray;
+    sections.Free;
+end;
+
+procedure TDataModule1.NewParty(AParty:TConfigSection; serials:TArray<integer>);
+var
+    p: TConfigProperty;
+    serial:integer;
+begin
+
+    with TFDQuery.Create(nil) do
+    begin
+        Connection := DataModule1.FDConnectionProductsDB;
+        SQL.Text := 'INSERT INTO party DEFAULT VALUES;';
+        Execute;
+
+        for p in AParty.FProperties do
+        begin
+            SQL.Text :=
+              'INSERT INTO party_value (party_id, var, value)' +
+              'VALUES ((SELECT * FROM current_party_id), :key, :val);';
+            ParamByName('key').Value := p.FPropertyName;
+            ParamByName('val').Value := p.FValue;
+            //p.SetParam(ParamByName('val'));
+            Execute;
+        end;
+
+        for serial in serials do
+        begin
+            SQL.Text := 'INSERT INTO product (party_id, product_serial) VALUES '
+              + '((SELECT * FROM current_party_id), :serial)';
+            ParamByName('serial').Value := serial;
+            Execute;
+        end;
+        Close;
+        Free;
+    end;
+
+
+
 end;
 
 end.
