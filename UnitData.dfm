@@ -14,6 +14,7 @@ object DataModule1: TDataModule1
     UpdateOptions.AssignedValues = [uvLockWait]
     UpdateOptions.LockWait = True
     Connected = True
+    OnError = FDConnectionProductsDBError
     Left = 80
     Top = 24
   end

@@ -12,6 +12,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDeactivate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
+    procedure FormHide(Sender: TObject);
     private
         { Private declarations }
         FPropertiesForm : TPropertiesForm;
@@ -56,6 +57,11 @@ end;
 procedure TFormSettings.FormDeactivate(Sender: TObject);
 begin
     Hide;
+end;
+
+procedure TFormSettings.FormHide(Sender: TObject);
+begin
+    FPropertiesForm.VST3.CancelEditNode;
 end;
 
 end.

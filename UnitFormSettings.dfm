@@ -3131,6 +3131,7 @@ object FormSettings: TFormSettings
   OnActivate = FormActivate
   OnCreate = FormCreate
   OnDeactivate = FormDeactivate
+  OnHide = FormHide
   PixelsPerInch = 96
   TextHeight = 13
 end

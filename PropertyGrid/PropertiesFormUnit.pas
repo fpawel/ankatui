@@ -411,6 +411,7 @@ end;
 
 procedure TPropertiesForm.FormHide(Sender: TObject);
 begin
+    VST3.FocusedNode := nil;
     VST3.CancelEditNode;
 end;
 

@@ -42,7 +42,7 @@ object PropertiesForm: TPropertiesForm
     TabOrder = 0
     TreeOptions.MiscOptions = [toAcceptOLEDrop, toEditable, toGridExtensions, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
     TreeOptions.PaintOptions = [toShowBackground, toShowButtons, toShowDropmark, toShowHorzGridLines, toShowRoot, toShowTreeLines, toShowVertGridLines, toUseBlendedImages, toGhostedIfUnfocused]
-    TreeOptions.SelectionOptions = [toFullRowSelect]
+    TreeOptions.SelectionOptions = [toDisableDrawSelection]
     TreeOptions.StringOptions = [toAutoAcceptEditChange]
     OnBeforeCellPaint = VST3BeforeCellPaint
     OnChange = VST3Change
@@ -104,7 +104,7 @@ object PropertiesForm: TPropertiesForm
     Left = 422
     Top = 224
     Bitmap = {
-      494C010107001300440010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101070013004C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

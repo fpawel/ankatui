@@ -86,6 +86,8 @@ type
         FDQueryWorkLogsYearMonthDay: TFDQuery;
         FDQuery1: TFDQuery;
         procedure DataModuleCreate(Sender: TObject);
+        procedure FDConnectionProductsDBError(ASender, AInitiator: TObject;
+          var AException: Exception);
     private
         { Private declarations }
         procedure read_config_section(sect: TConfigSection);
@@ -125,7 +127,7 @@ type
         function GetSeriesVarProducts(seriesID: int64; AVar: integer)
           : TArray<integer>;
 
-        procedure UpdateConfig(p:TConfigProperty);
+        procedure UpdateConfig(p: TConfigProperty);
 
         function GetConfig: TConfig;
         function PartyValuesConfigSection: TConfigSection;
@@ -138,7 +140,7 @@ type
         function GetConfigPropertyDefaultValue(section_name,
           property_name: string): variant;
 
-        procedure NewParty(AParty:TConfigSection; serials:TArray<integer>);
+        procedure NewParty(AParty: TConfigSection; serials: TArray<integer>);
         function CurrentPartyDateTime: TDAteTime;
     end;
 
@@ -504,6 +506,14 @@ begin
 
 end;
 
+procedure TDataModule1.FDConnectionProductsDBError(ASender, AInitiator: TObject;
+  var AException: Exception);
+begin
+    ApplicationShowException
+      (Exception.Create(FDConnectionProductsDB.Params.Database + ': ' +
+      AException.Message))
+end;
+
 function TDataModule1.PartyValues(partyID: int64): TKeysValues;
 var
     xs: TList<TKeyValue>;
@@ -739,8 +749,6 @@ begin
     end;
 end;
 
-
-
 function TDataModule1.GetSeriesVarProducts(seriesID: int64; AVar: integer)
   : TArray<integer>;
 var
@@ -767,7 +775,7 @@ begin
     xs.Free;
 end;
 
-procedure TDataModule1.UpdateConfig(p:TConfigProperty);
+procedure TDataModule1.UpdateConfig(p: TConfigProperty);
 begin
     with TFDQuery.Create(nil) do
     begin
@@ -793,13 +801,14 @@ begin
         end;
 
         if (p.FType = VtcString) or (p.FType = VtcComportName) then
-           ParamByName('value').Value := p.FValue
-        else if (p.FType = VtcInt) or (p.FType = VtcBaud) or (p.FType = VtcBool) then
+            ParamByName('value').Value := p.FValue
+        else if (p.FType = VtcInt) or (p.FType = VtcBaud) or (p.FType = VtcBool)
+        then
             ParamByName('value').Value := strtoint(p.FValue)
         else if p.FType = VtcFloat then
             ParamByName('value').Value := Str_To_Float(p.FValue)
         else
-            raise Exception.Create('unknown value type: "' +p.FType + '"');
+            raise Exception.Create('unknown value type: "' + p.FType + '"');
 
         ExecSQL;
         Close;
@@ -1048,10 +1057,11 @@ begin
     sections.Free;
 end;
 
-procedure TDataModule1.NewParty(AParty:TConfigSection; serials:TArray<integer>);
+procedure TDataModule1.NewParty(AParty: TConfigSection;
+  serials: TArray<integer>);
 var
     p: TConfigProperty;
-    serial:integer;
+    Serial: integer;
 begin
 
     with TFDQuery.Create(nil) do
@@ -1062,27 +1072,24 @@ begin
 
         for p in AParty.FProperties do
         begin
-            SQL.Text :=
-              'INSERT INTO party_value (party_id, var, value)' +
+            SQL.Text := 'INSERT INTO party_value (party_id, var, value)' +
               'VALUES ((SELECT * FROM current_party_id), :key, :val);';
             ParamByName('key').Value := p.FPropertyName;
             ParamByName('val').Value := p.FValue;
-            //p.SetParam(ParamByName('val'));
+            // p.SetParam(ParamByName('val'));
             Execute;
         end;
 
-        for serial in serials do
+        for Serial in serials do
         begin
             SQL.Text := 'INSERT INTO product (party_id, product_serial) VALUES '
               + '((SELECT * FROM current_party_id), :serial)';
-            ParamByName('serial').Value := serial;
+            ParamByName('serial').Value := Serial;
             Execute;
         end;
         Close;
         Free;
     end;
-
-
 
 end;
 
