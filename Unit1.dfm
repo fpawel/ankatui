@@ -3431,9 +3431,9 @@ object Form1: TForm1
         object StringGrid1: TStringGrid
           Left = 0
           Top = 32
-          Width = 321
+          Width = 276
           Height = 328
-          Align = alLeft
+          Align = alClient
           BorderStyle = bsNone
           ColCount = 4
           DefaultDrawing = False
@@ -3450,6 +3450,9 @@ object Form1: TForm1
           OnMouseUp = StringGrid1MouseUp
           OnSelectCell = StringGrid1SelectCell
           OnTopLeftChanged = StringGrid1TopLeftChanged
+          ExplicitLeft = 6
+          ExplicitTop = 31
+          ExplicitWidth = 321
           ColWidths = (
             64
             64
@@ -3573,26 +3576,14 @@ object Form1: TForm1
     object TabSheet4: TTabSheet
       Caption = #1040#1088#1093#1080#1074
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
     end
     object TabSheet7: TTabSheet
       Caption = #1046#1091#1088#1085#1072#1083
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
     end
     object TabSheet8: TTabSheet
       Caption = #1043#1088#1072#1092#1080#1082
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
     end
   end
   object ImageList1: TImageList
@@ -3605,7 +3596,7 @@ object Form1: TForm1
     Left = 480
     Top = 178
     Bitmap = {
-      494C010108009C00380232003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010108009C003C0232003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000C8000000960000000100200000000000C0D4
       0100000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -7524,7 +7515,7 @@ object Form1: TForm1
     Left = 472
     Top = 256
     Bitmap = {
-      494C010103001801100210001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010103001801140210001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -7673,7 +7664,7 @@ object Form1: TForm1
     Left = 544
     Top = 178
     Bitmap = {
-      494C01010300D401540219001900FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C01010300D401580219001900FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000640000001900000001002000000000001027
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
