@@ -245,23 +245,27 @@ procedure TNodeWorkLog.Populate;
 var
     Node: PVirtualNode;
     d: TNodeWorkLog;
+    q : TFDQuery;
 begin
     Node := nil;
-    with DataModule1.FDQueryWorksByParentRecordID do
+    q := TFDQuery.Create(nil);
+    with q do
     begin
+        Connection := DataModule1.FDConnectionProductsDB;
+        SQL.Text := 'SELECT * FROM work_info WHERE parent_work_id = :parent_work_id;';
         ParamByName('parent_work_id').Value := FWorkID;
         open;
         First;
         FTreeView.HasChildren[FNode] := false;
         while not Eof do
         begin
-            d := TNodeWorkLog.Create(FTreeView, FNode,
-              DataModule1.FDQueryWorksByParentRecordID);
+            d := TNodeWorkLog.Create(FTreeView, FNode,q);
             Node := d.FNode;
             Next;
             FTreeView.HasChildren[FNode] := true;
         end;
         close;
+        Free;
     end;
     if Assigned(Node) then
         FTreeView.Selected[Node] := true;

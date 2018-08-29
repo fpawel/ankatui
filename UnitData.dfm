@@ -22,37 +22,6 @@ object DataModule1: TDataModule1
     Left = 624
     Top = 40
   end
-  object FDQueryWorksByParentRecordID: TFDQuery
-    Connection = FDConnectionProductsDB
-    SQL.Strings = (
-      'SELECT'
-      '       w.work_id, w.created_at, w.work_index, w.work_name,'
-      
-        '       exists(SELECT * FROM work ww WHERE ww.parent_work_id = w.' +
-        'work_id) AS has_children,'
-      '       ('
-      '       WITH RECURSIVE a(work_id, parent_work_id, level) AS ('
-      '         SELECT work_id, parent_work_id, level'
-      '         FROM work_log2'
-      '         WHERE work_id = w.work_id OR parent_work_id = w.work_id'
-      '         UNION'
-      '         SELECT l.work_id, l.parent_work_id, l.level'
-      
-        '         FROM a INNER JOIN work_log2 l ON l.parent_work_id = a.w' +
-        'ork_id'
-      '       ) SELECT EXISTS(SELECT * FROM a WHERE level >= 4)'
-      '       ) AS has_error'
-      'FROM work w'
-      'WHERE'
-      '    w.parent_work_id = :parent_work_id;')
-    Left = 88
-    Top = 188
-    ParamData = <
-      item
-        Name = 'PARENT_WORK_ID'
-        ParamType = ptInput
-      end>
-  end
   object FDQueryPartyWorks: TFDQuery
     Connection = FDConnectionProductsDB
     SQL.Strings = (
@@ -349,26 +318,8 @@ object DataModule1: TDataModule1
   object FDQueryWorkLogsYearMonthDay: TFDQuery
     Connection = FDConnectionProductsDB
     SQL.Strings = (
-      'SELECT'
-      '   w.work_id, w.created_at, w.work_index, w.work_name,'
-      
-        '   exists(SELECT * FROM work ww WHERE ww.parent_work_id = w.work' +
-        '_id) AS has_children,'
-      '    ('
-      '       WITH RECURSIVE a(work_id, parent_work_id, level) AS ('
-      '         SELECT work_id, parent_work_id, 0'
-      '         FROM work'
-      '         WHERE work_id = w.work_id OR parent_work_id = w.work_id'
-      '         UNION'
-      '         SELECT l.work_id, l.parent_work_id, l.level'
-      
-        '         FROM a INNER JOIN work_log2 l ON l.parent_work_id = a.w' +
-        'ork_id'
-      '       ) SELECT EXISTS(SELECT * FROM a WHERE level >= 4)'
-      '    ) AS has_error'
-      'FROM work w'
-      'WHERE'
-      '    w.parent_work_id ISNULL AND'
+      'SELECT * FROM work_info'
+      'WHERE parent_work_id ISNULL AND'
       '    cast(strftime('#39'%Y'#39', created_at) AS INT) = :year AND'
       '    cast(strftime('#39'%m'#39', created_at) AS INT) = :month AND'
       '    cast(strftime('#39'%d'#39', created_at) AS INT) = :day;')

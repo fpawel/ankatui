@@ -246,21 +246,25 @@ begin
 end;
 
 procedure TNodeWorkLog.Populate;
+var q:TFDQuery;
 begin
-    with DataModule1.FDQueryWorksByParentRecordID do
+    q := TFDQuery.Create(nil);
+    with q do
     begin
+        Connection := DataModule1.FDConnectionProductsDB;
+        SQL.Text := 'SELECT * FROM work_info WHERE parent_work_id = :parent_work_id;';
         ParamByName('parent_work_id').Value := FRecordID;
         open;
         First;
         FTreeView.HasChildren[FNode] := false;
         while not Eof do
         begin
-            TNodeWorkLog.Create(FTreeView, FNode,
-              DataModule1.FDQueryWorksByParentRecordID);
+            TNodeWorkLog.Create(FTreeView, FNode, q);
             Next;
             FTreeView.HasChildren[FNode] := true;
         end;
         Close;
+        Free;
     end;
 
 end;

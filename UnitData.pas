@@ -69,7 +69,6 @@ type
     TDataModule1 = class(TDataModule)
         FDConnectionProductsDB: TFDConnection;
         FDPhysSQLiteDriverLink1: TFDPhysSQLiteDriverLink;
-        FDQueryWorksByParentRecordID: TFDQuery;
         FDQueryPartyWorks: TFDQuery;
         FDQueryWorkMessages: TFDQuery;
         FDConnectionConfig: TFDConnection;
