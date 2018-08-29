@@ -32,6 +32,7 @@ type
         procedure Button1Click(Sender: TObject);
         procedure VirtualStringTree1Change(Sender: TBaseVirtualTree;
           Node: PVirtualNode);
+        procedure FormDeactivate(Sender: TObject);
     private
         { Private declarations }
         procedure AddNode(par: PVirtualNode; op_info: TOperationInfo);
@@ -141,7 +142,7 @@ begin
     while Form1.Panel6.ControlCount > 0 do
         Form1.Panel6.Controls[0].Parent := nil;
     VirtualStringTree1.Parent := Form1.Panel6;
-    ModalResult := mrOk;
+
 end;
 
 procedure TFormCurrentWork.FormCreate(Sender: TObject);
@@ -152,6 +153,11 @@ begin
     defstyle := GetWindowLong(Button1.Handle, GWL_STYLE);
     SetWindowLong(Button1.Handle, GWL_STYLE, defstyle or BS_LEFT);
 
+end;
+
+procedure TFormCurrentWork.FormDeactivate(Sender: TObject);
+begin
+    Hide;
 end;
 
 procedure TFormCurrentWork.Setup;
@@ -169,7 +175,8 @@ begin
     end;
     VirtualStringTree1.Clear;
 
-    AddNode(nil, TJson.JsonToObject<TOperationInfo>(HostAppData.FPipe.Fetch1('CURRENT_WORKS', nil)));
+    AddNode(nil, TJson.JsonToObject<TOperationInfo>
+      (HostAppData.FPipe.Fetch1('CURRENT_WORKS', nil)));
 
     Node := VirtualStringTree1.GetFirst;
     Node := VirtualStringTree1.GetNext(Node);
@@ -179,9 +186,6 @@ begin
     else
         VirtualStringTree1.TreeOptions.MiscOptions :=
           VirtualStringTree1.TreeOptions.MiscOptions - [toCheckSupport];
-
-
-
 
 end;
 
@@ -381,7 +385,7 @@ procedure TFormCurrentWork.AddNode(par: PVirtualNode; op_info: TOperationInfo);
 var
     Node: PVirtualNode;
     parent_tree_data: PTreeData;
-    d: rTreeData;
+    d: RTreeData;
     i: integer;
 begin
 
@@ -404,17 +408,12 @@ begin
     if par = nil then
         d.x.EnumDescendants;
 
-    VirtualStringTree1.Expanded[Node] := true;
     VirtualStringTree1.CheckType[Node] := ctTriStateCheckBox;
     Node.CheckState := parseCheckState
       (DataModule1.GetCurrentWorkCheckState(op_info.FOrdinal));
 
-    Node := VirtualStringTree1.GetFirst;
-    while Assigned(Node) do
-    begin
-        VirtualStringTree1.Expanded[Node] := true;
-        Node := VirtualStringTree1.GetNext(Node);
-    end;
+    VirtualStringTree1.Expanded[Node] := (Node = VirtualStringTree1.RootNode) or
+      (Node.Parent <> Nil) and (Node.Parent = VirtualStringTree1.RootNode);
 
 end;
 

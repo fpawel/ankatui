@@ -24,7 +24,7 @@ type
         FList: TArray<string>;
 
         procedure SetStr(str: string);
-        // procedure SetParam(p: TFDParam);
+        procedure SetParam(p: TFDParam);
     end;
 
     TConfigSection = class
@@ -50,17 +50,18 @@ implementation
 
 uses stringutils, sysutils;
 
+procedure TConfigProperty.SetParam(p: TFDParam);
+begin
+    if (FType = VtcInt) or (FType = VtcBaud) or (FType = VtcBool) then
+        p.AsInteger := strtoint(FValue)
+    else if FType = VtcFloat then
+        p.AsFloat := str_to_float(FValue)
+    else if FType = VtcString then
+        p.AsString := FValue
+    else
+        raise Exception.Create('unknown value type: "' + FType + '"');
 
-// procedure TConfigProperty.SetParam(p: TFDParam);
-// begin
-// if (FType = VtcInt) or (FType = VtcBaud) or (FType = VtcBool) then
-// p.AsInteger := strtoint(FValue)
-// else if FType = VtcFloat then
-// p.AsFloat := str_to_float(FValue)
-// else
-// p.AsString := FValue;
-//
-// end;
+end;
 
 function TConfigSection.HasError: boolean;
 var

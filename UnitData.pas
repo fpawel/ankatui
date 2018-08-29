@@ -798,16 +798,7 @@ begin
             ParamByName('property_name').Value := p.FPropertyName;
             ParamByName('section_name').Value := p.FSectionName;
         end;
-
-        if (p.FType = VtcString) or (p.FType = VtcComportName) then
-            ParamByName('value').Value := p.FValue
-        else if (p.FType = VtcInt) or (p.FType = VtcBaud) or (p.FType = VtcBool)
-        then
-            ParamByName('value').Value := strtoint(p.FValue)
-        else if p.FType = VtcFloat then
-            ParamByName('value').Value := Str_To_Float(p.FValue)
-        else
-            raise Exception.Create('unknown value type: "' + p.FType + '"');
+        p.SetParam(ParamByName('value'));
 
         ExecSQL;
         Close;
@@ -1074,8 +1065,7 @@ begin
             SQL.Text := 'INSERT INTO party_value (party_id, var, value)' +
               'VALUES ((SELECT * FROM current_party_id), :key, :val);';
             ParamByName('key').Value := p.FPropertyName;
-            ParamByName('val').Value := p.FValue;
-            // p.SetParam(ParamByName('val'));
+            p.SetParam(ParamByName('val'));
             Execute;
         end;
 

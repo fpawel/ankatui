@@ -485,6 +485,7 @@ begin
     ToolBar1.Width := 178;
     if started then
     begin
+        FormCurrentWork.Hide;
         FormCurrentWork.Setup;
         ToolBar1.Width := 58;
         if ToolBar5.Visible then
@@ -629,7 +630,7 @@ end;
 procedure TForm1.N4Click(Sender: TObject);
 begin
     FormCurrentWork.Setup;
-    FormCurrentWork.ShowModal;
+    FormCurrentWork.Show;
 end;
 
 procedure TForm1.PanelConsolePlaceholderBottomResize(Sender: TObject);

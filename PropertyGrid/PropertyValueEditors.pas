@@ -314,6 +314,11 @@ begin
 
             Checked := Data.FValue <> '0';
             Caption := '---';
+
+            Data.SetStr(Data.FValue);
+            if Assigned(FHandlePropertyValueChanged) then
+                FHandlePropertyValueChanged(Data^);
+
         end;
     end
     else
