@@ -187,22 +187,6 @@ begin
             begin
                 CellText := Data.FError;
             end;
-        3:
-            if Data.FMinSet then
-            begin
-
-                CellText := Floattostr(Data.FMin);
-            end;
-        4:
-            if Data.FMaxSet then
-            begin
-
-                CellText := Floattostr(Data.FMax);
-            end;
-        5:
-            begin
-                CellText := Data.FDefaultValue;
-            end;
     end;
 
 end;

@@ -70,41 +70,20 @@ object PropertiesForm: TPropertiesForm
         MinWidth = 100
         Options = [coAllowClick, coDraggable, coEnabled, coParentBidiMode, coParentColor, coResizable, coShowDropMark, coVisible, coAutoSpring]
         Position = 1
-        Width = 100
+        Width = 300
         WideText = #1047#1085#1072#1095#1077#1085#1080#1077
       end
       item
         Position = 2
         Width = 457
         WideText = #1055#1088#1080#1084#1077#1095#1072#1085#1080#1077
-      end
-      item
-        MaxWidth = 100
-        MinWidth = 100
-        Position = 3
-        Width = 100
-        WideText = #1052#1080#1085#1080#1091#1084
-      end
-      item
-        MaxWidth = 100
-        MinWidth = 100
-        Position = 4
-        Width = 100
-        WideText = #1052#1072#1082#1089#1080#1084#1091#1084
-      end
-      item
-        MaxWidth = 100
-        MinWidth = 100
-        Position = 5
-        Width = 100
-        WideText = #1055#1086' '#1091#1084#1086#1083#1095#1072#1085#1080#1102
       end>
   end
   object TreeImages: TImageList
     Left = 422
     Top = 224
     Bitmap = {
-      494C0101070013004C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C010107001300500010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

@@ -48,7 +48,6 @@ type
         CheckBox1: TCheckBox;
         Panel3: TPanel;
         ToolBar1: TToolBar;
-        ToolButton1: TToolButton;
         ImageList1: TImageList;
         PopupMenu1: TPopupMenu;
         N1: TMenuItem;
@@ -63,7 +62,6 @@ type
         TabSheet3: TTabSheet;
         TabSheet4: TTabSheet;
         N3: TMenuItem;
-        ToolButton2: TToolButton;
         TabSheet7: TTabSheet;
         TabSheet8: TTabSheet;
         N4: TMenuItem;
@@ -89,6 +87,11 @@ type
         Panel13: TPanel;
         ToolBar5: TToolBar;
         ToolButton7: TToolButton;
+    N6: TMenuItem;
+    N7: TMenuItem;
+    N8: TMenuItem;
+    Panel8: TPanel;
+    Panel14: TPanel;
         procedure FormCreate(Sender: TObject);
         procedure ComboBox1CloseUp(Sender: TObject);
         procedure StringGrid1SelectCell(Sender: TObject; ACol, ARow: integer;
@@ -98,22 +101,14 @@ type
         procedure CheckBox1Click(Sender: TObject);
         procedure StringGrid1MouseUp(Sender: TObject; Button: TMouseButton;
           Shift: TShiftState; X, Y: integer);
-        procedure ToolButton1Click(Sender: TObject);
         procedure ComboBox1DropDown(Sender: TObject);
         procedure StringGrid1TopLeftChanged(Sender: TObject);
         procedure ComboBox1Exit(Sender: TObject);
         procedure StringGrid1KeyPress(Sender: TObject; var Key: Char);
-        procedure TFrameRun1ToolButtonRunMouseUp(Sender: TObject;
-          Button: TMouseButton; Shift: TShiftState; X, Y: integer);
-        procedure N1Click(Sender: TObject);
         procedure ToolButtonStopClick(Sender: TObject);
         procedure StringGrid1DblClick(Sender: TObject);
         procedure FormClose(Sender: TObject; var Action: TCloseAction);
-        procedure N2Click(Sender: TObject);
-        procedure N3Click(Sender: TObject);
-        procedure ToolButton2Click(Sender: TObject);
         procedure ToolButton3Click(Sender: TObject);
-        procedure N4Click(Sender: TObject);
         procedure ToolButtonMoveConsoleUpClick(Sender: TObject);
         procedure ToolButtonMoveConsoleDownClick(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -121,6 +116,14 @@ type
         procedure PanelConsolePlaceholderRightResize(Sender: TObject);
         procedure ToolButtonConsoleHideClick(Sender: TObject);
         procedure ToolButton7Click(Sender: TObject);
+        procedure N4Click(Sender: TObject);
+    procedure N1Click(Sender: TObject);
+    procedure N3Click(Sender: TObject);
+    procedure N2Click(Sender: TObject);
+    procedure ToolButtonRunMouseUp(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+    procedure N7Click(Sender: TObject);
+    procedure N8Click(Sender: TObject);
     private
         { Private declarations }
 
@@ -182,7 +185,6 @@ begin
     FIni := TIniFile.Create(ExtractFileDir(paramstr(0)) + '\main.ini');
     FReadProduct := -1;
 
-    ToolBar2.Width := 58;
     ComboBox1DropDown(ComboBox1);
 
     ComboBox1.ItemHeight := 18;
@@ -325,6 +327,44 @@ begin
         Panel5.Caption := 'Нет хост-процеса';
         Panel5.Font.Color := clRed;
     end;
+end;
+
+procedure TForm1.N1Click(Sender: TObject);
+begin
+    HostAppData.FPipe.WriteMsgJSON('READ_VARS', nil);
+    SetupWorkStarted('Опрос', true);
+    Panel6.Controls[0].Parent := nil;
+    FFrameVar.StringGrid2.Parent := Form1.Panel6;
+end;
+
+procedure TForm1.N2Click(Sender: TObject);
+begin
+    HostAppData.FPipe.WriteMsgJSON('READ_COEFFICIENTS', nil);
+    SetupWorkStarted('Считывание коэффициентов', true);
+end;
+
+procedure TForm1.N3Click(Sender: TObject);
+begin
+    HostAppData.FPipe.WriteMsgJSON('WRITE_COEFFICIENTS', nil);
+    SetupWorkStarted('Запись коэффициентов', true);
+end;
+
+procedure TForm1.N4Click(Sender: TObject);
+begin
+    FormCurrentWork.Setup;
+    FormCurrentWork.Show;
+end;
+
+procedure TForm1.N7Click(Sender: TObject);
+begin
+    FormNewPartyDialog.ShowModal;
+    if FormNewPartyDialog.ModalResult = mrOk then
+        SetCurrentParty;
+end;
+
+procedure TForm1.N8Click(Sender: TObject);
+begin
+    FormManualControl.Show;
 end;
 
 function TForm1.HandleEndWork(content: string): string;
@@ -474,26 +514,23 @@ begin
     Panel13.Caption := '   ' + work;
 
     Panel5.Font.Color := clNavy;
-    ToolButton1.Visible := not started;
-    ToolButton2.Visible := not started;
-    ToolButtonRun.Visible := not started;
-    ToolButtonStop.Visible := started;
+
     FormManualControl.Button1.Enabled := not started;
     FormManualControl.Button6.Enabled := not started;
     FormManualControl.RadioGroup1.Enabled := not started;
     FormManualControl.GroupBox2.Enabled := not started;
-    ToolBar1.Width := 178;
+    ToolButtonRun.Visible := not started;
+    ToolButtonStop.Visible := started;
+
     if started then
     begin
         FormCurrentWork.Hide;
         FormCurrentWork.Setup;
-        ToolBar1.Width := 58;
         if ToolBar5.Visible then
             ToolButton7.Click;
     end
     else
     begin
-
         if (Panel6.ControlCount > 0) AND
           (Panel6.Controls[0] = FormCurrentWork.VirtualStringTree1) then
         begin
@@ -588,8 +625,9 @@ begin
     FProducts := DataModule1.CurrentPartyProducts;
 
     CurrentPartyID := DataModule1.CurrentPartyID;
-    TabSheet3.Caption := Format('Партия № %d %s',
-      [CurrentPartyID, DAtetimetostr(IncHour(DataModule1.CurrentPartyDateTime, 3))]);
+//    TabSheet3.Caption := Format('Партия № %d %s',
+//      [CurrentPartyID,
+//      DAtetimetostr(IncHour(DataModule1.CurrentPartyDateTime, 3))]);
 
     with StringGrid1 do
     begin
@@ -605,32 +643,6 @@ begin
     end;
     FFrameVar.SetCurrentParty(FProducts);
     FFrameCoef.SetCurrentParty(FProducts);
-end;
-
-procedure TForm1.N1Click(Sender: TObject);
-begin
-    HostAppData.FPipe.WriteMsgJSON('READ_VARS', nil);
-    SetupWorkStarted('Опрос', true);
-    Panel6.Controls[0].Parent := nil;
-    FFrameVar.StringGrid2.Parent := Form1.Panel6;
-end;
-
-procedure TForm1.N2Click(Sender: TObject);
-begin
-    HostAppData.FPipe.WriteMsgJSON('READ_COEFFICIENTS', nil);
-    SetupWorkStarted('Считывание коэффициентов', true);
-end;
-
-procedure TForm1.N3Click(Sender: TObject);
-begin
-    HostAppData.FPipe.WriteMsgJSON('WRITE_COEFFICIENTS', nil);
-    SetupWorkStarted('Запись коэффициентов', true);
-end;
-
-procedure TForm1.N4Click(Sender: TObject);
-begin
-    FormCurrentWork.Setup;
-    FormCurrentWork.Show;
 end;
 
 procedure TForm1.PanelConsolePlaceholderBottomResize(Sender: TObject);
@@ -916,31 +928,11 @@ begin
     ComboBox1.Visible := false;
 end;
 
-procedure TForm1.TFrameRun1ToolButtonRunMouseUp(Sender: TObject;
-  Button: TMouseButton; Shift: TShiftState; X, Y: integer);
-begin
-    with ToolButtonRun do
-        with ClientToScreen(Point(0, Height)) do
-            PopupMenu1.Popup(X, Y);
-end;
-
-procedure TForm1.ToolButton1Click(Sender: TObject);
-begin
-    FormNewPartyDialog.ShowModal;
-    if FormNewPartyDialog.ModalResult = mrOk then
-        SetCurrentParty;
-
-end;
-
-procedure TForm1.ToolButton2Click(Sender: TObject);
-begin
-    FormManualControl.Show;
-end;
-
 procedure TForm1.ToolButton3Click(Sender: TObject);
 begin
     FormSettings.Position := poScreenCenter;
     FormSettings.Show;
+    ShowWindow(FormSettings.Handle, SW_RESTORE);
     // PropertiesForm.Show;
 end;
 
@@ -1013,6 +1005,14 @@ begin
     RichEdit1.SetFocus;
     SendMessage(RichEdit1.Handle, EM_SCROLL, SB_LINEDOWN, 0);
 
+end;
+
+procedure TForm1.ToolButtonRunMouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+    with ToolButtonRun do
+        with ClientToScreen(Point(0, Height)) do
+            PopupMenu1.Popup(X, Y);
 end;
 
 procedure TForm1.ToolButtonStopClick(Sender: TObject);
