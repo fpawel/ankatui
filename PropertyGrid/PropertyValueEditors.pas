@@ -12,7 +12,7 @@ uses
 
 type
 
-    THandlePropertyValueChanged = reference to procedure(p:TConfigProperty);
+    THandlePropertyValueChanged = reference to procedure(p:RConfigProperty);
 
     // ----------------------------------------------------------------------------------------------------------------------
     // Our own edit link to implement several different node editors.

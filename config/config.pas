@@ -5,9 +5,9 @@ interface
 uses FireDAC.Stan.Param;
 
 type
-    PConfigProperty = ^TConfigProperty;
+    PConfigProperty = ^RConfigProperty;
 
-    TConfigProperty = class
+    RConfigProperty = record
     public
         FSectionName: string;
         FHint: string;
@@ -27,16 +27,16 @@ type
         procedure SetParam(p: TFDParam);
     end;
 
-    TConfigSection = class
+    RConfigSection = record
     public
         FSectionName: string;
         FHint: string;
         FSortOrder: integer;
-        FProperties: TArray<TConfigProperty>;
+        FProperties: TArray<RConfigProperty>;
         function HasError: boolean;
     end;
 
-    TConfig = TArray<TConfigSection>;
+    TConfig = TArray<RConfigSection>;
 
 const
     VtcInt = 'integer';
@@ -46,11 +46,26 @@ const
     VtcBaud = 'baud';
     VtcBool = 'bool';
 
+    function NewRConfigProperty: RConfigProperty;
+    function NewRConfigSection: RConfigSection;
+
 implementation
+
+
 
 uses stringutils, sysutils;
 
-procedure TConfigProperty.SetParam(p: TFDParam);
+function NewRConfigSection: RConfigSection;
+begin
+
+end;
+
+function NewRConfigProperty: RConfigProperty;
+begin
+
+end;
+
+procedure RConfigProperty.SetParam(p: TFDParam);
 begin
     if (FType = VtcInt) or (FType = VtcBaud) or (FType = VtcBool) then
         p.AsInteger := strtoint(FValue)
@@ -63,7 +78,7 @@ begin
 
 end;
 
-function TConfigSection.HasError: boolean;
+function RConfigSection.HasError: boolean;
 var
     i: integer;
 begin
@@ -73,7 +88,7 @@ begin
     exit(false);
 end;
 
-procedure TConfigProperty.SetStr(str: string);
+procedure RConfigProperty.SetStr(str: string);
 var
     v: double;
     i, vInt: integer;

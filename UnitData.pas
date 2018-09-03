@@ -89,7 +89,7 @@ type
           var AException: Exception);
     private
         { Private declarations }
-        procedure read_config_section(sect: TConfigSection);
+        procedure read_config_section(var sect: RConfigSection);
     public
         { Public declarations }
         function DeviceVars: TArray<TDeviceVar>;
@@ -126,20 +126,16 @@ type
         function GetSeriesVarProducts(seriesID: int64; AVar: integer)
           : TArray<integer>;
 
-        procedure UpdateConfig(p: TConfigProperty);
+        procedure UpdateConfig(p: RConfigProperty);
 
         function GetConfig: TConfig;
-        function PartyValuesConfigSection: TConfigSection;
-
-        function GetDefaultPartyVarValue(property_name: string): variant;
-        function GetCurrentPartyVarValue(property_name: string): variant;
 
         function GetConfigPropertyValue(section_name, property_name
           : string): variant;
         function GetConfigPropertyDefaultValue(section_name,
           property_name: string): variant;
 
-        procedure NewParty(AParty: TConfigSection; serials: TArray<integer>);
+        procedure NewParty(AParty: RConfigSection; serials: TArray<integer>);
         function CurrentPartyDateTime: TDAteTime;
     end;
 
@@ -412,7 +408,7 @@ begin
     with TFDQuery.Create(nil) do
     begin
         Connection := FDConnectionProductsDB;
-        SQL.Text := 'select * from current_party_id';
+        SQL.Text := 'select party_id from current_party';
         Open;
         result := FieldValues['party_id'];
         Free;
@@ -774,7 +770,7 @@ begin
     xs.Free;
 end;
 
-procedure TDataModule1.UpdateConfig(p: TConfigProperty);
+procedure TDataModule1.UpdateConfig(p: RConfigProperty);
 begin
     with TFDQuery.Create(nil) do
     begin
@@ -783,11 +779,9 @@ begin
         if p.FSectionName = 'party' then
         begin
             Connection := DataModule1.FDConnectionProductsDB;
-            SQL.Text :=
-              'INSERT OR REPLACE INTO party_value (var, party_id, value) ' +
-              'VALUES (:var, (SELECT * FROM current_party_id), :value);';
-            ParamByName('var').Value := p.FPropertyName;
-
+            SQL.Text := 'UPDATE party SET :property_name = :value ' +
+              'WHERE party_id IN (SELECT party_id FROM current_party);';
+            ParamByName('property_name').Value := p.FPropertyName;
         end
         else
         begin
@@ -811,15 +805,28 @@ function TDataModule1.GetConfigPropertyValue(section_name,
 begin
     with TFDQuery.Create(nil) do
     begin
-        Connection := FDConnectionConfig;
-        SQL.Text :=
-          'SELECT value FROM config WHERE section_name = :section_name AND property_name = :property_name;';
-        ParamByName('section_name').Value := section_name;
-        ParamByName('property_name').Value := property_name;
-        Open;
-        First;
-        if not Eof then
-            result := FieldValues['value'];
+        if section_name = 'party' then
+        begin
+            Connection := FDConnectionProductsDB;
+            SQL.Text := 'SELECT ' + property_name + ' FROM current_party;';
+            Open;
+            First;
+            if not Eof then
+                result := FieldValues[property_name];
+        end
+        else
+        begin
+            Connection := FDConnectionConfig;
+            SQL.Text :=
+              'SELECT value FROM config WHERE section_name = :section_name AND property_name = :property_name;';
+            ParamByName('section_name').Value := section_name;
+            ParamByName('property_name').Value := property_name;
+            Open;
+            First;
+            if not Eof then
+                result := FieldValues['value'];
+        end;
+
         Close;
         Free;
     end;
@@ -844,115 +851,12 @@ begin
     end;
 end;
 
-function TDataModule1.GetDefaultPartyVarValue(property_name: string): variant;
-begin
-    with TFDQuery.Create(nil) do
-    begin
-        Connection := FDConnectionProductsDB;
-        SQL.Text := 'SELECT def_val FROM party_var WHERE var = :var;';
-        ParamByName('var').Value := property_name;
-        Open;
-        First;
-        if not Eof then
-            result := FieldValues['def_val'];
-        Close;
-        Free;
-    end;
-end;
-
-function TDataModule1.GetCurrentPartyVarValue(property_name: string): variant;
-begin
-    with TFDQuery.Create(nil) do
-    begin
-        Connection := FDConnectionProductsDB;
-        SQL.Text :=
-          'SELECT value FROM current_party_var_value WHERE var = :var;';
-        ParamByName('var').Value := property_name;
-        Open;
-        First;
-        if not Eof then
-            result := FieldValues['value'];
-        Close;
-        Free;
-    end;
-end;
-
-function TDataModule1.PartyValuesConfigSection: TConfigSection;
+procedure TDataModule1.read_config_section(var sect: RConfigSection);
 var
-    p: TConfigProperty;
-    vars: TList<TConfigProperty>;
-    value_list: TList<string>;
-    s, SQL: string;
-begin
-    result := TConfigSection.Create;
-    vars := TList<TConfigProperty>.Create;
-    result.FSortOrder := -1;
-    result.FSectionName := 'party';
-    result.FHint := 'Параметры партии';
-    with TFDQuery.Create(nil) do
-    begin
-        Connection := FDConnectionProductsDB;
-        SQL.Text := 'SELECT * FROM party_var;';
-        Open;
-        First;
-        while not Eof do
-        begin
-            vars.Add(TConfigProperty.Create);
-            p := vars.Last;
-            p.FPropertyName := FieldValues['var'];
-            p.FHint := FieldValues['name'];
-            p.FSectionName := result.FSectionName;
-            p.FSortOrder := FieldValues['sort_order'];
-            p.FMinSet := FieldValues['min'] <> System.Variants.Null;
-            p.FMaxSet := FieldValues['max'] <> System.Variants.Null;
-            if p.FMinSet then
-                p.FMin := FieldValues['min'];
-            if p.FMaxSet then
-                p.FMax := FieldValues['max'];
-            p.FType := FieldValues['type'];
-            p.FDefaultValue := self.GetDefaultPartyVarValue(p.FPropertyName);
-            p.FValue := self.GetCurrentPartyVarValue(p.FPropertyName);
-
-            Next;
-        end;
-        Close;
-        Free;
-        for p in vars do
-            with TFDQuery.Create(nil) do
-            begin
-                Connection := FDConnectionConfig;
-                SQL.Text :=
-                  'select value from value_list where property_name = :property_name;';
-                s := p.FPropertyName;
-                ParamByName('property_name').Value := s;
-                Open;
-                First;
-                value_list := TList<string>.Create;
-                while not Eof do
-                begin
-                    value_list.Add(FieldValues['value']);
-                    Next;
-                end;
-                Close;
-                Free;
-                p.FList := value_list.ToArray;
-                value_list.Free;
-
-                p.SetStr(p.FValue);
-            end;
-
-    end;
-    result.FProperties := vars.ToArray;
-    vars.Free;
-end;
-
-procedure TDataModule1.read_config_section(sect: TConfigSection);
-var
-    vars: TList<TConfigProperty>;
     value_list: TList<string>;
     s: string;
+    config_property: RConfigProperty;
 begin
-    vars := TList<TConfigProperty>.Create;
     with TFDQuery.Create(nil) do
     begin
         Connection := FDConnectionConfig;
@@ -964,8 +868,8 @@ begin
         First;
         while not Eof do
         begin
-            vars.Add(TConfigProperty.Create);
-            with vars.Last do
+            setlength(sect.FProperties, length(sect.FProperties) + 1);
+            with sect.FProperties[length(sect.FProperties) - 1] do
             begin
                 FSectionName := sect.FSectionName;
                 FType := FieldValues['type'];
@@ -1010,18 +914,13 @@ begin
         end;
         Close;
         Free;
-        sect.FProperties := vars.ToArray;
+
     end;
-    vars.Free;
 end;
 
 function TDataModule1.GetConfig: TConfig;
-var
-    sections: TList<TConfigSection>;
-    sect: TConfigSection;
 begin
-    sections := TList<TConfigSection>.Create;
-    sections.Add(PartyValuesConfigSection);
+
     with TFDQuery.Create(nil) do
     begin
         Connection := FDConnectionConfig;
@@ -1030,28 +929,29 @@ begin
         First;
         while not Eof do
         begin
-            sect := TConfigSection.Create;
-            sect.FSectionName := FieldByName('section_name').Value;
-            sect.FSortOrder := FieldByName('sort_order').Value;
-            sect.FHint := FieldByName('hint').Value;
-            read_config_section(sect);
+            setlength(result, length(result) + 1);
+            with result[length(result) - 1] do
+            begin
+                FSectionName := FieldByName('section_name').Value;
+                FSortOrder := FieldByName('sort_order').Value;
+                FHint := FieldByName('hint').Value;
+            end;
 
-            sections.Add(sect);
+            read_config_section(result[length(result) - 1]);
+
             Next;
         end;
         Close;
         Free;
     end;
-
-    result := sections.ToArray;
-    sections.Free;
 end;
 
-procedure TDataModule1.NewParty(AParty: TConfigSection;
+procedure TDataModule1.NewParty(AParty: RConfigSection;
   serials: TArray<integer>);
 var
-    p: TConfigProperty;
+    p: RConfigProperty;
     Serial: integer;
+    s: string;
 begin
 
     with TFDQuery.Create(nil) do
@@ -1062,17 +962,17 @@ begin
 
         for p in AParty.FProperties do
         begin
-            SQL.Text := 'INSERT INTO party_value (party_id, var, value)' +
-              'VALUES ((SELECT * FROM current_party_id), :key, :val);';
-            ParamByName('key').Value := p.FPropertyName;
-            p.SetParam(ParamByName('val'));
+            s := 'UPDATE party SET ' + p.FPropertyName + ' = :value ' +
+              'WHERE party_id IN (SELECT party_id FROM current_party);';
+            SQL.Text := s;
+            p.SetParam(ParamByName('value'));
             Execute;
         end;
 
         for Serial in serials do
         begin
             SQL.Text := 'INSERT INTO product (party_id, product_serial) VALUES '
-              + '((SELECT * FROM current_party_id), :serial)';
+              + '((SELECT party_id FROM current_party), :serial)';
             ParamByName('serial').Value := Serial;
             Execute;
         end;

@@ -11,7 +11,7 @@ uses
     System.ImageList, UnitData, Vcl.ImgList, Vcl.Menus, VirtualTrees,
     msglevel, UnitFormLog, UnitFormPopup, UnitFrameCoef,
     UnitFrameVar, UnitFormParties,
-    UnitFormManualControl, inifiles, System.SyncObjs, DebugEngine.Core;
+    UnitFormManualControl, inifiles, System.SyncObjs;
 
 type
 
@@ -560,19 +560,7 @@ var
 begin
     OnActivate := nil;
 
-    if not DataModule1.PartyExists then
-    begin
-        WindowState := wsMaximized;
-        FormNewPartyDialog.WindowState := wsMaximized;
-        FormNewPartyDialog.ShowModal;
-        if not DataModule1.PartyExists then
-        begin
-            Close;
-            Exit;
-        end;
-    end
-    else
-        SetCurrentParty;
+    SetCurrentParty;
     Init2;
 
     FileName := TPath.Combine(ExtractFilePath(paramstr(0)), 'window.position');

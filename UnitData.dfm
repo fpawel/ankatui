@@ -115,7 +115,7 @@ object DataModule1: TDataModule1
       
         'INSERT OR REPLACE INTO product_coefficient_value (party_id, prod' +
         'uct_serial, coefficient_id, value)'
-      'VALUES ((SELECT * FROM current_party_id),'
+      'VALUES ((SELECT party_id FROM current_party),'
       
         '        (SELECT product_serial FROM current_party_products_confi' +
         'g WHERE ordinal = :ordinal),'
@@ -140,7 +140,7 @@ object DataModule1: TDataModule1
     Connection = FDConnectionProductsDB
     SQL.Strings = (
       'DELETE FROM product_coefficient_value WHERE'
-      '    coefficient_id = :coef AND party_id IN current_party_id AND'
+      '    coefficient_id = :coef AND party_id IN current_party AND'
       '    product_serial IN ('
       
         '        SELECT product_serial FROM current_party_products_config' +

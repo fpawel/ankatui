@@ -46,7 +46,7 @@ begin
         Align := alClient;
         BorderStyle := bsNone;
         Visible := true;
-        SetPropertyValueChanged(procedure(p:TConfigProperty)
+        SetPropertyValueChanged(procedure(p:RConfigProperty)
         begin
             if p.FError = '' then
                 DataModule1.UpdateConfig(p);
