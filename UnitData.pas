@@ -89,7 +89,7 @@ type
           var AException: Exception);
     private
         { Private declarations }
-        procedure read_config_section(var sect: RConfigSection);
+        procedure read_config_section(sect: TConfigSection);
     public
         { Public declarations }
         function DeviceVars: TArray<TDeviceVar>;
@@ -126,7 +126,7 @@ type
         function GetSeriesVarProducts(seriesID: int64; AVar: integer)
           : TArray<integer>;
 
-        procedure UpdateConfig(p: RConfigProperty);
+        procedure UpdateConfig(p: TConfigProperty);
 
         function GetConfig: TConfig;
 
@@ -135,7 +135,7 @@ type
         function GetConfigPropertyDefaultValue(section_name,
           property_name: string): variant;
 
-        procedure NewParty(AParty: RConfigSection; serials: TArray<integer>);
+        procedure NewParty(AParty: TConfigSection; serials: TArray<integer>);
         function CurrentPartyDateTime: TDAteTime;
     end;
 
@@ -770,7 +770,7 @@ begin
     xs.Free;
 end;
 
-procedure TDataModule1.UpdateConfig(p: RConfigProperty);
+procedure TDataModule1.UpdateConfig(p: TConfigProperty);
 begin
     with TFDQuery.Create(nil) do
     begin
@@ -779,9 +779,8 @@ begin
         if p.FSectionName = 'party' then
         begin
             Connection := DataModule1.FDConnectionProductsDB;
-            SQL.Text := 'UPDATE party SET :property_name = :value ' +
+            SQL.Text := 'UPDATE party SET '+p.FPropertyName+' = :value ' +
               'WHERE party_id IN (SELECT party_id FROM current_party);';
-            ParamByName('property_name').Value := p.FPropertyName;
         end
         else
         begin
@@ -851,11 +850,11 @@ begin
     end;
 end;
 
-procedure TDataModule1.read_config_section(var sect: RConfigSection);
+procedure TDataModule1.read_config_section(sect: TConfigSection);
 var
     value_list: TList<string>;
     s: string;
-    config_property: RConfigProperty;
+    config_property: TConfigProperty;
 begin
     with TFDQuery.Create(nil) do
     begin
@@ -869,6 +868,7 @@ begin
         while not Eof do
         begin
             setlength(sect.FProperties, length(sect.FProperties) + 1);
+            sect.FProperties[length(sect.FProperties) - 1] := TConfigProperty.Create;
             with sect.FProperties[length(sect.FProperties) - 1] do
             begin
                 FSectionName := sect.FSectionName;
@@ -930,12 +930,14 @@ begin
         while not Eof do
         begin
             setlength(result, length(result) + 1);
+            result[length(result) - 1] := TConfigSection.Create;
             with result[length(result) - 1] do
             begin
                 FSectionName := FieldByName('section_name').Value;
                 FSortOrder := FieldByName('sort_order').Value;
                 FHint := FieldByName('hint').Value;
             end;
+
 
             read_config_section(result[length(result) - 1]);
 
@@ -946,10 +948,10 @@ begin
     end;
 end;
 
-procedure TDataModule1.NewParty(AParty: RConfigSection;
+procedure TDataModule1.NewParty(AParty: TConfigSection;
   serials: TArray<integer>);
 var
-    p: RConfigProperty;
+    p: TConfigProperty;
     Serial: integer;
     s: string;
 begin

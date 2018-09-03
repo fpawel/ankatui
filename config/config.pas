@@ -5,9 +5,9 @@ interface
 uses FireDAC.Stan.Param;
 
 type
-    PConfigProperty = ^RConfigProperty;
+    PConfigProperty = ^TConfigProperty;
 
-    RConfigProperty = record
+    TConfigProperty = class
     public
         FSectionName: string;
         FHint: string;
@@ -24,19 +24,19 @@ type
         FList: TArray<string>;
 
         procedure SetStr(str: string);
-        procedure SetParam(p: TFDParam);
+         procedure SetParam(p: TFDParam);
     end;
 
-    RConfigSection = record
+    TConfigSection = class
     public
         FSectionName: string;
         FHint: string;
         FSortOrder: integer;
-        FProperties: TArray<RConfigProperty>;
+        FProperties: TArray<TConfigProperty>;
         function HasError: boolean;
     end;
 
-    TConfig = TArray<RConfigSection>;
+    TConfig = TArray<TConfigSection>;
 
 const
     VtcInt = 'integer';
@@ -46,39 +46,23 @@ const
     VtcBaud = 'baud';
     VtcBool = 'bool';
 
-    function NewRConfigProperty: RConfigProperty;
-    function NewRConfigSection: RConfigSection;
-
 implementation
-
-
 
 uses stringutils, sysutils;
 
-function NewRConfigSection: RConfigSection;
-begin
 
-end;
-
-function NewRConfigProperty: RConfigProperty;
-begin
-
-end;
-
-procedure RConfigProperty.SetParam(p: TFDParam);
+procedure TConfigProperty.SetParam(p: TFDParam);
 begin
     if (FType = VtcInt) or (FType = VtcBaud) or (FType = VtcBool) then
         p.AsInteger := strtoint(FValue)
     else if FType = VtcFloat then
         p.AsFloat := str_to_float(FValue)
-    else if FType = VtcString then
-        p.AsString := FValue
     else
-        raise Exception.Create('unknown value type: "' + FType + '"');
+        p.AsString := FValue;
 
 end;
 
-function RConfigSection.HasError: boolean;
+function TConfigSection.HasError: boolean;
 var
     i: integer;
 begin
@@ -88,7 +72,7 @@ begin
     exit(false);
 end;
 
-procedure RConfigProperty.SetStr(str: string);
+procedure TConfigProperty.SetStr(str: string);
 var
     v: double;
     i, vInt: integer;

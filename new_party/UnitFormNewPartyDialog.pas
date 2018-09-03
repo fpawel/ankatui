@@ -21,9 +21,9 @@ type
         procedure ComboBox1Change(Sender: TObject);
     private
         { Private declarations }
-        FParty, FSerials: RConfigSection;
+        FParty, FSerials: TConfigSection;
         FPropertiesForm: TPropertiesForm;
-        procedure Validate(p: RConfigProperty);
+        procedure Validate(p: TConfigProperty);
 
     public
 
@@ -51,6 +51,7 @@ begin
         SetLength(FProperties, n2);
         for i := n1 to n2 - 1 do
         begin
+            FProperties[i] := TConfigProperty.Create;
             with FProperties[i] do
             begin
                 FSortOrder := i;
@@ -78,6 +79,8 @@ begin
 
     end;
 
+    FSerials := TConfigSection.Create;
+
     with FSerials do
     begin
         FSortOrder := 1;
@@ -86,6 +89,7 @@ begin
         SetLength(FProperties, 5);
         for i := 0 to 4 do
         begin
+            FProperties[i] := TConfigProperty.Create;
             with FProperties[i] do
             begin
                 FSortOrder := i;
@@ -108,10 +112,10 @@ begin
         SetConfig([FParty, FSerials]);
         SetPropertyValueChanged(Validate);
     end;
-    Validate(NewRConfigProperty);
+    Validate(nil);
 end;
 
-procedure TFormNewPartyDialog.Validate(p: RConfigProperty);
+procedure TFormNewPartyDialog.Validate(p: TConfigProperty);
 var
     i, J: integer;
 begin
@@ -150,7 +154,7 @@ end;
 procedure TFormNewPartyDialog.Button1Click(Sender: TObject);
 var
     l: TList<integer>;
-    p: RConfigProperty;
+    p: TConfigProperty;
     serials: TArray<integer>;
 begin
     l := TList<integer>.Create;

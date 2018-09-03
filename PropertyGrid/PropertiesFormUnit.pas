@@ -90,7 +90,7 @@ begin
 
     // Always tell the tree how much data space per node it must allocated for us. We can do this here, in the
     // object inspector or in the OnGetNodeDataSize event.
-    VST3.NodeDataSize := SizeOf(RConfigProperty);
+    VST3.NodeDataSize := SizeOf(TConfigProperty);
     // The VCL (D7 and lower) still uses 16 color image lists. We create a high color version explicitely because it
     // looks so much nicer.
     ConvertToHighColor(TreeImages);
@@ -139,6 +139,7 @@ begin
     begin
         InitialStates := InitialStates + [ivsHasChildren, ivsExpanded];
         Data := Sender.GetNodeData(Node);
+        Data^ := TConfigProperty.Create;
         Data.FValue := FConfig[Node.Index].FSectionName;
     end
     else
