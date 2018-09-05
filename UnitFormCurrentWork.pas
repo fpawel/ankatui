@@ -39,6 +39,8 @@ type
         function RootNodeData: TNodeData;
 
         procedure Reset;
+
+        procedure UpdateWorksCheckedConfigDB;
     public
         { Public declarations }
         procedure SetRunError;
@@ -64,69 +66,84 @@ implementation
 
 uses rest.json, stringutils, Unit1, unitdata, UnitHostAppData;
 
-type
-    TOperationCheckState = class
-    public
-        FOrdinal: integer;
-        FCheckState: string;
-    end;
 
-function checkStateToStr(x: TCheckState): string;
+//function checkStateToStr(x: TCheckState): string;
+//begin
+//    case x of
+//        csUncheckedNormal:
+//            exit('csUncheckedNormal');
+//        csUncheckedPressed:
+//            exit('csUncheckedPressed');
+//        csCheckedNormal:
+//            exit('csCheckedNormal');
+//        csCheckedPressed:
+//            exit('csCheckedPressed');
+//        csMixedNormal:
+//            exit('csMixedNormal');
+//        csMixedPressed:
+//            exit('csMixedPressed');
+//        csUncheckedDisabled:
+//            exit('csUncheckedDisabled');
+//        csCheckedDisabled:
+//            exit('csCheckedDisabled');
+//        csMixedDisabled:
+//            exit('csMixedDisabled');
+//    else
+//        exit('csCheckedNormal')
+//    end;
+//end;
+//
+//function parseCheckState(x: string): TCheckState;
+//begin
+//    if x = 'csUncheckedNormal' then
+//        exit(csUncheckedNormal);
+//
+//    if x = 'csUncheckedPressed' then
+//        exit(csUncheckedPressed);
+//
+//    if x = 'csCheckedNormal' then
+//        exit(csCheckedNormal);
+//
+//    if x = 'csCheckedPressed' then
+//        exit(csCheckedPressed);
+//
+//    if x = 'csMixedNormal' then
+//        exit(csMixedNormal);
+//
+//    if x = 'csMixedPressed' then
+//        exit(csMixedPressed);
+//
+//    if x = 'csUncheckedDisabled' then
+//        exit(csUncheckedDisabled);
+//
+//    if x = 'csCheckedDisabled' then
+//        exit(csCheckedDisabled);
+//
+//    if x = 'csMixedDisabled' then
+//        exit(csMixedDisabled);
+//
+//    exit(csCheckedNormal);
+//end;
+
+procedure TFormCurrentWork.UpdateWorksCheckedConfigDB;
+var
+    Node: PVirtualNode;
+    d: PTreeData;
+    xs:array of integer;
+    n:integer;
 begin
-    case x of
-        csUncheckedNormal:
-            exit('csUncheckedNormal');
-        csUncheckedPressed:
-            exit('csUncheckedPressed');
-        csCheckedNormal:
-            exit('csCheckedNormal');
-        csCheckedPressed:
-            exit('csCheckedPressed');
-        csMixedNormal:
-            exit('csMixedNormal');
-        csMixedPressed:
-            exit('csMixedPressed');
-        csUncheckedDisabled:
-            exit('csUncheckedDisabled');
-        csCheckedDisabled:
-            exit('csCheckedDisabled');
-        csMixedDisabled:
-            exit('csMixedDisabled');
-    else
-        exit('csCheckedNormal')
+    Node := VirtualStringTree1.GetFirst;
+    while Assigned(Node) do
+    begin
+        d := VirtualStringTree1.GetNodeData(Node);
+        n :=  d.X.FInfo.FOrdinal;
+        if length(xs) <= n then
+            SetLength(xs, n+1);
+        xs[n] := ord(Node.CheckState);
+        Node := VirtualStringTree1.GetNext(Node);
     end;
-end;
+    DataModule1.SetWorksChecked(xs);
 
-function parseCheckState(x: string): TCheckState;
-begin
-    if x = 'csUncheckedNormal' then
-        exit(csUncheckedNormal);
-
-    if x = 'csUncheckedPressed' then
-        exit(csUncheckedPressed);
-
-    if x = 'csCheckedNormal' then
-        exit(csCheckedNormal);
-
-    if x = 'csCheckedPressed' then
-        exit(csCheckedPressed);
-
-    if x = 'csMixedNormal' then
-        exit(csMixedNormal);
-
-    if x = 'csMixedPressed' then
-        exit(csMixedPressed);
-
-    if x = 'csUncheckedDisabled' then
-        exit(csUncheckedDisabled);
-
-    if x = 'csCheckedDisabled' then
-        exit(csCheckedDisabled);
-
-    if x = 'csMixedDisabled' then
-        exit(csMixedDisabled);
-
-    exit(csCheckedNormal);
 end;
 
 procedure TFormCurrentWork.Button1Click(Sender: TObject);
@@ -158,6 +175,7 @@ end;
 procedure TFormCurrentWork.FormDeactivate(Sender: TObject);
 begin
     Hide;
+    UpdateWorksCheckedConfigDB;
 end;
 
 procedure TFormCurrentWork.Setup;
@@ -277,17 +295,17 @@ end;
 
 procedure TFormCurrentWork.VirtualStringTree1Checked(Sender: TBaseVirtualTree;
 Node: PVirtualNode);
-var
-    p: PTreeData;
-    d: TNodeData;
-    x: TOperationCheckState;
+//var
+//    p: PTreeData;
+//    d: TNodeData;
+//    x: TOperationCheckState;
 begin
-    p := Sender.GetNodeData(Node);
-    d := p.x;
-    x := TOperationCheckState.Create;
-    x.FOrdinal := d.FInfo.FOrdinal;
-    x.FCheckState := checkStateToStr(VirtualStringTree1.CheckState[Node]);
-    HostAppData.FPipe.WriteMsgJSON('CURRENT_WORK_CHECKED_CHANGED', x);
+//    p := Sender.GetNodeData(Node);
+//    d := p.x;
+//    x := TOperationCheckState.Create;
+//    x.FOrdinal := d.FInfo.FOrdinal;
+//    x.FCheckState := checkStateToStr(VirtualStringTree1.CheckState[Node]);
+    //HostAppData.FPipe.WriteMsgJSON('CURRENT_WORK_CHECKED_CHANGED', x);
 end;
 
 procedure TFormCurrentWork.VirtualStringTree1GetImageIndex
@@ -409,7 +427,7 @@ begin
         d.x.EnumDescendants;
 
     VirtualStringTree1.CheckType[Node] := ctTriStateCheckBox;
-    Node.CheckState := parseCheckState
+    Node.CheckState := TCheckState
       (DataModule1.GetCurrentWorkCheckState(op_info.FOrdinal));
 
     VirtualStringTree1.Expanded[Node] := (Node = VirtualStringTree1.RootNode) or

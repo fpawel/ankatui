@@ -104,7 +104,7 @@ type
         procedure UpdateProductchecked(Ordinal: integer; checked: boolean);
         procedure UpdateCurrentWorkCheckState(Ordinal: integer;
           checkState: string);
-        function GetCurrentWorkCheckState(Ordinal: integer): string;
+        function GetCurrentWorkCheckState(Ordinal: integer): integer;
         procedure UpdateDeviceVarChecked(devicevar: integer; checked: boolean);
 
         function InvertProductsChecked: boolean;
@@ -136,7 +136,12 @@ type
           property_name: string): variant;
 
         procedure NewParty(AParty: TConfigSection; serials: TArray<integer>);
+
         function CurrentPartyDateTime: TDAteTime;
+
+        procedure SetWorksChecked(xs:array of integer);
+
+
     end;
 
 var
@@ -283,7 +288,7 @@ begin
 
 end;
 
-function TDataModule1.GetCurrentWorkCheckState(Ordinal: integer): string;
+function TDataModule1.GetCurrentWorkCheckState(Ordinal: integer): integer;
 begin
     with TFDQuery.Create(nil) do
     begin
@@ -294,7 +299,9 @@ begin
         Open;
         First;
         if not Eof then
-            result := FieldValues['checked'];
+            result := FieldValues['checked']
+        else
+            result := 0;
         Free;
     end;
 
@@ -981,7 +988,25 @@ begin
         Close;
         Free;
     end;
+end;
 
+procedure TDataModule1.SetWorksChecked(xs:array of integer);
+var i:integer;
+begin
+    with TFDQuery.Create(nil) do
+    begin
+        Connection := DataModule1.FDConnectionConfig;
+        SQL.Text := 'INSERT OR REPLACE INTO work_checked VALUES ';
+        for I := 0 to length(xs)-1 do
+        begin
+            if i > 0 then
+                SQL.Text := SQL.Text + ', ';
+            SQL.Text := SQL.Text + format('(%d, %d)', [i, xs[i]]);
+        end;
+        Execute;
+        Close;
+        Free;
+    end;
 end;
 
 end.
