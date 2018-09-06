@@ -139,8 +139,7 @@ type
 
         function CurrentPartyDateTime: TDAteTime;
 
-        procedure SetWorksChecked(xs:array of integer);
-
+        procedure SetWorksChecked(xs: array of integer);
 
     end;
 
@@ -517,28 +516,45 @@ begin
 end;
 
 function TDataModule1.PartyValues(partyID: int64): TKeysValues;
-var
-    xs: TList<TKeyValue>;
 begin
-    xs := TList<TKeyValue>.Create;
+
     with TFDQuery.Create(nil) do
     begin
-        Connection := FDConnectionProductsDB;
+        Connection := FDConnectionConfig;
         SQL.Text :=
-          'SELECT name, value FROM party_value2 WHERE party_id = :party_id;';
-        ParamByName('party_id').Value := partyID;
+          'SELECT property_name FROM config WHERE section_name = :party;';
+        ParamByName('party').Value := 'party';
         Open;
         First;
         while not Eof do
         begin
-            xs.Add(TKeyValue.Create(FieldValues['name'], FieldValues['value']));
+            SetLength(result, Length(result) + 1);
+            with result[Length(result) - 1] do
+            begin
+                Key := FieldValues['property_name'];
+
+                with TFDQuery.Create(nil) do
+                begin
+                    Connection := FDConnectionProductsDB;
+                    SQL.Text :=
+                      'SELECT '+ Key + ' FROM party WHERE party_id = :party_id;';
+                    ParamByName('party_id').Value := partyID;
+                    Open;
+                    First;
+                    if Eof then
+                        raise Exception.Create('Not found: ' + Key);
+                    Value := FieldValues[Key];
+                    Close;
+                    Free;
+                end;
+
+            end;
             Next;
         end;
+
         Close;
         Free;
     end;
-    result := xs.ToArray;
-    xs.Free;
 end;
 
 function TDataModule1.SeriesYears: TArray<integer>;
@@ -786,7 +802,7 @@ begin
         if p.FSectionName = 'party' then
         begin
             Connection := DataModule1.FDConnectionProductsDB;
-            SQL.Text := 'UPDATE party SET '+p.FPropertyName+' = :value ' +
+            SQL.Text := 'UPDATE party SET ' + p.FPropertyName + ' = :value ' +
               'WHERE party_id IN (SELECT party_id FROM current_party);';
         end
         else
@@ -874,9 +890,10 @@ begin
         First;
         while not Eof do
         begin
-            setlength(sect.FProperties, length(sect.FProperties) + 1);
-            sect.FProperties[length(sect.FProperties) - 1] := TConfigProperty.Create;
-            with sect.FProperties[length(sect.FProperties) - 1] do
+            SetLength(sect.FProperties, Length(sect.FProperties) + 1);
+            sect.FProperties[Length(sect.FProperties) - 1] :=
+              TConfigProperty.Create;
+            with sect.FProperties[Length(sect.FProperties) - 1] do
             begin
                 FSectionName := sect.FSectionName;
                 FType := FieldValues['type'];
@@ -936,17 +953,16 @@ begin
         First;
         while not Eof do
         begin
-            setlength(result, length(result) + 1);
-            result[length(result) - 1] := TConfigSection.Create;
-            with result[length(result) - 1] do
+            SetLength(result, Length(result) + 1);
+            result[Length(result) - 1] := TConfigSection.Create;
+            with result[Length(result) - 1] do
             begin
                 FSectionName := FieldByName('section_name').Value;
                 FSortOrder := FieldByName('sort_order').Value;
                 FHint := FieldByName('hint').Value;
             end;
 
-
-            read_config_section(result[length(result) - 1]);
+            read_config_section(result[Length(result) - 1]);
 
             Next;
         end;
@@ -990,18 +1006,19 @@ begin
     end;
 end;
 
-procedure TDataModule1.SetWorksChecked(xs:array of integer);
-var i:integer;
+procedure TDataModule1.SetWorksChecked(xs: array of integer);
+var
+    I: integer;
 begin
     with TFDQuery.Create(nil) do
     begin
         Connection := DataModule1.FDConnectionConfig;
         SQL.Text := 'INSERT OR REPLACE INTO work_checked VALUES ';
-        for I := 0 to length(xs)-1 do
+        for I := 0 to Length(xs) - 1 do
         begin
-            if i > 0 then
+            if I > 0 then
                 SQL.Text := SQL.Text + ', ';
-            SQL.Text := SQL.Text + format('(%d, %d)', [i, xs[i]]);
+            SQL.Text := SQL.Text + format('(%d, %d)', [I, xs[I]]);
         end;
         Execute;
         Close;
