@@ -8,6 +8,9 @@ object DataModule1: TDataModule1
       'Database=$(MYAPPDATA)\'#1040#1085#1072#1083#1080#1090#1087#1088#1080#1073#1086#1088'\ankat\products.db'
       'LockingMode=Normal'
       'StringFormat=Unicode'
+      'BusyTimeout=100'
+      'JournalMode=Off'
+      'SharedCache=False'
       'DriverID=SQLite')
     UpdateOptions.AssignedValues = [uvLockWait]
     UpdateOptions.LockWait = True
@@ -97,9 +100,11 @@ object DataModule1: TDataModule1
     Params.Strings = (
       'Database=$(MYAPPDATA)\'#1040#1085#1072#1083#1080#1090#1087#1088#1080#1073#1086#1088'\ankat\config.db'
       'LockingMode=Normal'
-      'JournalMode=Off'
       'StringFormat=Unicode'
+      'Synchronous=Normal'
+      'BusyTimeout=100'
       'SharedCache=False'
+      'JournalMode=Off'
       'DriverID=SQLite')
     UpdateOptions.AssignedValues = [uvLockWait]
     UpdateOptions.LockWait = True
@@ -136,13 +141,13 @@ object DataModule1: TDataModule1
   object FDQueryDeleteCoefValue: TFDQuery
     Connection = FDConnectionProductsDB
     SQL.Strings = (
-      'DELETE FROM product_coefficient_value WHERE'
-      '    coefficient_id = :coef AND party_id IN current_party AND'
-      '    product_serial IN ('
+      'DELETE'
+      'FROM product_coefficient_value'
+      'WHERE coefficient_id = :coef'
+      '  AND party_id IN (SELECT party_id FROM current_party)'
       
-        '        SELECT product_serial FROM current_party_products_config' +
-        ' WHERE ordinal = :ordinal'
-      '    );')
+        '  AND product_serial IN (SELECT product_serial FROM current_part' +
+        'y_products_config WHERE ordinal = :ordinal);')
     Left = 264
     Top = 316
     ParamData = <

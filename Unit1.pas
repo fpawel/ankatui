@@ -87,11 +87,11 @@ type
         Panel13: TPanel;
         ToolBar5: TToolBar;
         ToolButton7: TToolButton;
-    N6: TMenuItem;
-    N7: TMenuItem;
-    N8: TMenuItem;
-    Panel8: TPanel;
-    Panel14: TPanel;
+        N6: TMenuItem;
+        N7: TMenuItem;
+        N8: TMenuItem;
+        Panel8: TPanel;
+        Panel14: TPanel;
         procedure FormCreate(Sender: TObject);
         procedure ComboBox1CloseUp(Sender: TObject);
         procedure StringGrid1SelectCell(Sender: TObject; ACol, ARow: integer;
@@ -117,13 +117,13 @@ type
         procedure ToolButtonConsoleHideClick(Sender: TObject);
         procedure ToolButton7Click(Sender: TObject);
         procedure N4Click(Sender: TObject);
-    procedure N1Click(Sender: TObject);
-    procedure N3Click(Sender: TObject);
-    procedure N2Click(Sender: TObject);
-    procedure ToolButtonRunMouseUp(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: Integer);
-    procedure N7Click(Sender: TObject);
-    procedure N8Click(Sender: TObject);
+        procedure N1Click(Sender: TObject);
+        procedure N3Click(Sender: TObject);
+        procedure N2Click(Sender: TObject);
+        procedure ToolButtonRunMouseUp(Sender: TObject; Button: TMouseButton;
+          Shift: TShiftState; X, Y: integer);
+        procedure N7Click(Sender: TObject);
+        procedure N8Click(Sender: TObject);
     private
         { Private declarations }
 
@@ -151,6 +151,7 @@ type
         procedure SetCurrentParty;
         procedure Init2;
         procedure SetupWorkStarted(work: string; started: boolean);
+        procedure WriteCoef(product_order, coef_order: integer);
     end;
 
 var
@@ -167,6 +168,13 @@ uses DataRichEditOutput, pipe, dateutils, rest.json, Winapi.uxtheme,
     PropertiesFormUnit, UnitHostAppData;
 
 {$R *.dfm}
+
+type
+    TProductCoefficient = class
+    public
+        FProduct, FCoefficient: integer;
+
+    end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
@@ -301,9 +309,7 @@ begin
             end;
     end;
 
-
     // FCurrentWork := TCurrentWork.Create(FPipe, Panel5, VirtualStringTree1);
-
     HostAppData.FPipe.Handle('READ_COEFFICIENT', HandleReadCoefficient);
     HostAppData.FPipe.Handle('READ_VAR', HandleReadVar);
 
@@ -326,7 +332,27 @@ begin
     begin
         Panel5.Caption := 'Нет хост-процеса';
         Panel5.Font.Color := clRed;
+    end
+    else
+    begin
+        HostAppData.Init;
+        FormManualControl.Init;
     end;
+end;
+
+procedure TForm1.WriteCoef(product_order, coef_order: integer);
+var
+    X: TProductCoefficient;
+begin
+    X := TProductCoefficient.Create;
+    X.FProduct := product_order;
+    X.FCoefficient := coef_order;
+    HostAppData.FPipe.WriteMsgJSON('WRITE_COEFFICIENT', X);
+    SetupWorkStarted('Запись коэффициента ' +
+      inttostr(DataModule1.DeviceCoefs[coef_order].FVar) + ' прибора ' +
+      inttostr(DataModule1.CurrentPartyProducts[product_order].FSerial), true);
+    X.Free;
+
 end;
 
 procedure TForm1.N1Click(Sender: TObject);
@@ -613,9 +639,9 @@ begin
     FProducts := DataModule1.CurrentPartyProducts;
 
     CurrentPartyID := DataModule1.CurrentPartyID;
-//    TabSheet3.Caption := Format('Партия № %d %s',
-//      [CurrentPartyID,
-//      DAtetimetostr(IncHour(DataModule1.CurrentPartyDateTime, 3))]);
+    // TabSheet3.Caption := Format('Партия № %d %s',
+    // [CurrentPartyID,
+    // DAtetimetostr(IncHour(DataModule1.CurrentPartyDateTime, 3))]);
 
     with StringGrid1 do
     begin
@@ -996,7 +1022,7 @@ begin
 end;
 
 procedure TForm1.ToolButtonRunMouseUp(Sender: TObject; Button: TMouseButton;
-  Shift: TShiftState; X, Y: Integer);
+  Shift: TShiftState; X, Y: integer);
 begin
     with ToolButtonRun do
         with ClientToScreen(Point(0, Height)) do

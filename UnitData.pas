@@ -64,8 +64,6 @@ type
         function ValueError: RValueError;
     end;
 
-    TModbusCommand = TPair<integer, string>;
-
     TDataModule1 = class(TDataModule)
         FDConnectionProductsDB: TFDConnection;
         FDPhysSQLiteDriverLink1: TFDPhysSQLiteDriverLink;
@@ -115,7 +113,6 @@ type
         function InvertCoefsChecked: boolean;
         function GetCoefValue(product_ordinal, Coef: integer): string;
         procedure SetCoefValue(product_ordinal, Coef: integer; Value: string);
-        function ModbusCommands: TArray<TModbusCommand>;
 
         function PartyProductsWithCoefs(partyID: int64): TArray<integer>;
         function PartyCoefsWithProducts(partyID: int64): TArray<integer>;
@@ -236,31 +233,6 @@ begin
         ExecSQL;
         Free;
     end;
-end;
-
-function TDataModule1.ModbusCommands: TArray<TModbusCommand>;
-var
-    xs: TList<TModbusCommand>;
-begin
-    xs := TList<TModbusCommand>.Create;
-
-    with TFDQuery.Create(nil) do
-    begin
-        Connection := FDConnectionProductsDB;
-        SQL.Text := 'SELECT * FROM command ORDER BY command_id;';
-        Open;
-        First;
-        while not Eof do
-        begin
-            xs.Add(TModbusCommand.Create(FieldValues['command_id'],
-              FieldValues['description']));
-            Next;
-        end;
-        Free;
-    end;
-    result := xs.ToArray;
-    xs.Free;
-
 end;
 
 function TDataModule1.InvertProductsChecked: boolean;

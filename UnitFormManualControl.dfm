@@ -13,7 +13,6 @@ object FormManualControl: TFormManualControl
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
-  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 19
   object Label2: TLabel

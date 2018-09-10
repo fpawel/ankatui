@@ -165,7 +165,11 @@ begin
 
     DataModule1.NewParty(FParty, serials);
     if Application.MainForm = self then
-        Close
+    begin
+        DataModule1.FDConnectionProductsDB.Connected := false;
+        DataModule1.FDConnectionConfig.Connected := false;
+        Close;
+    end
     else
         ModalResult := mrOk;
 end;

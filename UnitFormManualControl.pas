@@ -33,19 +33,18 @@ type
     Edit3: TEdit;
     Button6: TButton;
         procedure Edit1Change(Sender: TObject);
-        procedure FormCreate(Sender: TObject);
         procedure Button1Click(Sender: TObject);
     procedure ComboBox2Change(Sender: TObject);
     procedure Button6Click(Sender: TObject);
     procedure Edit3Change(Sender: TObject);
     private
         { Private declarations }
-        FModbusCommands: TArray<TModbusCommand>;
-
         procedure InvalidateModbusCommand;
 
     public
         function GetModbusCommand(var cmd: integer; var arg: extended): boolean;
+        procedure Init;
+
     end;
 
 var
@@ -98,17 +97,16 @@ begin
     Button1.Enabled := GetModbusCommand(a, b);
 end;
 
-procedure TFormManualControl.FormCreate(Sender: TObject);
+procedure TFormManualControl.Init;
 var
     i: integer;
 begin
-    FModbusCommands := DataModule1.ModbusCommands;
     with ComboBox2 do
     begin
         Items.Clear;
-        for i := 0 to length(FModbusCommands) - 1 do
+        for i := 0 to length(HostAppData.FCmds.FItems) - 1 do
         begin
-            Items.Add(FModbusCommands[i].Value);
+            Items.Add(HostAppData.FCmds.FItems[i].FStr);
         end;
         ItemIndex := 0;
     end;
@@ -123,7 +121,7 @@ begin
         result := TryStrToInt(str_validate_decimal_separator
           (ComboBox2.Text), cmd)
     else
-        cmd := FModbusCommands[ComboBox2.ItemIndex].Key;
+        cmd := HostAppData.FCmds.FItems[ComboBox2.ItemIndex].FCmd;
     result := result AND TryStrToFloat(Edit1.Text, arg);
 end;
 

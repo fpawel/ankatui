@@ -78,6 +78,7 @@ type
 
         function Fetch1(Msg: string; obj: TObject): string;
         function Fetch2(Msg: string; Str: string): string;
+        property Connected : boolean read FConnected;
 
     end;
 

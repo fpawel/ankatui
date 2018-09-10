@@ -25,8 +25,6 @@ object FrameCoef: TFrameCoef
     OnKeyPress = StringGrid3KeyPress
     OnSelectCell = StringGrid3SelectCell
     OnSetEditText = StringGrid3SetEditText
-    ExplicitTop = -6
-    ExplicitHeight = 430
     ColWidths = (
       64
       64

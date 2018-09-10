@@ -6,27 +6,29 @@ uses
     Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
     System.Classes,
     Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids, UnitData,
-    stringgridutils, Vcl.StdCtrls, Vcl.ExtCtrls;
+    stringgridutils, Vcl.StdCtrls, Vcl.ExtCtrls, System.Generics.collections;
 
 type
+    TProductCoefErrors = TDictionary<RProductVar, string>;
+
     TFrameCoef = class(TFrame)
         StringGrid3: TStringGrid;
-    CheckBox3: TCheckBox;
-    procedure StringGrid3SetEditText(Sender: TObject; ACol, ARow: Integer;
-      const Value: string);
-    procedure StringGrid3SelectCell(Sender: TObject; ACol, ARow: Integer;
-      var CanSelect: Boolean);
-    procedure CheckBox3Click(Sender: TObject);
-    procedure StringGrid3DrawCell(Sender: TObject; ACol, ARow: Integer;
-      Rect: TRect; State: TGridDrawState);
-    procedure StringGrid3KeyPress(Sender: TObject; var Key: Char);
-    procedure StringGrid3DblClick(Sender: TObject);
+        CheckBox3: TCheckBox;
+        procedure StringGrid3SetEditText(Sender: TObject; ACol, ARow: Integer;
+          const Value: string);
+        procedure StringGrid3SelectCell(Sender: TObject; ACol, ARow: Integer;
+          var CanSelect: Boolean);
+        procedure CheckBox3Click(Sender: TObject);
+        procedure StringGrid3DrawCell(Sender: TObject; ACol, ARow: Integer;
+          Rect: TRect; State: TGridDrawState);
+        procedure StringGrid3KeyPress(Sender: TObject; var Key: Char);
+        procedure StringGrid3DblClick(Sender: TObject);
     private
         { Private declarations }
         FCurentProductCoef: RProductVar;
 
-        Last_Edited_Col, Last_Edited_Row: integer;
-        FProductCoefValues: TProductVarValues;
+        Last_Edited_Col, Last_Edited_Row: Integer;
+        FProductCoefErrors: TProductCoefErrors;
     public
         FCoefs: TArray<TDeviceVar>;
         { Public declarations }
@@ -40,7 +42,7 @@ implementation
 
 {$R *.dfm}
 
-uses stringutils, UnitFormPopup;
+uses stringutils, UnitFormPopup, Unit1, UnitHostAppData;
 
 constructor TFrameCoef.Create(AOwner: TComponent);
 begin
@@ -56,7 +58,7 @@ begin
         Width := 15;
         Height := 15;
     end;
-    FProductCoefValues:= TProductVarValues.Create;
+    FProductCoefErrors := TProductCoefErrors.Create;
 
 end;
 
@@ -69,15 +71,18 @@ begin
 
     FCurentProductCoef.FProduct := x.FProduct;
     FCurentProductCoef.FVar := x.FVar;
-    FProductCoefValues.AddOrSetValue(x.ProductVar, x.ValueError);
-    StringGrid3.Cells[x.ProductVar.FProduct + 2, x.ProductVar.FVar + 1] :=
-      x.ValueError.FValue;
+    FProductCoefErrors.AddOrSetValue(x.ProductVar, x.FError);
+
+    if x.FError = '' then
+        StringGrid3.Cells[x.ProductVar.FProduct + 2, x.ProductVar.FVar + 1] :=
+          floattostr(x.FValue);
 
     if (PrevProductCoef.FProduct >= 0) and (PrevProductCoef.FVar >= 0) then
         StringGrid_RedrawCell(StringGrid3, PrevProductCoef.FProduct + 2,
           PrevProductCoef.FVar + 1);
 
-    if (FCurentProductCoef.FProduct >= 0) and (FCurentProductCoef.FVar >= 0) then
+    if (FCurentProductCoef.FProduct >= 0) and (FCurentProductCoef.FVar >= 0)
+    then
         StringGrid_RedrawCell(StringGrid3, FCurentProductCoef.FProduct + 2,
           FCurentProductCoef.FVar + 1);
 
@@ -94,12 +99,12 @@ begin
         StringGrid_RedrawCell(StringGrid3, PrevProductVar.FProduct + 2,
           PrevProductVar.FVar + 1);
 
-    if (FCurentProductCoef.FProduct >= 0) and (FCurentProductCoef.FVar >= 0) then
+    if (FCurentProductCoef.FProduct >= 0) and (FCurentProductCoef.FVar >= 0)
+    then
         StringGrid_RedrawCell(StringGrid3, FCurentProductCoef.FProduct + 2,
           FCurentProductCoef.FVar + 1);
 
 end;
-
 
 procedure TFrameCoef.CheckBox3Click(Sender: TObject);
 begin
@@ -113,10 +118,9 @@ begin
     StringGrid3.SetFocus;
 end;
 
-
 procedure TFrameCoef.SetCurrentParty(Products: TArray<TProduct>);
 var
-    i, arow: integer;
+    i, ARow: Integer;
     v: TDeviceVar;
     c: RProductCoefValue;
 begin
@@ -132,11 +136,11 @@ begin
         FixedRows := 1;
         Cells[0, 0] := '№';
         Cells[1, 0] := 'Коэффициент';
-        for arow := 1 to length(FCoefs) do
+        for ARow := 1 to length(FCoefs) do
         begin
-            v := FCoefs[arow - 1];
-            Cells[0, arow] := inttostr(v.FVar);
-            Cells[1, arow] := v.FName;
+            v := FCoefs[ARow - 1];
+            Cells[0, ARow] := inttostr(v.FVar);
+            Cells[1, ARow] := v.FName;
         end;
 
         for i := 0 to length(Products) - 1 do
@@ -146,7 +150,7 @@ begin
 
         OnSetEditText := nil;
         for c in DataModule1.CurrentPartyCoefs do
-            Cells[c.Ordinal + 2, c.Coef + 1] := FloatToStr(c.Value);
+            Cells[c.Ordinal + 2, c.Coef + 1] := floattostr(c.Value);
         OnSetEditText := StringGrid3SetEditText;
     end;
 end;
@@ -159,10 +163,10 @@ var
 begin
     a.FVar := StringGrid3.Row - 1;
     a.FProduct := StringGrid3.Col - 2;
-    if FProductCoefValues.ContainsKey(a) and FProductCoefValues[a].FError then
+    if FProductCoefErrors.ContainsKey(a) and (FProductCoefErrors[a] <> '') then
     begin
         FormPopup.RichEdit1.Font.Color := clRed;
-        FormPopup.RichEdit1.Text := FProductCoefValues[a].FValue;
+        FormPopup.RichEdit1.Text := FProductCoefErrors[a];
         r := StringGrid3.CellRect(StringGrid3.Col, StringGrid3.Row);
         pt := StringGrid3.ClientToScreen(r.BottomRight);
         FormPopup.Left := pt.x + 5;
@@ -177,10 +181,10 @@ procedure TFrameCoef.StringGrid3DrawCell(Sender: TObject; ACol, ARow: Integer;
 var
     grd: TStringGrid;
     cnv: TCanvas;
-    X, Y: integer;
+    x, Y: Integer;
     txt_width, txt_height: double;
     s: string;
-    Checked: boolean;
+    Checked: Boolean;
     pv: RProductVar;
 const
     lineColor: TColor = $00BCBCBC;
@@ -218,16 +222,16 @@ begin
       (ProductVarEqual(pv, FCurentProductCoef)) then
         cnv.Brush.Color := clInfoBk;
 
-      if FProductCoefValues.ContainsKey(pv) then
+    if FProductCoefErrors.ContainsKey(pv) AND (FProductCoefErrors[pv] <> '')
+    then
     begin
-        if FProductCoefValues[pv].FError then
-        begin
-            cnv.Brush.Color := clBlack;
-            cnv.Font.Color := clYellow;
-            cnv.Font.Size := 10;
-            if gdSelected in State then
-                cnv.Brush.Color := clGray;
-        end;
+
+        cnv.Brush.Color := clBlack;
+        cnv.Font.Color := clYellow;
+        cnv.Font.Size := 10;
+        if gdSelected in State then
+            cnv.Brush.Color := clGray;
+
     end;
 
     if cnv.TextWidth(s) + 3 > Rect.Width then
@@ -236,15 +240,15 @@ begin
     txt_width := cnv.TextWidth(s);
     txt_height := cnv.TextHeight(s);
 
-    X := Rect.Left + 3;
+    x := Rect.Left + 3;
     // x := Rect.left + round((Rect.Width - txt_width) / 2.0);
 
     if (ARow > 0) AND (ACol <> 1) then
-        X := Rect.Right - 3 - round(txt_width);
+        x := Rect.Right - 3 - round(txt_width);
 
     Y := Rect.Top + round((Rect.Height - txt_height) / 2.0);
 
-    cnv.TextRect(Rect, X, Y, s);
+    cnv.TextRect(Rect, x, Y, s);
 
     if (ACol = 0) and (ARow > 0) then
         StringGrid_DrawCheckBoxCell(grd, ACol, ARow, Rect, State, Checked);
@@ -273,8 +277,8 @@ end;
 procedure TFrameCoef.StringGrid3KeyPress(Sender: TObject; var Key: Char);
 var
     g: TStringGrid;
-    i: integer;
-    v: boolean;
+    i: Integer;
+    v: Boolean;
 
 begin
     g := Sender as TStringGrid;
@@ -294,7 +298,10 @@ begin
     begin
         v := DataModule1.InvertCoefsChecked;
         for i := 0 to length(FCoefs) - 1 do
+        begin
             FCoefs[i].FChecked := v;
+            DataModule1.UpdateCoefChecked(FCoefs[i].FVar, FCoefs[i].FChecked);
+        end;
         StringGrid_Redraw(g);
     end;
 
@@ -322,12 +329,10 @@ begin
     end;
     // Do whatever else wanted
 
-
     if (ARow > 0) AND (ACol > 1) then
         grd.Options := grd.Options + [goEditing]
     else
         grd.Options := grd.Options - [goEditing];
-
 
     case ACol of
         0:
@@ -368,10 +373,11 @@ begin
 
 end;
 
-procedure TFrameCoef.StringGrid3SetEditText(Sender: TObject; ACol,
-  ARow: Integer; const Value: string);
+procedure TFrameCoef.StringGrid3SetEditText(Sender: TObject;
+  ACol, ARow: Integer; const Value: string);
 var
     s: string;
+    v: extended;
 begin
     With StringGrid3 do
         if (ARow > 0) and (ACol > 1) then
@@ -384,6 +390,11 @@ begin
                 Last_Edited_Row := -1; // Indicate no cell is edited
                 // Do whatever wanted after user has finish editing a cell
                 DataModule1.SetCoefValue(ACol - 2, ARow - 1, Value);
+                if TryStrToFloat(str_validate_decimal_separator(Value), v) AND
+                  HostAppData.FPipe.Connected then
+                begin
+                    Form1.WriteCoef(ACol - 2, ARow - 1);
+                end;
                 s := DataModule1.GetCoefValue(ACol - 2, ARow - 1);
                 if (Value <> s) then
                 begin
