@@ -57,8 +57,8 @@ type
         CreatedAt: TDateTime;
         PartyID: int64;
         SeriesID: int64;
-        WorkName: string;
-        WorkIndex: integer;
+        Name: string;
+
     end;
 
     TNodeSeries = class(TNodeData)
@@ -176,10 +176,9 @@ constructor TNodeSeries.Create(ATreeView: TVirtualStringTree;
 begin
     inherited Create(ATreeView, ATreeView.AddChild(ANode));
     FSeriesInfo := ASeriesInfo;
-    FColumn[0].Text := ASeriesInfo.WorkName;
+    FColumn[0].Text := ASeriesInfo.Name;
     FColumn[1].Text := TimeToStr(ASeriesInfo.CreatedAt);
     FColumn[2].Text := inttostr(ASeriesInfo.PartyID);
-    FColumn[3].Text := inttostr2(ASeriesInfo.WorkIndex);
     FColumn[0].ImageIndex := 3;
 end;
 
@@ -283,8 +282,7 @@ begin
             r.Day := FDay;
             r.CreatedAt := FieldValues['created_at'];
             r.PartyID := FieldValues['party_id'];
-            r.WorkName := FieldValues['work_name'];
-            r.WorkIndex := FieldValues['work_index'];
+            r.Name := FieldValues['name'];
             r.SeriesID := FieldValues['series_id'];
             TNodeSeries.Create(FTreeView, FNode, r);
             Next;

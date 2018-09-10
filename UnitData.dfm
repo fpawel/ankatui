@@ -7,13 +7,10 @@ object DataModule1: TDataModule1
     Params.Strings = (
       'Database=$(MYAPPDATA)\'#1040#1085#1072#1083#1080#1090#1087#1088#1080#1073#1086#1088'\ankat\products.db'
       'LockingMode=Normal'
-      'Synchronous=Full'
-      'JournalMode=WAL'
       'StringFormat=Unicode'
       'DriverID=SQLite')
     UpdateOptions.AssignedValues = [uvLockWait]
     UpdateOptions.LockWait = True
-    Connected = True
     OnError = FDConnectionProductsDBError
     Left = 80
     Top = 24
@@ -100,9 +97,9 @@ object DataModule1: TDataModule1
     Params.Strings = (
       'Database=$(MYAPPDATA)\'#1040#1085#1072#1083#1080#1090#1087#1088#1080#1073#1086#1088'\ankat\config.db'
       'LockingMode=Normal'
-      'Synchronous=Full'
-      'JournalMode=WAL'
+      'JournalMode=Off'
       'StringFormat=Unicode'
+      'SharedCache=False'
       'DriverID=SQLite')
     UpdateOptions.AssignedValues = [uvLockWait]
     UpdateOptions.LockWait = True

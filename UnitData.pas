@@ -141,6 +141,9 @@ type
 
         procedure SetWorksChecked(xs: array of integer);
 
+        function GetConfigPropertyValueList(property_name: string)
+          : TArray<string>;
+
     end;
 
 var
@@ -536,8 +539,8 @@ begin
                 with TFDQuery.Create(nil) do
                 begin
                     Connection := FDConnectionProductsDB;
-                    SQL.Text :=
-                      'SELECT '+ Key + ' FROM party WHERE party_id = :party_id;';
+                    SQL.Text := 'SELECT ' + Key +
+                      ' FROM party WHERE party_id = :party_id;';
                     ParamByName('party_id').Value := partyID;
                     Open;
                     First;
@@ -873,10 +876,32 @@ begin
     end;
 end;
 
+function TDataModule1.GetConfigPropertyValueList(property_name: string)
+  : TArray<string>;
+begin
+    SetLength(result, 0);
+    with TFDQuery.Create(nil) do
+    begin
+        Connection := FDConnectionConfig;
+        SQL.Text :=
+          'select value from value_list where property_name = :property_name;';
+        ParamByName('property_name').Value := property_name;
+        Open;
+        First;
+        while not Eof do
+        begin
+            SetLength(result, Length(result)+1);
+            result[Length(result)-1]  := FieldValues['value'];
+            Next;
+        end;
+        Close;
+        Free;
+    end;
+
+end;
+
 procedure TDataModule1.read_config_section(sect: TConfigSection);
 var
-    value_list: TList<string>;
-    s: string;
     config_property: TConfigProperty;
 begin
     with TFDQuery.Create(nil) do
@@ -911,26 +936,7 @@ begin
                 FDefaultValue := GetConfigPropertyDefaultValue(FSectionName,
                   FPropertyName);
 
-                value_list := TList<string>.Create;
-                with TFDQuery.Create(nil) do
-                begin
-                    Connection := FDConnectionConfig;
-                    SQL.Text :=
-                      'select value from value_list where property_name = :property_name;';
-                    s := FPropertyName;
-                    ParamByName('property_name').Value := s;
-                    Open;
-                    First;
-                    while not Eof do
-                    begin
-                        value_list.Add(FieldValues['value']);
-                        Next;
-                    end;
-                    Close;
-                    Free;
-                end;
-                FList := value_list.ToArray;
-                value_list.Free;
+                FList := GetConfigPropertyValueList(FPropertyName);
 
                 SetStr(FValue);
             end;

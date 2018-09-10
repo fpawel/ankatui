@@ -79,7 +79,7 @@ begin
     begin
         Connection := DataModule1.FDConnectionProductsDB;
         SQL.Text :=
-          'SELECT x,y FROM chart_value_info WHERE product_serial = :product_serial '
+          'SELECT created_at,value FROM chart_value_info WHERE product_serial = :product_serial '
           + 'AND var = :var AND series_id = :series_id;';
         ParamByName('product_serial').Value := product_serial;
         ParamByName('var').Value := AVar;
@@ -88,8 +88,8 @@ begin
         First;
         while not Eof do
         begin
-            X := FieldValues['x'];
-            y := FieldValues['y'];
+            X := FieldValues['created_at'];
+            y := FieldValues['value'];
             ser.AddNullXY(StrToDateTime(X, FmtStngs), y);
             Next;
         end;
