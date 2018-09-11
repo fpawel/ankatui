@@ -6,7 +6,8 @@ uses
     Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
     System.Classes,
     Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.Grids, UnitData,
-    stringgridutils, Vcl.StdCtrls, Vcl.ExtCtrls, System.Generics.collections;
+    stringgridutils, Vcl.StdCtrls, Vcl.ExtCtrls, System.Generics.collections,
+    models;
 
 type
     TProductCoefErrors = TDictionary<RProductVar, string>;
@@ -69,8 +70,8 @@ begin
     PrevProductCoef := FCurentProductCoef;
     FCurentProductCoef := x.ProductVar;
 
-    FCurentProductCoef.FProduct := x.FProduct;
-    FCurentProductCoef.FVar := x.FVar;
+    FCurentProductCoef.FProduct := x.FProductOrder;
+    FCurentProductCoef.FVar := x.FVarOrder;
     FProductCoefErrors.AddOrSetValue(x.ProductVar, x.FError);
 
     if x.FError = '' then
@@ -390,17 +391,18 @@ begin
                 Last_Edited_Row := -1; // Indicate no cell is edited
                 // Do whatever wanted after user has finish editing a cell
                 DataModule1.SetCoefValue(ACol - 2, ARow - 1, Value);
-                if TryStrToFloat(str_validate_decimal_separator(Value), v) AND
-                  HostAppData.FPipe.Connected then
-                begin
-                    Form1.WriteCoef(ACol - 2, ARow - 1);
-                end;
+
                 s := DataModule1.GetCoefValue(ACol - 2, ARow - 1);
                 if (Value <> s) then
                 begin
                     OnSetEditText := nil;
                     Cells[ACol, ARow] := s;
                     OnSetEditText := StringGrid3SetEditText;
+                end;
+
+                if HostAppData.FPipe.Connected then
+                begin
+                    Form1.SetCoef(ACol - 2, ARow - 1);
                 end;
 
             end

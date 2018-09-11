@@ -11,7 +11,7 @@ uses
     System.ImageList, UnitData, Vcl.ImgList, Vcl.Menus, VirtualTrees,
     msglevel, UnitFormLog, UnitFormPopup, UnitFrameCoef,
     UnitFrameVar, UnitFormParties,
-    UnitFormManualControl, inifiles, System.SyncObjs;
+    UnitFormManualControl, inifiles, System.SyncObjs, models;
 
 type
 
@@ -151,7 +151,7 @@ type
         procedure SetCurrentParty;
         procedure Init2;
         procedure SetupWorkStarted(work: string; started: boolean);
-        procedure WriteCoef(product_order, coef_order: integer);
+        procedure SetCoef(product_order, coef_order: integer);
     end;
 
 var
@@ -165,7 +165,7 @@ uses DataRichEditOutput, pipe, dateutils, rest.json, Winapi.uxtheme,
     listports, System.IOUtils,
     CurrentWorkTreeData, stringutils, vclutils, UnitFormChart, UnitFormSettings,
     UnitFormCurrentWork, UnitFormDelay, System.Types, System.UITypes, findproc,
-    PropertiesFormUnit, UnitHostAppData;
+    PropertiesFormUnit, UnitHostAppData, UnitFormCurrentChart;
 
 {$R *.dfm}
 
@@ -217,6 +217,39 @@ begin
         ColWidths[1] := 90;
         ColWidths[2] := 75;
     end;
+
+    FFormParties := TFormParties.Create(self);
+    with TFormParties.Create(self) do
+    begin
+        Splitter1.Parent := TabSheet4;
+        Panel1.Parent := TabSheet4;
+        VirtualStringTree1.Parent := TabSheet4;
+    end;
+
+    with TFormChart.Create(self) do
+    begin
+        Splitter1.Parent := TabSheet8;
+        VirtualStringTree1.Parent := TabSheet8;
+        Chart1.Parent := TabSheet8;
+    end;
+
+    FFormLog := TFormLog.Create(self);
+    with FFormLog do
+    begin
+        Splitter1.Parent := TabSheet7;
+        RichEdit1.Parent := TabSheet7;
+        VirtualStringTree1.Parent := TabSheet7;
+        FFormLog.FOnRenderMessages := procedure
+            begin
+                if PageControl2.activePage = TabSheet7 then
+                begin
+                    FFormLog.RichEdit1.SetFocus;
+                    SendMessage(FFormLog.RichEdit1.Handle, EM_SCROLL,
+                      SB_LINEDOWN, 0);
+                end;
+            end;
+    end;
+
 end;
 
 procedure TForm1.OnException(Sender: TObject; E: Exception);
@@ -276,38 +309,7 @@ end;
 
 procedure TForm1.Init2;
 begin
-    FFormParties := TFormParties.Create(self);
-    with TFormParties.Create(self) do
-    begin
-        Splitter1.Parent := TabSheet4;
-        Panel1.Parent := TabSheet4;
-        VirtualStringTree1.Parent := TabSheet4;
-    end;
 
-    with TFormChart.Create(self) do
-    begin
-        Splitter1.Parent := TabSheet8;
-        Panel1.Parent := TabSheet8;
-        VirtualStringTree1.Parent := TabSheet8;
-        Chart1.Parent := TabSheet8;
-    end;
-
-    FFormLog := TFormLog.Create(self);
-    with FFormLog do
-    begin
-        Splitter1.Parent := TabSheet7;
-        RichEdit1.Parent := TabSheet7;
-        VirtualStringTree1.Parent := TabSheet7;
-        FFormLog.FOnRenderMessages := procedure
-            begin
-                if PageControl2.activePage = TabSheet7 then
-                begin
-                    FFormLog.RichEdit1.SetFocus;
-                    SendMessage(FFormLog.RichEdit1.Handle, EM_SCROLL,
-                      SB_LINEDOWN, 0);
-                end;
-            end;
-    end;
 
     // FCurrentWork := TCurrentWork.Create(FPipe, Panel5, VirtualStringTree1);
     HostAppData.FPipe.Handle('READ_COEFFICIENT', HandleReadCoefficient);
@@ -340,15 +342,15 @@ begin
     end;
 end;
 
-procedure TForm1.WriteCoef(product_order, coef_order: integer);
+procedure TForm1.SetCoef(product_order, coef_order: integer);
 var
     X: TProductCoefficient;
 begin
     X := TProductCoefficient.Create;
     X.FProduct := product_order;
     X.FCoefficient := coef_order;
-    HostAppData.FPipe.WriteMsgJSON('WRITE_COEFFICIENT', X);
-    SetupWorkStarted('Запись коэффициента ' +
+    HostAppData.FPipe.WriteMsgJSON('SET_COEFFICIENT', X);
+    SetupWorkStarted('Установка коэффициента ' +
       inttostr(DataModule1.DeviceCoefs[coef_order].FVar) + ' прибора ' +
       inttostr(DataModule1.CurrentPartyProducts[product_order].FSerial), true);
     X.Free;
@@ -489,8 +491,8 @@ var
 begin
     Result := '';
     X := TJson.JsonToObject<TReadVar>(content);
-    p := FProducts[X.FProduct];
-    v := FFrameVar.FVars[X.FVar];
+    p := FProducts[X.FProductOrder];
+    v := FFrameVar.FVars[X.FVarOrder];
     Panel2.Font.Color := clNavy;
     Panel2.Caption := Format('Считывание: АНКАТ %d: регистр %d: %s: %s: ',
       [p.FSerial, v.FVar, v.FName, v.FDescription]);
@@ -504,6 +506,7 @@ begin
     end;
 
     FFrameVar.HandleReadVar(X);
+    FormCurrentChart.HandleReadVar(x);
     X.Free;
 end;
 
@@ -515,8 +518,8 @@ var
 begin
     Result := '';
     X := TJson.JsonToObject<TReadVar>(content);
-    p := FProducts[X.FProduct];
-    v := FFrameCoef.FCoefs[X.FVar];
+    p := FProducts[X.FProductOrder];
+    v := FFrameCoef.FCoefs[X.FVarOrder];
     Panel2.Font.Color := clNavy;
     Panel2.Caption := Format('Считывание: АНКАТ %d: коэффициент %d: %s: %s: ',
       [p.FSerial, v.FVar, v.FName, v.FDescription]);
@@ -536,17 +539,7 @@ end;
 procedure TForm1.SetupWorkStarted(work: string; started: boolean);
 begin
 
-    Panel5.Caption := work;
-    Panel13.Caption := '   ' + work;
 
-    Panel5.Font.Color := clNavy;
-
-    FormManualControl.Button1.Enabled := not started;
-    FormManualControl.Button6.Enabled := not started;
-    FormManualControl.RadioGroup1.Enabled := not started;
-    FormManualControl.GroupBox2.Enabled := not started;
-    ToolButtonRun.Visible := not started;
-    ToolButtonStop.Visible := started;
 
     if started then
     begin
@@ -575,7 +568,17 @@ begin
 
     end;
 
-    // UpdateGroupHeights;
+    Panel5.Caption := work;
+    Panel13.Caption := '   ' + work;
+
+    Panel5.Font.Color := clNavy;
+
+    FormManualControl.Button1.Enabled := not started;
+    FormManualControl.Button6.Enabled := not started;
+    FormManualControl.RadioGroup1.Enabled := not started;
+    FormManualControl.GroupBox2.Enabled := not started;
+    ToolButtonRun.Visible := not started;
+    ToolButtonStop.Visible := started;
 end;
 
 procedure TForm1.FormActivate(Sender: TObject);

@@ -6,7 +6,7 @@ uses
     Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
     System.Classes,
     Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, UnitData, Vcl.StdCtrls,
-    Vcl.Grids, Vcl.ExtCtrls;
+    Vcl.Grids, Vcl.ExtCtrls, models;
 
 type
     TFrameVar = class(TFrame)
@@ -108,8 +108,8 @@ begin
     PrevProductVar := FCurentProductVar;
     FCurentProductVar := x.ProductVar;
 
-    FCurentProductVar.FProduct := x.FProduct;
-    FCurentProductVar.FVar := x.FVar;
+    FCurentProductVar.FProduct := x.FProductOrder;
+    FCurentProductVar.FVar := x.FVarOrder;
     FProductVarValues.AddOrSetValue(x.ProductVar, x.ValueError);
     StringGrid2.Cells[x.ProductVar.FProduct + 2, x.ProductVar.FVar + 1] :=
       x.ValueError.FValue;

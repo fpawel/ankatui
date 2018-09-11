@@ -37,7 +37,9 @@ uses
   PropertyUtils in 'PropertyGrid\PropertyUtils.pas',
   UnitHostAppData in 'UnitHostAppData.pas' {HostAppData: TDataModule},
   config in 'config\config.pas',
-  DataRichEditOutput in 'DataRichEditOutput.pas';
+  DataRichEditOutput in 'DataRichEditOutput.pas',
+  UnitFormCurrentChart in 'UnitFormCurrentChart.pas' {FormCurrentChart},
+  models in 'models.pas';
 
 {$R *.res}
 
@@ -57,5 +59,6 @@ begin
   Application.CreateForm(TFormParties, FormParties);
   Application.CreateForm(TPropertiesForm, PropertiesForm);
   Application.CreateForm(THostAppData, HostAppData);
+  Application.CreateForm(TFormCurrentChart, FormCurrentChart);
   Application.Run;
 end.

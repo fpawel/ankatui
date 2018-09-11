@@ -9,60 +9,10 @@ uses
     FireDAC.Phys.SQLiteDef, FireDAC.Stan.ExprFuncs, FireDAC.VCLUI.Wait, Data.DB,
     FireDAC.Comp.Client, FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf,
     FireDAC.DApt, Vcl.ComCtrls, FireDAC.Comp.DataSet,
-    System.Generics.collections, config;
+    System.Generics.collections, config, models;
 
 type
-    TKeyValue = TPair<string, variant>;
 
-    TKeysValues = TArray<TKeyValue>;
-
-    TProduct = class
-        FSerial: integer;
-        FChecked: boolean;
-        FComport: string;
-        FConnection: string;
-        FConnectionError: boolean;
-
-        constructor Create(ASerial: integer; AChecked: boolean;
-          AComport: string);
-    end;
-
-    RProductVar = record
-        FProduct: integer;
-        FVar: integer;
-
-    end;
-
-    RValueError = record
-        FValue: string;
-        FError: boolean;
-
-    end;
-
-    TDeviceVar = class
-        FVar: integer;
-        FName: string;
-        FDescription: string;
-        FChecked: boolean;
-    end;
-
-    RProductCoefValue = record
-        Serial: integer;
-        Ordinal: integer;
-        Coef: integer;
-        Value: double;
-    end;
-
-    TProductVarValues = TDictionary<RProductVar, RValueError>;
-
-    TReadVar = class
-        FProduct: integer;
-        FVar: integer;
-        FValue: double;
-        FError: string;
-        function ProductVar: RProductVar;
-        function ValueError: RValueError;
-    end;
 
     TDataModule1 = class(TDataModule)
         FDConnectionProductsDB: TFDConnection;
@@ -91,6 +41,7 @@ type
     public
         { Public declarations }
         function DeviceVars: TArray<TDeviceVar>;
+        function GetDeviceVarName(v:integer): string;
         function DeviceCoefs: TArray<TDeviceVar>;
         function PartiesYears: TArray<integer>;
         function SeriesYears: TArray<integer>;
@@ -146,7 +97,7 @@ type
 var
     DataModule1: TDataModule1;
 
-function ProductVarEqual(X, Y: RProductVar): boolean;
+
 
 implementation
 
@@ -156,38 +107,6 @@ uses dateutils, Vcl.dialogs, System.Variants, stringutils, variantutils;
 
 {$R *.dfm}
 
-function TReadVar.ProductVar: RProductVar;
-begin
-    result.FVar := FVar;
-    result.FProduct := FProduct;
-end;
-
-function TReadVar.ValueError: RValueError;
-begin
-    if FError <> '' then
-    begin
-        result.FError := true;
-        result.FValue := FError;
-    end
-    else
-    begin
-        result.FError := false;
-        result.FValue := FloatToStr(FValue);
-    end;
-end;
-
-function ProductVarEqual(X, Y: RProductVar): boolean;
-begin
-    result := (X.FProduct = Y.FProduct) AND (X.FVar = Y.FVar);
-end;
-
-constructor TProduct.Create(ASerial: integer; AChecked: boolean;
-  AComport: string);
-begin
-    FSerial := ASerial;
-    FChecked := AChecked;
-    FComport := AComport;
-end;
 
 procedure TDataModule1.DataModuleCreate(Sender: TObject);
 begin
@@ -450,6 +369,23 @@ begin
     result := xs.ToArray;
     xs.Free;
 
+end;
+
+function TDataModule1.GetDeviceVarName(v:integer): string;
+begin
+    with TFDQuery.Create(nil) do
+    begin
+        Connection := FDConnectionProductsDB;
+        SQL.Text := 'SELECT name FROM read_var WHERE var = :var;';
+        Open;
+        First;
+        if not Eof then
+        begin
+            Result := FieldValues['name'];
+        end;
+        Close;
+        Free;
+    end;
 end;
 
 function TDataModule1.DeviceVars: TArray<TDeviceVar>;
