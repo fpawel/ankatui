@@ -20,10 +20,14 @@ type
           AComport: string);
     end;
 
-    RProductVar = record
-        FProduct: integer;
-        FVar: integer;
+    RProductVarOrder = record
+        FProductOrder: integer;
+        FVarOrder: integer;
+    end;
 
+    RProductCoefOrder = record
+        FProductOrder: integer;
+        FCoefOrder: integer;
     end;
 
     RValueError = record
@@ -46,27 +50,43 @@ type
         Value: double;
     end;
 
-    TProductVarValues = TDictionary<RProductVar, RValueError>;
+    TProductVarValues = TDictionary<RProductVarOrder, RValueError>;
 
     TReadVar = class
         FProductOrder: integer;
+        FProductSerial: integer;
         FVarOrder: integer;
+        FVar: integer;
+        FVarName: string;
         FValue: double;
         FError: string;
-        function ProductVar: RProductVar;
+        function ProductVarOrder: RProductVarOrder;
         function ValueError: RValueError;
     end;
 
-function ProductVarEqual(X, Y: RProductVar): boolean;
+    TReadCoef = class
+        FProductOrder: integer;
+        FProductSerial: integer;
+        FCoefficientOrder: integer;
+        FCoefficient: integer;
+        FCoefficientName: string;
+        FValue: double;
+        FError: string;
+        function ProductCoefOrder: RProductCoefOrder;
+        function ValueError: RValueError;
+    end;
+
+function ProductVarEqual(X, Y: RProductVarOrder): boolean;
+function ProductCoefEqual(X, Y: RProductCoefOrder): boolean;
 
 implementation
 
 uses stringutils, sysutils;
 
-function TReadVar.ProductVar: RProductVar;
+function TReadVar.ProductVarOrder: RProductVarOrder;
 begin
-    result.FVar := FVarOrder;
-    result.FProduct := FProductOrder;
+    result.FVarOrder := FVarOrder;
+    result.FProductOrder := FProductOrder;
 end;
 
 function TReadVar.ValueError: RValueError;
@@ -83,9 +103,34 @@ begin
     end;
 end;
 
-function ProductVarEqual(X, Y: RProductVar): boolean;
+function TReadCoef.ProductCoefOrder: RProductCoefOrder;
 begin
-    result := (X.FProduct = Y.FProduct) AND (X.FVar = Y.FVar);
+    result.FCoefOrder := FCoefficientOrder;
+    result.FProductOrder := FProductOrder;
+end;
+
+function TReadCoef.ValueError: RValueError;
+begin
+    if FError <> '' then
+    begin
+        result.FError := true;
+        result.FValue := FError;
+    end
+    else
+    begin
+        result.FError := false;
+        result.FValue := floattostr(FValue);
+    end;
+end;
+
+function ProductVarEqual(X, Y: RProductVarOrder): boolean;
+begin
+    result := (X.FProductOrder = Y.FProductOrder) AND (X.FVarOrder = Y.FVarOrder);
+end;
+
+function ProductCoefEqual(X, Y: RProductCoefOrder): boolean;
+begin
+    result := (X.FProductOrder = Y.FProductOrder) AND (X.FCoefOrder = Y.FCoefOrder);
 end;
 
 constructor TProduct.Create(ASerial: integer; AChecked: boolean;

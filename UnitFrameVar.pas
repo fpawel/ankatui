@@ -22,7 +22,7 @@ type
     private
         { Private declarations }
     public
-        FCurentProductVar: RProductVar;
+        FCurentProductVar: RProductVarOrder;
         FProductVarValues: TProductVarValues;
         FVars: TArray<TDeviceVar>;
         { Public declarations }
@@ -41,8 +41,8 @@ uses stringgridutils, stringutils, UnitFormPopup;
 constructor TFrameVar.Create(AOwner: TComponent);
 begin
     inherited Create(AOwner);
-    FCurentProductVar.FProduct := -1;
-    FCurentProductVar.FVar := -1;
+    FCurentProductVar.FProductOrder := -1;
+    FCurentProductVar.FVarOrder := -1;
     with CheckBox2 do
     begin
         Visible := false;
@@ -85,42 +85,42 @@ end;
 
 procedure TFrameVar.reset;
 var
-    PrevProductVar: RProductVar;
+    PrevProductVar: RProductVarOrder;
 begin
     PrevProductVar := FCurentProductVar;
-    FCurentProductVar.FProduct := -1;
-    FCurentProductVar.FVar := -1;
-    if (PrevProductVar.FProduct >= 0) and (PrevProductVar.FVar >= 0) then
-        StringGrid_RedrawCell(StringGrid2, PrevProductVar.FProduct + 2,
-          PrevProductVar.FVar + 1);
+    FCurentProductVar.FProductOrder := -1;
+    FCurentProductVar.FVarOrder := -1;
+    if (PrevProductVar.FProductOrder >= 0) and (PrevProductVar.FVarOrder >= 0) then
+        StringGrid_RedrawCell(StringGrid2, PrevProductVar.FProductOrder + 2,
+          PrevProductVar.FVarOrder + 1);
 
-    if (FCurentProductVar.FProduct >= 0) and (FCurentProductVar.FVar >= 0) then
-        StringGrid_RedrawCell(StringGrid2, FCurentProductVar.FProduct + 2,
-          FCurentProductVar.FVar + 1);
+    if (FCurentProductVar.FProductOrder >= 0) and (FCurentProductVar.FVarOrder >= 0) then
+        StringGrid_RedrawCell(StringGrid2, FCurentProductVar.FProductOrder + 2,
+          FCurentProductVar.FVarOrder + 1);
 
 end;
 
 procedure TFrameVar.HandleReadVar(x: TReadVar);
 var
-    PrevProductVar: RProductVar;
+    PrevProductVar: RProductVarOrder;
 
 begin
     PrevProductVar := FCurentProductVar;
-    FCurentProductVar := x.ProductVar;
+    FCurentProductVar := x.ProductVarOrder;
 
-    FCurentProductVar.FProduct := x.FProductOrder;
-    FCurentProductVar.FVar := x.FVarOrder;
-    FProductVarValues.AddOrSetValue(x.ProductVar, x.ValueError);
-    StringGrid2.Cells[x.ProductVar.FProduct + 2, x.ProductVar.FVar + 1] :=
+    FCurentProductVar.FProductOrder := x.FProductOrder;
+    FCurentProductVar.FVarOrder := x.FVarOrder;
+    FProductVarValues.AddOrSetValue(x.ProductVarOrder, x.ValueError);
+    StringGrid2.Cells[x.ProductVarOrder.FProductOrder + 2, x.ProductVarOrder.FVarOrder + 1] :=
       x.ValueError.FValue;
 
-    if (PrevProductVar.FProduct >= 0) and (PrevProductVar.FVar >= 0) then
-        StringGrid_RedrawCell(StringGrid2, PrevProductVar.FProduct + 2,
-          PrevProductVar.FVar + 1);
+    if (PrevProductVar.FProductOrder >= 0) and (PrevProductVar.FVarOrder >= 0) then
+        StringGrid_RedrawCell(StringGrid2, PrevProductVar.FProductOrder + 2,
+          PrevProductVar.FVarOrder + 1);
 
-    if (FCurentProductVar.FProduct >= 0) and (FCurentProductVar.FVar >= 0) then
-        StringGrid_RedrawCell(StringGrid2, FCurentProductVar.FProduct + 2,
-          FCurentProductVar.FVar + 1);
+    if (FCurentProductVar.FProductOrder >= 0) and (FCurentProductVar.FVarOrder >= 0) then
+        StringGrid_RedrawCell(StringGrid2, FCurentProductVar.FProductOrder + 2,
+          FCurentProductVar.FVarOrder + 1);
 
 end;
 
@@ -128,10 +128,10 @@ procedure TFrameVar.StringGrid2DblClick(Sender: TObject);
 var
     r: TRect;
     pt: TPoint;
-    a: RProductVar;
+    a: RProductVarOrder;
 begin
-    a.FVar := StringGrid2.Row - 1;
-    a.FProduct := StringGrid2.Col - 2;
+    a.FVarOrder := StringGrid2.Row - 1;
+    a.FProductOrder := StringGrid2.Col - 2;
     if FProductVarValues.ContainsKey(a) and FProductVarValues[a].FError then
     begin
         FormPopup.RichEdit1.Font.Color := clRed;
@@ -154,7 +154,7 @@ var
     txt_width, txt_height: double;
     s: string;
     Checked: Boolean;
-    pv: RProductVar;
+    pv: RProductVarOrder;
 const
     lineColor: TColor = $00BCBCBC;
 begin
@@ -184,10 +184,10 @@ begin
     else
         cnv.Brush.Color := clBtnFace;
 
-    pv.FProduct := ACol - 2;
-    pv.FVar := ARow - 1;
+    pv.FProductOrder := ACol - 2;
+    pv.FVarOrder := ARow - 1;
 
-    if (FCurentProductVar.FProduct >= 0) and (FCurentProductVar.FVar >= 0) and
+    if (FCurentProductVar.FProductOrder >= 0) and (FCurentProductVar.FVarOrder >= 0) and
       (ProductVarEqual(pv, FCurentProductVar)) then
         cnv.Brush.Color := clInfoBk;
 

@@ -92,6 +92,8 @@ type
         N8: TMenuItem;
         Panel8: TPanel;
         Panel14: TPanel;
+    ToolButton1: TToolButton;
+    PanelPlaceholderCurrentPartyMain: TPanel;
         procedure FormCreate(Sender: TObject);
         procedure ComboBox1CloseUp(Sender: TObject);
         procedure StringGrid1SelectCell(Sender: TObject; ACol, ARow: integer;
@@ -124,6 +126,7 @@ type
           Shift: TShiftState; X, Y: integer);
         procedure N7Click(Sender: TObject);
         procedure N8Click(Sender: TObject);
+    procedure ToolButton1Click(Sender: TObject);
     private
         { Private declarations }
 
@@ -326,6 +329,8 @@ begin
     HostAppData.FPipe.Handle('PROMPT_ERROR_STOP_WORK',
       HandlePromptErrorStopWork);
 
+    HostAppData.FPipe.Handle('NEW_CHART',FormCurrentChart.NewChart);
+
     FormCurrentWork.Init2;
     FormDelay.Init2;
     PrintLastMessages(RichEdit1, 500);
@@ -506,20 +511,21 @@ begin
     end;
 
     FFrameVar.HandleReadVar(X);
-    FormCurrentChart.HandleReadVar(x);
+    if x.FError = '' then
+        FormCurrentChart.AddValue(x.FProductSerial, x.FVar, x.FValue);
     X.Free;
 end;
 
 function TForm1.HandleReadCoefficient(content: string): string;
 var
-    X: TReadVar;
+    X: TReadCoef;
     p: TProduct;
     v: TDeviceVar;
 begin
     Result := '';
-    X := TJson.JsonToObject<TReadVar>(content);
+    X := TJson.JsonToObject<TReadCoef>(content);
     p := FProducts[X.FProductOrder];
-    v := FFrameCoef.FCoefs[X.FVarOrder];
+    v := FFrameCoef.FCoefs[X.FCoefficientOrder];
     Panel2.Font.Color := clNavy;
     Panel2.Caption := Format('Считывание: АНКАТ %d: коэффициент %d: %s: %s: ',
       [p.FSerial, v.FVar, v.FName, v.FDescription]);
@@ -943,6 +949,18 @@ end;
 procedure TForm1.StringGrid1TopLeftChanged(Sender: TObject);
 begin
     ComboBox1.Visible := false;
+end;
+
+procedure TForm1.ToolButton1Click(Sender: TObject);
+begin
+    with FormCurrentChart do
+    begin
+        Parent := TabSheet3;
+        Align := alClient;
+        BorderStyle := bsNone;
+        Visible := true;
+        BringToFront;
+    end;
 end;
 
 procedure TForm1.ToolButton3Click(Sender: TObject);

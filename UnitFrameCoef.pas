@@ -10,7 +10,7 @@ uses
     models;
 
 type
-    TProductCoefErrors = TDictionary<RProductVar, string>;
+    TProductCoefErrors = TDictionary<RProductCoefOrder, string>;
 
     TFrameCoef = class(TFrame)
         StringGrid3: TStringGrid;
@@ -26,7 +26,7 @@ type
         procedure StringGrid3DblClick(Sender: TObject);
     private
         { Private declarations }
-        FCurentProductCoef: RProductVar;
+        FCurentProductCoef: RProductCoefOrder;
 
         Last_Edited_Col, Last_Edited_Row: Integer;
         FProductCoefErrors: TProductCoefErrors;
@@ -35,7 +35,7 @@ type
         { Public declarations }
         constructor Create(AOwner: TComponent); override;
         procedure SetCurrentParty(Products: TArray<TProduct>);
-        procedure HandleReadCoef(x: TReadVar);
+        procedure HandleReadCoef(x: TReadCoef);
         procedure reset;
     end;
 
@@ -50,8 +50,8 @@ begin
     inherited Create(AOwner);
     Last_Edited_Col := -1;
     Last_Edited_Row := -1;
-    FCurentProductCoef.FProduct := -2;
-    FCurentProductCoef.FVar := -2;
+    FCurentProductCoef.FProductOrder := -2;
+    FCurentProductCoef.FCoefOrder := -2;
     with CheckBox3 do
     begin
         Visible := false;
@@ -63,47 +63,49 @@ begin
 
 end;
 
-procedure TFrameCoef.HandleReadCoef(x: TReadVar);
+procedure TFrameCoef.HandleReadCoef(x: TReadCoef);
 var
-    PrevProductCoef: RProductVar;
+    PrevProductCoef: RProductCoefOrder;
 begin
     PrevProductCoef := FCurentProductCoef;
-    FCurentProductCoef := x.ProductVar;
+    FCurentProductCoef := x.ProductCoefOrder;
 
-    FCurentProductCoef.FProduct := x.FProductOrder;
-    FCurentProductCoef.FVar := x.FVarOrder;
-    FProductCoefErrors.AddOrSetValue(x.ProductVar, x.FError);
+    FCurentProductCoef.FProductOrder := x.FProductOrder;
+    FCurentProductCoef.FCoefOrder := x.FCoefficientOrder;
+    FProductCoefErrors.AddOrSetValue(x.ProductCoefOrder, x.FError);
 
     if x.FError = '' then
-        StringGrid3.Cells[x.ProductVar.FProduct + 2, x.ProductVar.FVar + 1] :=
-          floattostr(x.FValue);
+        StringGrid3.Cells[x.ProductCoefOrder.FProductOrder + 2,
+          x.ProductCoefOrder.FCoefOrder + 1] := floattostr(x.FValue);
 
-    if (PrevProductCoef.FProduct >= 0) and (PrevProductCoef.FVar >= 0) then
-        StringGrid_RedrawCell(StringGrid3, PrevProductCoef.FProduct + 2,
-          PrevProductCoef.FVar + 1);
-
-    if (FCurentProductCoef.FProduct >= 0) and (FCurentProductCoef.FVar >= 0)
+    if (PrevProductCoef.FProductOrder >= 0) and (PrevProductCoef.FCoefOrder >= 0)
     then
-        StringGrid_RedrawCell(StringGrid3, FCurentProductCoef.FProduct + 2,
-          FCurentProductCoef.FVar + 1);
+        StringGrid_RedrawCell(StringGrid3, PrevProductCoef.FProductOrder + 2,
+          PrevProductCoef.FCoefOrder + 1);
+
+    if (FCurentProductCoef.FProductOrder >= 0) and
+      (FCurentProductCoef.FCoefOrder >= 0) then
+        StringGrid_RedrawCell(StringGrid3, FCurentProductCoef.FProductOrder + 2,
+          FCurentProductCoef.FCoefOrder + 1);
 
 end;
 
 procedure TFrameCoef.reset;
 var
-    PrevProductVar: RProductVar;
+    PrevProductVar: RProductCoefOrder;
 begin
     PrevProductVar := FCurentProductCoef;
-    FCurentProductCoef.FProduct := -1;
-    FCurentProductCoef.FVar := -1;
-    if (PrevProductVar.FProduct >= 0) and (PrevProductVar.FVar >= 0) then
-        StringGrid_RedrawCell(StringGrid3, PrevProductVar.FProduct + 2,
-          PrevProductVar.FVar + 1);
-
-    if (FCurentProductCoef.FProduct >= 0) and (FCurentProductCoef.FVar >= 0)
+    FCurentProductCoef.FProductOrder := -1;
+    FCurentProductCoef.FCoefOrder := -1;
+    if (PrevProductVar.FProductOrder >= 0) and (PrevProductVar.FCoefOrder >= 0)
     then
-        StringGrid_RedrawCell(StringGrid3, FCurentProductCoef.FProduct + 2,
-          FCurentProductCoef.FVar + 1);
+        StringGrid_RedrawCell(StringGrid3, PrevProductVar.FProductOrder + 2,
+          PrevProductVar.FCoefOrder + 1);
+
+    if (FCurentProductCoef.FProductOrder >= 0) and
+      (FCurentProductCoef.FCoefOrder >= 0) then
+        StringGrid_RedrawCell(StringGrid3, FCurentProductCoef.FProductOrder + 2,
+          FCurentProductCoef.FCoefOrder + 1);
 
 end;
 
@@ -160,10 +162,10 @@ procedure TFrameCoef.StringGrid3DblClick(Sender: TObject);
 var
     r: TRect;
     pt: TPoint;
-    a: RProductVar;
+    a: RProductCoefOrder;
 begin
-    a.FVar := StringGrid3.Row - 1;
-    a.FProduct := StringGrid3.Col - 2;
+    a.FCoefOrder := StringGrid3.Row - 1;
+    a.FProductOrder := StringGrid3.Col - 2;
     if FProductCoefErrors.ContainsKey(a) and (FProductCoefErrors[a] <> '') then
     begin
         FormPopup.RichEdit1.Font.Color := clRed;
@@ -186,7 +188,7 @@ var
     txt_width, txt_height: double;
     s: string;
     Checked: Boolean;
-    pv: RProductVar;
+    pv: RProductCoefOrder;
 const
     lineColor: TColor = $00BCBCBC;
 begin
@@ -216,11 +218,12 @@ begin
     else
         cnv.Brush.Color := clBtnFace;
 
-    pv.FProduct := ACol - 2;
-    pv.FVar := ARow - 1;
+    pv.FProductOrder := ACol - 2;
+    pv.FCoefOrder := ARow - 1;
 
-    if (FCurentProductCoef.FProduct >= 0) and (FCurentProductCoef.FVar >= 0) and
-      (ProductVarEqual(pv, FCurentProductCoef)) then
+    if (FCurentProductCoef.FProductOrder >= 0) and
+      (FCurentProductCoef.FCoefOrder >= 0) and
+      (ProductCoefEqual(pv, FCurentProductCoef)) then
         cnv.Brush.Color := clInfoBk;
 
     if FProductCoefErrors.ContainsKey(pv) AND (FProductCoefErrors[pv] <> '')

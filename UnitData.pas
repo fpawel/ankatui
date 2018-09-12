@@ -13,7 +13,6 @@ uses
 
 type
 
-
     TDataModule1 = class(TDataModule)
         FDConnectionProductsDB: TFDConnection;
         FDPhysSQLiteDriverLink1: TFDPhysSQLiteDriverLink;
@@ -37,11 +36,13 @@ type
           var AException: Exception);
     private
         { Private declarations }
+        FVars: TArray<TDeviceVar>;
         procedure read_config_section(sect: TConfigSection);
     public
         { Public declarations }
         function DeviceVars: TArray<TDeviceVar>;
-        function GetDeviceVarName(v:integer): string;
+        function GetDeviceVarName(v: integer): string;
+        function GetDeviceVarByName(s: string): integer;
         function DeviceCoefs: TArray<TDeviceVar>;
         function PartiesYears: TArray<integer>;
         function SeriesYears: TArray<integer>;
@@ -97,8 +98,6 @@ type
 var
     DataModule1: TDataModule1;
 
-
-
 implementation
 
 uses dateutils, Vcl.dialogs, System.Variants, stringutils, variantutils;
@@ -107,11 +106,34 @@ uses dateutils, Vcl.dialogs, System.Variants, stringutils, variantutils;
 
 {$R *.dfm}
 
-
 procedure TDataModule1.DataModuleCreate(Sender: TObject);
 begin
     FDConnectionProductsDB.Connected := true;
     FDConnectionConfig.Connected := true;
+    SetLength(FVars, 0);
+
+    with TFDQuery.Create(nil) do
+    begin
+        Connection := FDConnectionProductsDB;
+        SQL.Text := 'SELECT * FROM read_var ORDER BY var;';
+        Open;
+        First;
+        while not Eof do
+        begin
+            SetLength(FVars, length(FVars) + 1);
+            FVars[length(FVars)-1] := TDeviceVar.Create;
+            with FVars[length(FVars)-1] do
+            begin
+                FVar := FieldValues['var'];
+                FName := FieldValues['name'];
+                FChecked := FieldValues['checked'];
+                FDescription := FieldValues['description'];
+            end;
+            Next;
+        end;
+        Close;
+        Free;
+    end;
 end;
 
 function TDataModule1.InvertVarsChecked: boolean;
@@ -371,51 +393,31 @@ begin
 
 end;
 
-function TDataModule1.GetDeviceVarName(v:integer): string;
+function TDataModule1.GetDeviceVarByName(s: string): integer;
+var v:TDeviceVar;
 begin
-    with TFDQuery.Create(nil) do
+    for v in FVars do
     begin
-        Connection := FDConnectionProductsDB;
-        SQL.Text := 'SELECT name FROM read_var WHERE var = :var;';
-        Open;
-        First;
-        if not Eof then
+        if v.FName = s then
         begin
-            Result := FieldValues['name'];
+            Exit(v.FVar);
         end;
-        Close;
-        Free;
     end;
+    Exit(-1);
+end;
+
+function TDataModule1.GetDeviceVarName(v: integer): string;
+var x:TDeviceVar;
+begin
+    for x in FVars do
+        if x.FVar = v then
+            exit(x.FName);
+    exit('');
 end;
 
 function TDataModule1.DeviceVars: TArray<TDeviceVar>;
-var
-    xs: TList<TDeviceVar>;
-    v: TDeviceVar;
 begin
-    xs := TList<TDeviceVar>.Create;
-    with TFDQuery.Create(nil) do
-    begin
-        Connection := FDConnectionProductsDB;
-        SQL.Text := 'SELECT * FROM read_var ORDER BY var;';
-        Open;
-        First;
-        while not Eof do
-        begin
-            v := TDeviceVar.Create;
-            v.FVar := FieldValues['var'];
-            v.FName := FieldValues['name'];
-            v.FChecked := FieldValues['checked'];
-            v.FDescription := FieldValues['description'];
-            xs.Add(v);
-            Next;
-        end;
-        Close;
-        Free;
-    end;
-    result := xs.ToArray;
-    xs.Free;
-
+    exit(FVars);
 end;
 
 procedure TDataModule1.FDConnectionProductsDBError(ASender, AInitiator: TObject;
@@ -439,8 +441,8 @@ begin
         First;
         while not Eof do
         begin
-            SetLength(result, Length(result) + 1);
-            with result[Length(result) - 1] do
+            SetLength(result, length(result) + 1);
+            with result[length(result) - 1] do
             begin
                 Key := FieldValues['property_name'];
 
@@ -798,8 +800,8 @@ begin
         First;
         while not Eof do
         begin
-            SetLength(result, Length(result)+1);
-            result[Length(result)-1]  := FieldValues['value'];
+            SetLength(result, length(result) + 1);
+            result[length(result) - 1] := FieldValues['value'];
             Next;
         end;
         Close;
@@ -823,10 +825,10 @@ begin
         First;
         while not Eof do
         begin
-            SetLength(sect.FProperties, Length(sect.FProperties) + 1);
-            sect.FProperties[Length(sect.FProperties) - 1] :=
+            SetLength(sect.FProperties, length(sect.FProperties) + 1);
+            sect.FProperties[length(sect.FProperties) - 1] :=
               TConfigProperty.Create;
-            with sect.FProperties[Length(sect.FProperties) - 1] do
+            with sect.FProperties[length(sect.FProperties) - 1] do
             begin
                 FSectionName := sect.FSectionName;
                 FType := FieldValues['type'];
@@ -867,16 +869,16 @@ begin
         First;
         while not Eof do
         begin
-            SetLength(result, Length(result) + 1);
-            result[Length(result) - 1] := TConfigSection.Create;
-            with result[Length(result) - 1] do
+            SetLength(result, length(result) + 1);
+            result[length(result) - 1] := TConfigSection.Create;
+            with result[length(result) - 1] do
             begin
                 FSectionName := FieldByName('section_name').Value;
                 FSortOrder := FieldByName('sort_order').Value;
                 FHint := FieldByName('hint').Value;
             end;
 
-            read_config_section(result[Length(result) - 1]);
+            read_config_section(result[length(result) - 1]);
 
             Next;
         end;
@@ -928,7 +930,7 @@ begin
     begin
         Connection := DataModule1.FDConnectionConfig;
         SQL.Text := 'INSERT OR REPLACE INTO work_checked VALUES ';
-        for I := 0 to Length(xs) - 1 do
+        for I := 0 to length(xs) - 1 do
         begin
             if I > 0 then
                 SQL.Text := SQL.Text + ', ';
