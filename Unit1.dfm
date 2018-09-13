@@ -3169,13 +3169,12 @@ object Form1: TForm1
         BevelOuter = bvNone
         TabOrder = 0
         OnResize = PanelConsolePlaceholderRightResize
-        ExplicitWidth = 159
-        ExplicitHeight = 355
         object Splitter1: TSplitter
           Left = 281
           Top = 59
           Width = 5
           Height = 355
+          Color = clBtnFace
           ParentColor = False
           ExplicitLeft = 1013
           ExplicitTop = 65
@@ -3187,6 +3186,7 @@ object Form1: TForm1
           Height = 5
           Cursor = crVSplit
           Align = alBottom
+          Color = clBtnFace
           ParentColor = False
           ExplicitLeft = -2
           ExplicitWidth = 1087
@@ -3197,6 +3197,7 @@ object Form1: TForm1
           Width = 5
           Height = 355
           Align = alRight
+          Color = clBtnFace
           ParentColor = False
           Visible = False
           ExplicitLeft = 866
@@ -3213,6 +3214,8 @@ object Form1: TForm1
           TabOrder = 0
           Visible = False
           OnResize = PanelConsolePlaceholderRightResize
+          ExplicitLeft = 924
+          ExplicitTop = 58
         end
         object PanelConsolePlaceholderBottom: TPanel
           Left = 0
@@ -3261,7 +3264,6 @@ object Form1: TForm1
               Align = alTop
               Alignment = taLeftJustify
               BevelOuter = bvNone
-              Caption = '   '#1057#1086#1086#1073#1097#1077#1085#1080#1103':'
               Color = clGradientInactiveCaption
               Font.Charset = DEFAULT_CHARSET
               Font.Color = clGray
@@ -3271,6 +3273,45 @@ object Form1: TForm1
               ParentBackground = False
               ParentFont = False
               TabOrder = 1
+              ExplicitLeft = 2
+              ExplicitTop = 1
+              object Panel6: TPanel
+                Left = 0
+                Top = 0
+                Width = 129
+                Height = 32
+                Align = alLeft
+                Alignment = taLeftJustify
+                BevelOuter = bvNone
+                Caption = '   '#1057#1086#1086#1073#1097#1077#1085#1080#1103':'
+                Font.Charset = DEFAULT_CHARSET
+                Font.Color = clGray
+                Font.Height = -16
+                Font.Name = 'Tahoma'
+                Font.Style = [fsBold]
+                ParentColor = True
+                ParentFont = False
+                TabOrder = 2
+              end
+              object Panel2: TPanel
+                Left = 129
+                Top = 0
+                Width = 887
+                Height = 32
+                Align = alClient
+                Alignment = taLeftJustify
+                BevelOuter = bvNone
+                Font.Charset = DEFAULT_CHARSET
+                Font.Color = clWindowText
+                Font.Height = -16
+                Font.Name = 'Tahoma'
+                Font.Style = []
+                ParentColor = True
+                ParentFont = False
+                TabOrder = 1
+                ExplicitLeft = 135
+                ExplicitTop = 1
+              end
               object ToolBar4: TToolBar
                 Left = 1016
                 Top = 0
@@ -3306,25 +3347,6 @@ object Form1: TForm1
                   OnClick = ToolButtonConsoleHideClick
                 end
               end
-              object Panel2: TPanel
-                Left = 0
-                Top = 0
-                Width = 1016
-                Height = 32
-                Align = alClient
-                Alignment = taLeftJustify
-                BevelOuter = bvNone
-                Font.Charset = DEFAULT_CHARSET
-                Font.Color = clWindowText
-                Font.Height = -16
-                Font.Name = 'Tahoma'
-                Font.Style = []
-                ParentColor = True
-                ParentFont = False
-                TabOrder = 1
-                ExplicitLeft = 2
-                ExplicitTop = 1
-              end
             end
           end
         end
@@ -3336,7 +3358,6 @@ object Form1: TForm1
           Align = alLeft
           BevelOuter = bvNone
           TabOrder = 2
-          ExplicitHeight = 555
           object StringGrid1: TStringGrid
             Left = 0
             Top = 32
@@ -3359,7 +3380,6 @@ object Form1: TForm1
             OnMouseUp = StringGrid1MouseUp
             OnSelectCell = StringGrid1SelectCell
             OnTopLeftChanged = StringGrid1TopLeftChanged
-            ExplicitHeight = 523
             ColWidths = (
               64
               64
@@ -3425,7 +3445,6 @@ object Form1: TForm1
           Align = alLeft
           BevelOuter = bvNone
           TabOrder = 3
-          ExplicitHeight = 555
         end
         object Panel3: TPanel
           Left = 0
@@ -3436,9 +3455,9 @@ object Form1: TForm1
           BevelOuter = bvNone
           TabOrder = 4
           object ToolBar1: TToolBar
-            Left = 966
+            Left = 1024
             Top = 0
-            Width = 116
+            Width = 58
             Height = 59
             Align = alRight
             ButtonHeight = 56
@@ -3448,15 +3467,8 @@ object Form1: TForm1
             EdgeOuter = esNone
             Images = ImageList1
             TabOrder = 0
-            object ToolButton1: TToolButton
-              Left = 0
-              Top = 0
-              Caption = 'ToolButton1'
-              ImageIndex = 8
-              OnClick = ToolButton1Click
-            end
             object ToolButton3: TToolButton
-              Left = 57
+              Left = 0
               Top = 0
               Caption = 'ToolButton3'
               ImageIndex = 4
@@ -3501,12 +3513,13 @@ object Form1: TForm1
           object Panel5: TPanel
             Left = 58
             Top = 0
-            Width = 908
+            Width = 966
             Height = 59
             Align = alClient
             Alignment = taLeftJustify
             BevelOuter = bvNone
             TabOrder = 2
+            ExplicitWidth = 908
           end
         end
         object Panel12: TPanel
@@ -3519,11 +3532,7 @@ object Form1: TForm1
           BevelOuter = bvNone
           ParentColor = True
           TabOrder = 5
-          ExplicitLeft = 5
-          ExplicitTop = 0
-          ExplicitWidth = 1072
-          ExplicitHeight = 614
-          object Panel6: TPanel
+          object PanelCurrentWorkContent: TPanel
             Left = 0
             Top = 32
             Width = 632
@@ -3533,10 +3542,8 @@ object Form1: TForm1
             BevelOuter = bvNone
             ParentColor = True
             TabOrder = 0
-            ExplicitLeft = -1
-            ExplicitTop = 31
           end
-          object Panel13: TPanel
+          object PanelCurrentWorkTitle: TPanel
             Left = 0
             Top = 0
             Width = 632
@@ -3554,11 +3561,10 @@ object Form1: TForm1
             ParentBackground = False
             ParentFont = False
             TabOrder = 1
-            ExplicitWidth = 1072
-            object ToolBar5: TToolBar
-              Left = 595
+            object ToolBarCurrentWorkContent: TToolBar
+              Left = 600
               Top = 0
-              Width = 37
+              Width = 32
               Align = alRight
               ButtonHeight = 31
               ButtonWidth = 32
@@ -3567,14 +3573,13 @@ object Form1: TForm1
               EdgeOuter = esNone
               Images = ImageList3
               TabOrder = 0
-              Visible = False
-              ExplicitLeft = 1035
-              object ToolButton7: TToolButton
+              object ToolButtonCloseCurrentWork: TToolButton
                 Left = 0
                 Top = 0
                 Caption = 'ToolButtonConsoleHide'
                 ImageIndex = 0
-                OnClick = ToolButton7Click
+                Visible = False
+                OnClick = ToolButtonCloseCurrentWorkClick
               end
             end
           end
@@ -3622,7 +3627,7 @@ object Form1: TForm1
     Left = 480
     Top = 178
     Bitmap = {
-      494C010109009C00B00232003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010109009C00B40232003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000C8000000960000000100200000000000C0D4
       0100000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -7552,7 +7557,7 @@ object Form1: TForm1
     Left = 472
     Top = 256
     Bitmap = {
-      494C010103001801400210001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010103001801440210001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -7701,7 +7706,7 @@ object Form1: TForm1
     Left = 544
     Top = 178
     Bitmap = {
-      494C01010300D401840219001900FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C01010300D401880219001900FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000640000001900000001002000000000001027
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

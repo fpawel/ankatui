@@ -10,7 +10,7 @@ uses
     System.Generics.Collections,
     System.ImageList, UnitData, Vcl.ImgList, Vcl.Menus, VirtualTrees,
     msglevel, UnitFormLog, UnitFormPopup, UnitFrameCoef,
-    UnitFrameVar, UnitFormParties,
+    UnitFormParties,
     UnitFormManualControl, inifiles, System.SyncObjs, models;
 
 type
@@ -67,7 +67,7 @@ type
         N4: TMenuItem;
         N5: TMenuItem;
         ToolButton3: TToolButton;
-        Panel6: TPanel;
+        PanelCurrentWorkContent: TPanel;
         RichEdit1: TRichEdit;
         PanelConsole: TPanel;
         Panel10: TPanel;
@@ -84,16 +84,16 @@ type
         Panel9: TPanel;
         Panel11: TPanel;
         Panel12: TPanel;
-        Panel13: TPanel;
-        ToolBar5: TToolBar;
-        ToolButton7: TToolButton;
+        PanelCurrentWorkTitle: TPanel;
+    ToolBarCurrentWorkContent: TToolBar;
+        ToolButtonCloseCurrentWork: TToolButton;
         N6: TMenuItem;
         N7: TMenuItem;
         N8: TMenuItem;
         Panel8: TPanel;
         Panel14: TPanel;
-    ToolButton1: TToolButton;
-    PanelPlaceholderCurrentPartyMain: TPanel;
+        PanelPlaceholderCurrentPartyMain: TPanel;
+    Panel6: TPanel;
         procedure FormCreate(Sender: TObject);
         procedure ComboBox1CloseUp(Sender: TObject);
         procedure StringGrid1SelectCell(Sender: TObject; ACol, ARow: integer;
@@ -117,7 +117,7 @@ type
         procedure PanelConsolePlaceholderBottomResize(Sender: TObject);
         procedure PanelConsolePlaceholderRightResize(Sender: TObject);
         procedure ToolButtonConsoleHideClick(Sender: TObject);
-        procedure ToolButton7Click(Sender: TObject);
+        procedure ToolButtonCloseCurrentWorkClick(Sender: TObject);
         procedure N4Click(Sender: TObject);
         procedure N1Click(Sender: TObject);
         procedure N3Click(Sender: TObject);
@@ -126,7 +126,6 @@ type
           Shift: TShiftState; X, Y: integer);
         procedure N7Click(Sender: TObject);
         procedure N8Click(Sender: TObject);
-    procedure ToolButton1Click(Sender: TObject);
     private
         { Private declarations }
 
@@ -140,11 +139,17 @@ type
 
         procedure OnException(Sender: TObject; E: Exception);
 
+        procedure UpdateCurrentWorkPanelCaption;
+
+        procedure UpdatedControlsVisibilityOnStartedChanged(started: boolean);
+
+        procedure SetCurrentWorkContent(widget: TControl;
+          contetnt_title: string);
+
     public
 
         FProducts: TArray<TProduct>;
         FFrameCoef: TFrameCoef;
-        FFrameVar: TFrameVar;
         FReadProduct: integer;
         FFormLog: TFormLog;
         FFormParties: TFormParties;
@@ -153,8 +158,10 @@ type
         { Public declarations }
         procedure SetCurrentParty;
         procedure Init2;
-        procedure SetupWorkStarted(work: string; started: boolean);
+        procedure SetupWorkStarted(widget: TControl; work: string);
         procedure SetCoef(product_order, coef_order: integer);
+
+
     end;
 
 var
@@ -168,7 +175,7 @@ uses DataRichEditOutput, pipe, dateutils, rest.json, Winapi.uxtheme,
     listports, System.IOUtils,
     CurrentWorkTreeData, stringutils, vclutils, UnitFormChart, UnitFormSettings,
     UnitFormCurrentWork, UnitFormDelay, System.Types, System.UITypes, findproc,
-    PropertiesFormUnit, UnitHostAppData, UnitFormCurrentChart;
+    PropertiesFormUnit, UnitHostAppData, UnitFormCurrentChart, UnitFormReadVars;
 
 {$R *.dfm}
 
@@ -187,11 +194,8 @@ begin
     Application.OnException := OnException;
 
     FFrameCoef := TFrameCoef.Create(self);
-    FFrameCoef.Parent := Panel6;
+    FFrameCoef.Parent := PanelCurrentWorkContent;
     FFrameCoef.Align := alclient;
-
-    FFrameVar := TFrameVar.Create(self);
-    FFrameVar.Align := alclient;
 
     FIni := TIniFile.Create(ExtractFileDir(paramstr(0)) + '\main.ini');
     FReadProduct := -1;
@@ -312,9 +316,6 @@ end;
 
 procedure TForm1.Init2;
 begin
-
-
-    // FCurrentWork := TCurrentWork.Create(FPipe, Panel5, VirtualStringTree1);
     HostAppData.FPipe.Handle('READ_COEFFICIENT', HandleReadCoefficient);
     HostAppData.FPipe.Handle('READ_VAR', HandleReadVar);
 
@@ -329,10 +330,31 @@ begin
     HostAppData.FPipe.Handle('PROMPT_ERROR_STOP_WORK',
       HandlePromptErrorStopWork);
 
-    HostAppData.FPipe.Handle('NEW_CHART',FormCurrentChart.NewChart);
+    HostAppData.FPipe.Handle('DELAY',
+        function(content: string): string
+        var
+            i: TDelayInfo;
+        begin
+            Result := '';
+            i := TJson.JsonToObject<TDelayInfo>(content);
+            if i.FEnabled then
+            begin
+                if not FormDelay.Visible then
+                begin
+                    FormCurrentChart.NewChart;
+                    FormCurrentChart.Setup(PanelCurrentWorkContent);
+                end;
+            end else
+            begin
+                FormCurrentChart.Hide;
+            end;
+            FormDelay.SetupDelay(i);
+            i.Free;
+
+        end);
 
     FormCurrentWork.Init2;
-    FormDelay.Init2;
+
     PrintLastMessages(RichEdit1, 500);
 
     if not HostAppData.FPipe.Connect('ANKAT') then
@@ -355,9 +377,9 @@ begin
     X.FProduct := product_order;
     X.FCoefficient := coef_order;
     HostAppData.FPipe.WriteMsgJSON('SET_COEFFICIENT', X);
-    SetupWorkStarted('Установка коэффициента ' +
+    SetupWorkStarted(FFrameCoef, 'Установка коэффициента ' +
       inttostr(DataModule1.DeviceCoefs[coef_order].FVar) + ' прибора ' +
-      inttostr(DataModule1.CurrentPartyProducts[product_order].FSerial), true);
+      inttostr(DataModule1.CurrentPartyProducts[product_order].FSerial));
     X.Free;
 
 end;
@@ -365,26 +387,36 @@ end;
 procedure TForm1.N1Click(Sender: TObject);
 begin
     HostAppData.FPipe.WriteMsgJSON('READ_VARS', nil);
-    SetupWorkStarted('Опрос', true);
-    Panel6.Controls[0].Parent := nil;
-    FFrameVar.StringGrid2.Parent := Form1.Panel6;
+    SetupWorkStarted(FormReadVars, 'Опрос');
+    PanelCurrentWorkContent.Controls[0].Parent := nil;
+    with FormReadVars do
+    begin
+        Parent := self;
+        Align := alclient;
+        BorderStyle := bsNone;
+        Visible := true;
+        Parent := self.PanelCurrentWorkContent;
+        Font.Assign(self.Font);
+    end;
+    FormCurrentChart.NewChart;
+    FormCurrentChart.Setup( FormReadVars );
 end;
 
 procedure TForm1.N2Click(Sender: TObject);
 begin
     HostAppData.FPipe.WriteMsgJSON('READ_COEFFICIENTS', nil);
-    SetupWorkStarted('Считывание коэффициентов', true);
+    SetupWorkStarted(FFrameCoef, 'Считывание коэффициентов');
 end;
 
 procedure TForm1.N3Click(Sender: TObject);
 begin
     HostAppData.FPipe.WriteMsgJSON('WRITE_COEFFICIENTS', nil);
-    SetupWorkStarted('Запись коэффициентов', true);
+    SetupWorkStarted(FFrameCoef, 'Запись коэффициентов');
 end;
 
 procedure TForm1.N4Click(Sender: TObject);
 begin
-    FormCurrentWork.Setup;
+    FormCurrentWork.SetupDialogMode;
     FormCurrentWork.Show;
 end;
 
@@ -405,17 +437,34 @@ var
     X: TEndWorkInfo;
 begin
     Result := '';
-    FFrameVar.reset;
+    FormReadVars.reset;
     FFrameCoef.reset;
     X := TJson.JsonToObject<TEndWorkInfo>(content);
-    SetupWorkStarted(X.FName + ': выполнено', false);
     if X.FError <> '' then
     begin
         Panel5.Caption := X.FName + ': ' + X.FError;
         Panel5.Font.Color := clRed;
+    end
+    else
+    begin
+        Panel5.Caption := X.FName + ': выполнено';
+        Panel5.Font.Color := clNavy;
+
+    end;
+
+    if (PanelCurrentWorkContent.ControlCount > 0) AND
+      (PanelCurrentWorkContent.Controls[0] = FormCurrentWork) then
+    begin
+        ToolButtonCloseCurrentWork.Visible := true;
+    end
+    else
+    begin
+        SetCurrentWorkContent(FFrameCoef, 'Коэффициенты');
     end;
 
     X.Free;
+
+    UpdatedControlsVisibilityOnStartedChanged(false);
 
 end;
 
@@ -497,7 +546,7 @@ begin
     Result := '';
     X := TJson.JsonToObject<TReadVar>(content);
     p := FProducts[X.FProductOrder];
-    v := FFrameVar.FVars[X.FVarOrder];
+    v := FormReadVars.FVars[X.FVarOrder];
     Panel2.Font.Color := clNavy;
     Panel2.Caption := Format('Считывание: АНКАТ %d: регистр %d: %s: %s: ',
       [p.FSerial, v.FVar, v.FName, v.FDescription]);
@@ -510,9 +559,9 @@ begin
         Panel2.Font.Color := clRed;
     end;
 
-    FFrameVar.HandleReadVar(X);
-    if x.FError = '' then
-        FormCurrentChart.AddValue(x.FProductSerial, x.FVar, x.FValue);
+    FormReadVars.HandleReadVar(X);
+    if X.FError = '' then
+        FormCurrentChart.AddValue(X.FProductSerial, X.FVar, X.FValue);
     X.Free;
 end;
 
@@ -540,51 +589,6 @@ begin
 
     FFrameCoef.HandleReadCoef(X);
     X.Free;
-end;
-
-procedure TForm1.SetupWorkStarted(work: string; started: boolean);
-begin
-
-
-
-    if started then
-    begin
-        FormCurrentWork.Hide;
-        FormCurrentWork.Setup;
-        if ToolBar5.Visible then
-            ToolButton7.Click;
-    end
-    else
-    begin
-        if (Panel6.ControlCount > 0) AND
-          (Panel6.Controls[0] = FormCurrentWork.VirtualStringTree1) then
-        begin
-            ToolBar5.Visible := true;
-        end
-        else
-        begin
-            if (Panel6.ControlCount > 0) AND
-              (Panel6.Controls[0] <> FFrameCoef.StringGrid3) then
-                Panel6.Controls[0].Parent := nil;
-
-            if FFrameCoef.StringGrid3.Parent <> Panel6 then
-                FFrameCoef.StringGrid3.Parent := Panel6;
-            Panel13.Caption := '   Коэффициенты';
-        end;
-
-    end;
-
-    Panel5.Caption := work;
-    Panel13.Caption := '   ' + work;
-
-    Panel5.Font.Color := clNavy;
-
-    FormManualControl.Button1.Enabled := not started;
-    FormManualControl.Button6.Enabled := not started;
-    FormManualControl.RadioGroup1.Enabled := not started;
-    FormManualControl.GroupBox2.Enabled := not started;
-    ToolButtonRun.Visible := not started;
-    ToolButtonStop.Visible := started;
 end;
 
 procedure TForm1.FormActivate(Sender: TObject);
@@ -664,7 +668,7 @@ begin
 
         end;
     end;
-    FFrameVar.SetCurrentParty(FProducts);
+    FormReadVars.SetCurrentParty(FProducts);
     FFrameCoef.SetCurrentParty(FProducts);
 end;
 
@@ -951,18 +955,6 @@ begin
     ComboBox1.Visible := false;
 end;
 
-procedure TForm1.ToolButton1Click(Sender: TObject);
-begin
-    with FormCurrentChart do
-    begin
-        Parent := TabSheet3;
-        Align := alClient;
-        BorderStyle := bsNone;
-        Visible := true;
-        BringToFront;
-    end;
-end;
-
 procedure TForm1.ToolButton3Click(Sender: TObject);
 begin
     FormSettings.Position := poScreenCenter;
@@ -971,13 +963,10 @@ begin
     // PropertiesForm.Show;
 end;
 
-procedure TForm1.ToolButton7Click(Sender: TObject);
+procedure TForm1.ToolButtonCloseCurrentWorkClick(Sender: TObject);
 begin
-    ToolBar5.Visible := false;
-    if Panel6.ControlCount > 0 then
-        Panel6.Controls[0].Parent := nil;
-    FFrameCoef.StringGrid3.Parent := Panel6;
-    Panel13.Caption := '   Коэффициенты';
+    ToolButtonCloseCurrentWork.Visible := false;
+    SetCurrentWorkContent(FFrameCoef, 'Коэффициенты');
 
 end;
 
@@ -1055,6 +1044,75 @@ begin
     HostAppData.FPipe.WriteMsgJSON('CURRENT_WORK_STOP', nil);
     ToolButtonStop.Visible := false;
 
+end;
+
+procedure TForm1.SetCurrentWorkContent(widget: TControl;
+  contetnt_title: string);
+begin
+    if Assigned(widget) then
+    begin
+        with PanelCurrentWorkContent do
+            while ControlCount > 0 do
+            begin
+                if Controls[0] is TForm then
+                    Controls[0].Visible := false;
+                Controls[0].Parent := nil;
+            end;
+        if widget is TForm then
+            with widget as TForm do
+            begin
+                BorderStyle := bsNone;
+                Align := alclient;
+
+            end;
+        widget.Parent := PanelCurrentWorkContent;
+        widget.Visible := true;
+    end;
+    PanelCurrentWorkTitle.Caption := '   ' + contetnt_title;
+end;
+
+procedure TForm1.SetupWorkStarted(widget: TControl; work: string);
+begin
+    FormCurrentWork.SetupWorksTree;
+    PanelCurrentWorkTitle.Caption := '   ' + work;
+    if ToolButtonCloseCurrentWork.Visible then
+        ToolButtonCloseCurrentWork.Click;
+
+    Panel5.Caption := work;
+    Panel5.Font.Color := clNavy;
+    UpdatedControlsVisibilityOnStartedChanged(true);
+    SetCurrentWorkContent(widget, work);
+end;
+
+procedure TForm1.UpdateCurrentWorkPanelCaption;
+var
+    c: TControl;
+begin
+    if PanelCurrentWorkContent.ControlCount = 0 then
+    begin
+        PanelCurrentWorkTitle.Caption := '';
+        Exit;
+    end;
+    c := PanelCurrentWorkContent.Controls[0];
+    if c = FormCurrentWork then
+        PanelCurrentWorkTitle.Caption := '  ' +
+          FormCurrentWork.RootNodeData.FInfo.FName
+    else if c = FormReadVars then
+        PanelCurrentWorkTitle.Caption := '  Опрос'
+    else if c = FFrameCoef then
+        PanelCurrentWorkTitle.Caption := '  Коэффициенты'
+    else
+        PanelCurrentWorkTitle.Caption := '  ???????';
+end;
+
+procedure TForm1.UpdatedControlsVisibilityOnStartedChanged(started: boolean);
+begin
+    FormManualControl.Button1.Enabled := not started;
+    FormManualControl.Button6.Enabled := not started;
+    FormManualControl.RadioGroup1.Enabled := not started;
+    FormManualControl.GroupBox2.Enabled := not started;
+    ToolButtonRun.Visible := not started;
+    ToolButtonStop.Visible := started;
 end;
 
 end.

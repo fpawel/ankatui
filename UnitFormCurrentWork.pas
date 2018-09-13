@@ -36,7 +36,7 @@ type
     private
         { Private declarations }
         procedure AddNode(par: PVirtualNode; op_info: TOperationInfo);
-        function RootNodeData: TNodeData;
+
 
         procedure Reset;
 
@@ -46,7 +46,9 @@ type
         procedure SetRunError;
         procedure Init2;
         function SelectedOperation: TOperationInfo;
-        procedure Setup;
+        procedure SetupDialogMode;
+        procedure SetupWorksTree;
+        function RootNodeData: TNodeData;
     end;
 
 var
@@ -66,99 +68,18 @@ implementation
 
 uses rest.json, stringutils, Unit1, unitdata, UnitHostAppData;
 
-
-//function checkStateToStr(x: TCheckState): string;
-//begin
-//    case x of
-//        csUncheckedNormal:
-//            exit('csUncheckedNormal');
-//        csUncheckedPressed:
-//            exit('csUncheckedPressed');
-//        csCheckedNormal:
-//            exit('csCheckedNormal');
-//        csCheckedPressed:
-//            exit('csCheckedPressed');
-//        csMixedNormal:
-//            exit('csMixedNormal');
-//        csMixedPressed:
-//            exit('csMixedPressed');
-//        csUncheckedDisabled:
-//            exit('csUncheckedDisabled');
-//        csCheckedDisabled:
-//            exit('csCheckedDisabled');
-//        csMixedDisabled:
-//            exit('csMixedDisabled');
-//    else
-//        exit('csCheckedNormal')
-//    end;
-//end;
-//
-//function parseCheckState(x: string): TCheckState;
-//begin
-//    if x = 'csUncheckedNormal' then
-//        exit(csUncheckedNormal);
-//
-//    if x = 'csUncheckedPressed' then
-//        exit(csUncheckedPressed);
-//
-//    if x = 'csCheckedNormal' then
-//        exit(csCheckedNormal);
-//
-//    if x = 'csCheckedPressed' then
-//        exit(csCheckedPressed);
-//
-//    if x = 'csMixedNormal' then
-//        exit(csMixedNormal);
-//
-//    if x = 'csMixedPressed' then
-//        exit(csMixedPressed);
-//
-//    if x = 'csUncheckedDisabled' then
-//        exit(csUncheckedDisabled);
-//
-//    if x = 'csCheckedDisabled' then
-//        exit(csCheckedDisabled);
-//
-//    if x = 'csMixedDisabled' then
-//        exit(csMixedDisabled);
-//
-//    exit(csCheckedNormal);
-//end;
-
-procedure TFormCurrentWork.UpdateWorksCheckedConfigDB;
-var
-    Node: PVirtualNode;
-    d: PTreeData;
-    xs:array of integer;
-    n:integer;
-begin
-    Node := VirtualStringTree1.GetFirst;
-    while Assigned(Node) do
-    begin
-        d := VirtualStringTree1.GetNodeData(Node);
-        n :=  d.X.FInfo.FOrdinal;
-        if length(xs) <= n then
-            SetLength(xs, n+1);
-        xs[n] := ord(Node.CheckState);
-        Node := VirtualStringTree1.GetNext(Node);
-    end;
-    DataModule1.SetWorksChecked(xs);
-
-end;
-
 procedure TFormCurrentWork.Button1Click(Sender: TObject);
 var
     o: TOperationInfo;
 begin
-    o := FormCurrentWork.SelectedOperation;
+    o := SelectedOperation;
     if o = nil then
         o := RootNodeData.FInfo;
     Reset;
+    UpdateWorksCheckedConfigDB;
     HostAppData.FPipe.WriteMsgStr('RUN_MAIN_WORK', inttostr(o.FOrdinal));
-    Form1.SetupWorkStarted(o.FName, true);
-    while Form1.Panel6.ControlCount > 0 do
-        Form1.Panel6.Controls[0].Parent := nil;
-    VirtualStringTree1.Parent := Form1.Panel6;
+    Button1.Visible := false;
+    Form1.SetupWorkStarted(self, o.FName);
 
 end;
 
@@ -178,68 +99,6 @@ begin
     UpdateWorksCheckedConfigDB;
 end;
 
-procedure TFormCurrentWork.Setup;
-var
-    Node: PVirtualNode;
-    p: PTreeData;
-begin
-    VirtualStringTree1.Parent := Self;
-    Node := VirtualStringTree1.GetFirst;
-    while Assigned(Node) do
-    begin
-        p := VirtualStringTree1.GetNodeData(Node);
-        p.x.Free;
-        Node := VirtualStringTree1.GetNext(Node);
-    end;
-    VirtualStringTree1.Clear;
-
-    AddNode(nil, TJson.JsonToObject<TOperationInfo>
-      (HostAppData.FPipe.Fetch1('CURRENT_WORKS', nil)));
-
-    Node := VirtualStringTree1.GetFirst;
-    Node := VirtualStringTree1.GetNext(Node);
-    if Assigned(Node) then
-        VirtualStringTree1.TreeOptions.MiscOptions :=
-          VirtualStringTree1.TreeOptions.MiscOptions + [toCheckSupport]
-    else
-        VirtualStringTree1.TreeOptions.MiscOptions :=
-          VirtualStringTree1.TreeOptions.MiscOptions - [toCheckSupport];
-
-end;
-
-procedure TFormCurrentWork.Init2;
-begin
-
-    HostAppData.FPipe.Handle('CURRENT_WORK',
-        function(content: string): string
-        var
-            d: TNodeData;
-            op: TNotifyOperation;
-        begin
-            Result := '';
-
-            op := TJson.JsonToObject<TNotifyOperation>(content);
-            d := RootNodeData.FDescendants[op.FOrdinal];
-            if op.FName <> d.FInfo.FName then
-                exit;
-
-            if op.FRun then
-            begin
-                // VirtualStringTree1.Selected[d.FNode] := true;
-                VirtualStringTree1.Expanded[d.FNode] := true;
-                d.FInfo.FHasMessage := true;
-                d.FInfo.FHasError := false;
-            end;
-            if (d.FChildren.Count = 0) and op.FRun then
-            begin
-                Form1.Panel5.Caption := d.text;
-                Form1.Panel5.Font.Color := clNavy;
-            end;
-            d.FRun := op.FRun;
-            VirtualStringTree1.RepaintNode(d.FNode);
-        end);
-
-end;
 
 procedure TFormCurrentWork.VirtualStringTree1BeforeCellPaint
   (Sender: TBaseVirtualTree; TargetCanvas: TCanvas; Node: PVirtualNode;
@@ -393,11 +252,7 @@ begin
         end;
 end;
 
-function TFormCurrentWork.RootNodeData: TNodeData;
-begin
-    Result := PTreeData(VirtualStringTree1.GetNodeData
-      (VirtualStringTree1.GetFirst)).x;
-end;
+
 
 procedure TFormCurrentWork.AddNode(par: PVirtualNode; op_info: TOperationInfo);
 var
@@ -462,5 +317,110 @@ begin
     end;
 
 end;
+
+procedure TFormCurrentWork.SetupWorksTree;
+var
+    Node: PVirtualNode;
+    p: PTreeData;
+begin
+    Node := VirtualStringTree1.GetFirst;
+    while Assigned(Node) do
+    begin
+        p := VirtualStringTree1.GetNodeData(Node);
+        p.x.Free;
+        Node := VirtualStringTree1.GetNext(Node);
+    end;
+    VirtualStringTree1.Clear;
+
+    AddNode(nil, TJson.JsonToObject<TOperationInfo>
+      (HostAppData.FPipe.Fetch1('CURRENT_WORKS', nil)));
+
+    Node := VirtualStringTree1.GetFirst;
+    Node := VirtualStringTree1.GetNext(Node);
+    if Assigned(Node) then
+        VirtualStringTree1.TreeOptions.MiscOptions :=
+          VirtualStringTree1.TreeOptions.MiscOptions + [toCheckSupport]
+    else
+        VirtualStringTree1.TreeOptions.MiscOptions :=
+          VirtualStringTree1.TreeOptions.MiscOptions - [toCheckSupport];
+
+end;
+
+
+
+procedure TFormCurrentWork.SetupDialogMode;
+begin
+    SetupWorksTree;
+    BorderStyle := bsDialog;
+    Align := alnone;
+    Parent := nil;
+    Button1.Visible := true;
+    Width := 800;
+    Height := 550;
+    Position := poScreenCenter;
+    Visible := true;
+end;
+
+procedure TFormCurrentWork.Init2;
+begin
+
+    HostAppData.FPipe.Handle('CURRENT_WORK',
+        function(content: string): string
+        var
+            d: TNodeData;
+            op: TNotifyOperation;
+        begin
+            Result := '';
+
+            op := TJson.JsonToObject<TNotifyOperation>(content);
+            d := RootNodeData.FDescendants[op.FOrdinal];
+            if op.FName <> d.FInfo.FName then
+                exit;
+
+            if op.FRun then
+            begin
+                // VirtualStringTree1.Selected[d.FNode] := true;
+                VirtualStringTree1.Expanded[d.FNode] := true;
+                d.FInfo.FHasMessage := true;
+                d.FInfo.FHasError := false;
+            end;
+            if (d.FChildren.Count = 0) and op.FRun then
+            begin
+                Form1.Panel5.Caption := d.text;
+                Form1.Panel5.Font.Color := clNavy;
+            end;
+            d.FRun := op.FRun;
+            VirtualStringTree1.RepaintNode(d.FNode);
+        end);
+
+end;
+
+procedure TFormCurrentWork.UpdateWorksCheckedConfigDB;
+var
+    Node: PVirtualNode;
+    d: PTreeData;
+    xs:array of integer;
+    n:integer;
+begin
+    Node := VirtualStringTree1.GetFirst;
+    while Assigned(Node) do
+    begin
+        d := VirtualStringTree1.GetNodeData(Node);
+        n :=  d.X.FInfo.FOrdinal;
+        if length(xs) <= n then
+            SetLength(xs, n+1);
+        xs[n] := ord(Node.CheckState);
+        Node := VirtualStringTree1.GetNext(Node);
+    end;
+    DataModule1.SetWorksChecked(xs);
+
+end;
+
+function TFormCurrentWork.RootNodeData: TNodeData;
+begin
+    Result := PTreeData(VirtualStringTree1.GetNodeData
+      (VirtualStringTree1.GetFirst)).x;
+end;
+
 
 end.

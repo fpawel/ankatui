@@ -17,7 +17,6 @@ uses
   UnitFormPopup in 'UnitFormPopup.pas' {FormPopup},
   UnitFormLog in 'UnitFormLog.pas' {FormLog},
   UnitFrameCoef in 'UnitFrameCoef.pas' {FrameCoef: TFrame},
-  UnitFrameVar in 'UnitFrameVar.pas' {FrameVar: TFrame},
   UnitFormManualControl in 'UnitFormManualControl.pas' {FormManualControl},
   UnitFormChart in 'UnitFormChart.pas' {FormChart},
   UnitFormChartNodes in 'UnitFormChartNodes.pas',
@@ -39,7 +38,8 @@ uses
   config in 'config\config.pas',
   DataRichEditOutput in 'DataRichEditOutput.pas',
   UnitFormCurrentChart in 'UnitFormCurrentChart.pas' {FormCurrentChart},
-  models in 'models.pas';
+  models in 'models.pas',
+  UnitFormReadVars in 'UnitFormReadVars.pas' {FormReadVars};
 
 {$R *.res}
 
@@ -60,5 +60,6 @@ begin
   Application.CreateForm(TPropertiesForm, PropertiesForm);
   Application.CreateForm(THostAppData, HostAppData);
   Application.CreateForm(TFormCurrentChart, FormCurrentChart);
+  Application.CreateForm(TFormReadVars, FormReadVars);
   Application.Run;
 end.

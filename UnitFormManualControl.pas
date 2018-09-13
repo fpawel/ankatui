@@ -64,13 +64,13 @@ begin
     if GetModbusCommand(X.FCmd, X.FArg) then
         HostAppData.FPipe.WriteMsgJSON('MODBUS_CMD', X);
     X.Free;
-    Form1.SetupWorkStarted('отправка команды', true);
+    Form1.SetupWorkStarted(nil, 'отправка команды');
 end;
 
 procedure TFormManualControl.Button6Click(Sender: TObject);
 begin
     HostAppData.FPipe.WriteMsgStr('SEND_SET_WORK_MODE',  Edit3.Text);
-    Form1.SetupWorkStarted('установкарежима работы', true);
+    Form1.SetupWorkStarted(nil, 'установкарежима работы');
 end;
 
 procedure TFormManualControl.ComboBox2Change(Sender: TObject);

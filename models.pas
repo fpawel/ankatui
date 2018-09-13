@@ -5,6 +5,12 @@ interface
 uses System.Generics.collections;
 
 type
+    TDelayInfo = class
+        FName: string;
+	    FDurationMS: int64;
+	    FEnabled : boolean;
+    end;
+
     TKeyValue = TPair<string, variant>;
 
     TKeysValues = TArray<TKeyValue>;

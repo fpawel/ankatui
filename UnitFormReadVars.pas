@@ -1,46 +1,63 @@
-unit UnitFrameVar;
+unit UnitFormReadVars;
 
 interface
 
 uses
     Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
-    System.Classes,
-    Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, UnitData, Vcl.StdCtrls,
-    Vcl.Grids, Vcl.ExtCtrls, models;
+    System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Grids,models,
+  Vcl.ExtCtrls;
 
 type
-    TFrameVar = class(TFrame)
+    TFormReadVars = class(TForm)
         StringGrid2: TStringGrid;
         CheckBox2: TCheckBox;
         procedure CheckBox2Click(Sender: TObject);
-        procedure StringGrid2SelectCell(Sender: TObject; ACol, ARow: Integer;
-          var CanSelect: Boolean);
-        procedure StringGrid2KeyPress(Sender: TObject; var Key: Char);
-        procedure StringGrid2DrawCell(Sender: TObject; ACol, ARow: Integer;
-          Rect: TRect; State: TGridDrawState);
-        procedure StringGrid2DblClick(Sender: TObject);
+    procedure StringGrid2DblClick(Sender: TObject);
+    procedure StringGrid2DrawCell(Sender: TObject; ACol, ARow: Integer;
+      Rect: TRect; State: TGridDrawState);
+    procedure StringGrid2KeyPress(Sender: TObject; var Key: Char);
+    procedure FormCreate(Sender: TObject);
+    procedure StringGrid2SelectCell(Sender: TObject; ACol, ARow: Integer;
+      var CanSelect: Boolean);
     private
         { Private declarations }
+
     public
+        { Public declarations }
         FCurentProductVar: RProductVarOrder;
         FProductVarValues: TProductVarValues;
         FVars: TArray<TDeviceVar>;
-        { Public declarations }
-        constructor Create(AOwner: TComponent); override;
+
         procedure SetCurrentParty(Products: TArray<TProduct>);
         procedure HandleReadVar(x: TReadVar);
         procedure reset;
     end;
 
+var
+    FormReadVars: TFormReadVars;
+
 implementation
 
 {$R *.dfm}
 
-uses stringgridutils, stringutils, UnitFormPopup;
+uses UnitData,stringgridutils, stringutils, UnitFormPopup,
+  Unit1;
 
-constructor TFrameVar.Create(AOwner: TComponent);
+procedure TFormReadVars.CheckBox2Click(Sender: TObject);
 begin
-    inherited Create(AOwner);
+    with CheckBox2 do
+    begin
+        FVars[StringGrid2.Row - 1].FChecked := Checked;
+        DataModule1.UpdateDeviceVarChecked
+          (FVars[StringGrid2.Row - 1].FVar, Checked);
+    end;
+    StringGrid_Redraw(StringGrid2);
+    StringGrid2.SetFocus;
+end;
+
+procedure TFormReadVars.FormCreate(Sender: TObject);
+begin
     FCurentProductVar.FProductOrder := -1;
     FCurentProductVar.FVarOrder := -1;
     with CheckBox2 do
@@ -51,80 +68,10 @@ begin
         Height := 15;
     end;
     FProductVarValues := TProductVarValues.Create;
+    
 end;
 
-procedure TFrameVar.SetCurrentParty(Products: TArray<TProduct>);
-var
-    i, ARow: Integer;
-    v: TDeviceVar;
-begin
-    for i := 0 to length(FVars) - 1 do
-        FVars[i].Free;
-    FProductVarValues.Clear;
-    FVars := DataModule1.DeviceVars;
-    with StringGrid2 do
-    begin
-        RowCount := length(FVars) + 1;
-        ColCount := 2 + length(Products);
-        FixedRows := 1;
-        Cells[0, 0] := '№';
-        Cells[1, 0] := 'Параметр';
-        for ARow := 1 to length(FVars) do
-        begin
-            v := FVars[ARow - 1];
-            Cells[0, ARow] := inttostr(v.FVar);
-            Cells[1, ARow] := v.FName;
-        end;
-
-        for i := 0 to length(Products) - 1 do
-        begin
-            Cells[i + 2, 0] := inttostr(Products[i].FSerial);
-        end;
-    end;
-end;
-
-procedure TFrameVar.reset;
-var
-    PrevProductVar: RProductVarOrder;
-begin
-    PrevProductVar := FCurentProductVar;
-    FCurentProductVar.FProductOrder := -1;
-    FCurentProductVar.FVarOrder := -1;
-    if (PrevProductVar.FProductOrder >= 0) and (PrevProductVar.FVarOrder >= 0) then
-        StringGrid_RedrawCell(StringGrid2, PrevProductVar.FProductOrder + 2,
-          PrevProductVar.FVarOrder + 1);
-
-    if (FCurentProductVar.FProductOrder >= 0) and (FCurentProductVar.FVarOrder >= 0) then
-        StringGrid_RedrawCell(StringGrid2, FCurentProductVar.FProductOrder + 2,
-          FCurentProductVar.FVarOrder + 1);
-
-end;
-
-procedure TFrameVar.HandleReadVar(x: TReadVar);
-var
-    PrevProductVar: RProductVarOrder;
-
-begin
-    PrevProductVar := FCurentProductVar;
-    FCurentProductVar := x.ProductVarOrder;
-
-    FCurentProductVar.FProductOrder := x.FProductOrder;
-    FCurentProductVar.FVarOrder := x.FVarOrder;
-    FProductVarValues.AddOrSetValue(x.ProductVarOrder, x.ValueError);
-    StringGrid2.Cells[x.ProductVarOrder.FProductOrder + 2, x.ProductVarOrder.FVarOrder + 1] :=
-      x.ValueError.FValue;
-
-    if (PrevProductVar.FProductOrder >= 0) and (PrevProductVar.FVarOrder >= 0) then
-        StringGrid_RedrawCell(StringGrid2, PrevProductVar.FProductOrder + 2,
-          PrevProductVar.FVarOrder + 1);
-
-    if (FCurentProductVar.FProductOrder >= 0) and (FCurentProductVar.FVarOrder >= 0) then
-        StringGrid_RedrawCell(StringGrid2, FCurentProductVar.FProductOrder + 2,
-          FCurentProductVar.FVarOrder + 1);
-
-end;
-
-procedure TFrameVar.StringGrid2DblClick(Sender: TObject);
+procedure TFormReadVars.StringGrid2DblClick(Sender: TObject);
 var
     r: TRect;
     pt: TPoint;
@@ -145,8 +92,8 @@ begin
 
 end;
 
-procedure TFrameVar.StringGrid2DrawCell(Sender: TObject; ACol, ARow: Integer;
-  Rect: TRect; State: TGridDrawState);
+procedure TFormReadVars.StringGrid2DrawCell(Sender: TObject; ACol,
+  ARow: Integer; Rect: TRect; State: TGridDrawState);
 var
     grd: TStringGrid;
     cnv: TCanvas;
@@ -243,7 +190,7 @@ begin
 
 end;
 
-procedure TFrameVar.StringGrid2KeyPress(Sender: TObject; var Key: Char);
+procedure TFormReadVars.StringGrid2KeyPress(Sender: TObject; var Key: Char);
 var
     g: TStringGrid;
     i: Integer;
@@ -273,8 +220,8 @@ begin
 
 end;
 
-procedure TFrameVar.StringGrid2SelectCell(Sender: TObject; ACol, ARow: Integer;
-  var CanSelect: Boolean);
+procedure TFormReadVars.StringGrid2SelectCell(Sender: TObject; ACol,
+  ARow: Integer; var CanSelect: Boolean);
 var
     r: TRect;
     grd: TStringGrid;
@@ -321,16 +268,75 @@ begin
 
 end;
 
-procedure TFrameVar.CheckBox2Click(Sender: TObject);
+procedure TFormReadVars.SetCurrentParty(Products: TArray<TProduct>);
+var
+    i, ARow: Integer;
+    v: TDeviceVar;
 begin
-    with CheckBox2 do
+    for i := 0 to length(FVars) - 1 do
+        FVars[i].Free;
+    FProductVarValues.Clear;
+    FVars := DataModule1.DeviceVars;
+    with StringGrid2 do
     begin
-        FVars[StringGrid2.Row - 1].FChecked := Checked;
-        DataModule1.UpdateDeviceVarChecked
-          (FVars[StringGrid2.Row - 1].FVar, Checked);
+        RowCount := length(FVars) + 1;
+        ColCount := 2 + length(Products);
+        FixedRows := 1;
+        Cells[0, 0] := '№';
+        Cells[1, 0] := 'Параметр';
+        for ARow := 1 to length(FVars) do
+        begin
+            v := FVars[ARow - 1];
+            Cells[0, ARow] := inttostr(v.FVar);
+            Cells[1, ARow] := v.FName;
+        end;
+
+        for i := 0 to length(Products) - 1 do
+        begin
+            Cells[i + 2, 0] := inttostr(Products[i].FSerial);
+        end;
     end;
-    StringGrid_Redraw(StringGrid2);
-    StringGrid2.SetFocus;
+end;
+
+procedure TFormReadVars.reset;
+var
+    PrevProductVar: RProductVarOrder;
+begin
+    PrevProductVar := FCurentProductVar;
+    FCurentProductVar.FProductOrder := -1;
+    FCurentProductVar.FVarOrder := -1;
+    if (PrevProductVar.FProductOrder >= 0) and (PrevProductVar.FVarOrder >= 0) then
+        StringGrid_RedrawCell(StringGrid2, PrevProductVar.FProductOrder + 2,
+          PrevProductVar.FVarOrder + 1);
+
+    if (FCurentProductVar.FProductOrder >= 0) and (FCurentProductVar.FVarOrder >= 0) then
+        StringGrid_RedrawCell(StringGrid2, FCurentProductVar.FProductOrder + 2,
+          FCurentProductVar.FVarOrder + 1);
+
+end;
+
+procedure TFormReadVars.HandleReadVar(x: TReadVar);
+var
+    PrevProductVar: RProductVarOrder;
+
+begin
+    PrevProductVar := FCurentProductVar;
+    FCurentProductVar := x.ProductVarOrder;
+
+    FCurentProductVar.FProductOrder := x.FProductOrder;
+    FCurentProductVar.FVarOrder := x.FVarOrder;
+    FProductVarValues.AddOrSetValue(x.ProductVarOrder, x.ValueError);
+    StringGrid2.Cells[x.ProductVarOrder.FProductOrder + 2, x.ProductVarOrder.FVarOrder + 1] :=
+      x.ValueError.FValue;
+
+    if (PrevProductVar.FProductOrder >= 0) and (PrevProductVar.FVarOrder >= 0) then
+        StringGrid_RedrawCell(StringGrid2, PrevProductVar.FProductOrder + 2,
+          PrevProductVar.FVarOrder + 1);
+
+    if (FCurentProductVar.FProductOrder >= 0) and (FCurentProductVar.FVarOrder >= 0) then
+        StringGrid_RedrawCell(StringGrid2, FCurentProductVar.FProductOrder + 2,
+          FCurentProductVar.FVarOrder + 1);
+
 end;
 
 end.

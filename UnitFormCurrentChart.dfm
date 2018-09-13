@@ -12,6 +12,9 @@ object FormCurrentChart: TFormCurrentChart
   Font.Style = []
   OldCreateOrder = False
   OnCreate = FormCreate
+  OnHide = FormHide
+  OnResize = FormResize
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 19
   object Panel14: TPanel
@@ -31,8 +34,6 @@ object FormCurrentChart: TFormCurrentChart
     Align = alTop
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitLeft = 8
-    ExplicitTop = 85
   end
   object Panel4: TPanel
     Left = 995
@@ -60,7 +61,6 @@ object FormCurrentChart: TFormCurrentChart
     Align = alLeft
     BevelOuter = bvNone
     TabOrder = 4
-    ExplicitLeft = 235
   end
   object ListBox1: TListBox
     Left = 10
@@ -81,46 +81,11 @@ object FormCurrentChart: TFormCurrentChart
     Align = alClient
     BevelOuter = bvNone
     TabOrder = 6
-    ExplicitLeft = 552
-    ExplicitWidth = 448
-    object Panel12: TPanel
+    object Chart1: TChart
       Left = 0
       Top = 0
       Width = 898
-      Height = 59
-      Align = alTop
-      BevelOuter = bvNone
-      TabOrder = 0
-      ExplicitTop = 8
-      ExplicitWidth = 448
-      object ToolBar1: TToolBar
-        Left = 834
-        Top = 0
-        Width = 64
-        Height = 59
-        Align = alRight
-        ButtonHeight = 56
-        ButtonWidth = 57
-        Caption = 'ToolBar1'
-        EdgeInner = esNone
-        EdgeOuter = esNone
-        Images = ImageList1
-        TabOrder = 0
-        ExplicitLeft = 384
-        object ToolButton1: TToolButton
-          Left = 0
-          Top = 0
-          Caption = 'ToolButton1'
-          ImageIndex = 0
-          OnClick = ToolButton1Click
-        end
-      end
-    end
-    object Chart1: TChart
-      Left = 0
-      Top = 59
-      Width = 898
-      Height = 530
+      Height = 589
       Legend.Alignment = laLeft
       Legend.CheckBoxes = True
       Legend.Font.Charset = RUSSIAN_CHARSET
@@ -152,11 +117,17 @@ object FormCurrentChart: TFormCurrentChart
       Align = alClient
       BevelOuter = bvNone
       Color = clWindow
-      TabOrder = 1
-      ExplicitLeft = 6
-      ExplicitTop = 53
+      TabOrder = 0
       DefaultCanvas = 'TGDIPlusCanvas'
       ColorPaletteIndex = 13
+      object Splitter1: TSplitter
+        Left = 893
+        Top = 0
+        Width = 5
+        Height = 589
+        Align = alRight
+        ExplicitLeft = 875
+      end
     end
   end
   object ImageList1: TImageList
@@ -169,7 +140,7 @@ object FormCurrentChart: TFormCurrentChart
     Left = 480
     Top = 178
     Bitmap = {
-      494C010101009C00B40232003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010101009C00C00232003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000C8000000320000000100200000000000409C
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

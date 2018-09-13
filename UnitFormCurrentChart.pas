@@ -7,7 +7,8 @@ uses
     System.Classes, Vcl.Graphics,
     Vcl.Controls, Vcl.Forms, Vcl.Dialogs, VclTee.TeeGDIPlus, VclTee.TeEngine,
     VclTee.TeeProcs, VclTee.Chart, Vcl.StdCtrls, Vcl.ExtCtrls,
-    System.Generics.collections, System.Generics.Defaults, models, VclTee.Series, Vcl.ComCtrls,
+    System.Generics.collections, System.Generics.Defaults, models,
+    VclTee.Series, Vcl.ComCtrls,
     Vcl.ToolWin, System.ImageList, Vcl.ImgList;
 
 type
@@ -24,13 +25,13 @@ type
         ImageList1: TImageList;
         ListBox1: TListBox;
         PanelConsolePlaceholder: TPanel;
-        Panel12: TPanel;
-        ToolBar1: TToolBar;
-        ToolButton1: TToolButton;
         Chart1: TChart;
+        Splitter1: TSplitter;
         procedure FormCreate(Sender: TObject);
         procedure ListBox1Click(Sender: TObject);
-        procedure ToolButton1Click(Sender: TObject);
+        procedure FormResize(Sender: TObject);
+        procedure FormHide(Sender: TObject);
+        procedure FormShow(Sender: TObject);
     private
         { Private declarations }
         FSeries: TDictionary<ProductVar, TFastLineSeries>;
@@ -38,7 +39,9 @@ type
     public
         { Public declarations }
         procedure AddValue(product_serial, var_id: integer; value: double);
-        function NewChart(title: string): string;
+
+        procedure Setup(par: TwinControl);
+        procedure NewChart;
     end;
 
 var
@@ -48,7 +51,86 @@ implementation
 
 {$R *.dfm}
 
-uses UnitData, stringutils, dateutils, StrUtils;
+uses UnitData, stringutils, dateutils, StrUtils, Unit1;
+
+procedure TFormCurrentChart.FormCreate(Sender: TObject);
+begin
+    FSeries := TDictionary<ProductVar, TFastLineSeries>.create;
+    Chart1.title.Visible := false;
+    Width := Form1.FIni.ReadInteger('FormCurrentChart', 'Width', Width);
+end;
+
+procedure TFormCurrentChart.FormHide(Sender: TObject);
+begin
+    Splitter1.Parent := nil;
+    Splitter1.Visible := false;
+    Parent := nil;
+
+end;
+
+procedure TFormCurrentChart.FormResize(Sender: TObject);
+begin
+    Form1.FIni.WriteInteger('FormCurrentChart', 'Width', Width);
+end;
+
+procedure TFormCurrentChart.FormShow(Sender: TObject);
+begin
+    Splitter1.Parent := Parent;
+    Splitter1.Visible := true;
+    Splitter1.Left := 0;
+
+end;
+
+procedure TFormCurrentChart.ListBox1Click(Sender: TObject);
+var
+    i, dev_var: integer;
+    k: ProductVar;
+    xs: array of ProductVar;
+begin
+    SetLength(xs, 0);
+    Chart1.RemoveAllSeries;
+    for i := 0 to ListBox1.Items.Count - 1 do
+    begin
+        if not ListBox1.Selected[i] then
+            Continue;
+        dev_var := DataModule1.GetDeviceVarByName(ListBox1.Items[i]);
+        for k in FSeries.Keys do
+        begin
+            if k.VarID = dev_var then
+            begin
+                SetLength(xs, length(xs) + 1);
+                xs[length(xs) - 1] := k;
+            end;
+        end;
+    end;
+    TArray.Sort<ProductVar>(xs, TDelegatedComparer<ProductVar>.Construct(
+        function(const a, b: ProductVar): integer
+        begin
+            Result := TComparer<integer>.Default.Compare(a.VarID, b.VarID);
+            if Result = 0 then
+                Result := TComparer<integer>.Default.Compare(a.ProductSerial,
+                  b.ProductSerial);
+        end));
+    for i := 0 to length(xs) - 1 do
+    begin
+        Chart1.AddSeries(FSeries[xs[i]]);
+    end;
+end;
+
+procedure TFormCurrentChart.NewChart;
+var
+    ser: TFastLineSeries;
+    k: ProductVar;
+begin
+    Chart1.RemoveAllSeries;
+    for ser in FSeries.Values do
+    begin
+        ser.Free;
+    end;
+    FSeries.Clear;
+    ListBox1.Clear;
+    // Panel12.Caption := format('%s %s', [datetimetostr(now), FChartTitle]);
+end;
 
 function CompareVars(List: TStringList; Index1, Index2: integer): integer;
 var
@@ -65,75 +147,6 @@ begin
         Result := 0;
 end;
 
-procedure TFormCurrentChart.FormCreate(Sender: TObject);
-begin
-    FSeries := TDictionary<ProductVar, TFastLineSeries>.create;
-    Chart1.title.Visible := false;
-end;
-
-procedure TFormCurrentChart.ListBox1Click(Sender: TObject);
-var
-    i, dev_var: integer;
-    k: ProductVar;
-    xs: array of TChartSeries;
-begin
-    SetLength(xs, 0);
-    Chart1.RemoveAllSeries;
-    for i := 0 to ListBox1.Items.Count - 1 do
-    begin
-        if not ListBox1.Selected[i] then
-            Continue;
-        dev_var := DataModule1.GetDeviceVarByName(ListBox1.Items[i]);
-        for k in FSeries.Keys do
-        begin
-            if k.VarID = dev_var then
-            begin
-                // Chart1.AddSeries(FSeries[k]);
-                FSeries[k].Tag := (k.VarID * 100000) + k.ProductSerial;
-                SetLength(xs, length(xs) + 1);
-                xs[length(xs) - 1] := FSeries[k];
-
-            end;
-        end;
-    end;
-
-    TArray.Sort<TChartSeries>(xs, TDelegatedComparer<TChartSeries>.Construct(
-        function(const a, b: TChartSeries): integer
-        begin
-            Result := TComparer<integer>.Default.Compare(a.tag,
-              b.tag);
-        end));
-
-    for i := 0 to length(xs) - 1 do
-    begin
-        Chart1.AddSeries(xs[i]);
-
-    end;
-
-end;
-
-procedure TFormCurrentChart.ToolButton1Click(Sender: TObject);
-begin
-    Hide;
-end;
-
-function TFormCurrentChart.NewChart(title: string): string;
-var
-    ser: TFastLineSeries;
-    k: ProductVar;
-begin
-    Chart1.RemoveAllSeries;
-    for ser in FSeries.Values do
-    begin
-        ser.Free;
-    end;
-    FSeries.Clear;
-    ListBox1.Clear;
-    Panel12.Caption := format('%s %s', [datetimetostr(now), title]);
-    exit('');
-
-end;
-
 procedure TFormCurrentChart.AddValue(product_serial, var_id: integer;
 value: double);
 var
@@ -141,20 +154,31 @@ var
     ser: TFastLineSeries;
     k: ProductVar;
     sl: TStringList;
-    n: integer;
+    n,i: integer;
+    sel:array of boolean;
 begin
+
     varName := DataModule1.GetDeviceVarName(var_id);
     k.ProductSerial := product_serial;
     k.VarID := var_id;
     if ListBox1.Items.IndexOf(varName) = -1 then
     begin
         n := ListBox1.Items.Add(varName);
-        ListBox1.Selected[n] := false;
+        ListBox1.Selected[n] := n = 0;
+
+        SetLength(sel, ListBox1.Items.Count);
+        for I := 0 to ListBox1.Items.Count-1 do
+            sel[i] := ListBox1.Selected[i];
+
+
         sl := TStringList.create;
         sl.Assign(ListBox1.Items);
         sl.CustomSort(CompareVars);
         ListBox1.Items.Assign(sl);
         sl.Free;
+
+        for I := 0 to ListBox1.Items.Count-1 do
+            ListBox1.Selected[i] := sel[i] ;
     end;
     if not FSeries.TryGetValue(k, ser) then
     begin
@@ -162,13 +186,29 @@ begin
         ser.XValues.DateTime := true;
         ser.title := IntToStr(product_serial) + ' ' + varName;
         FSeries.Add(k, ser);
-        if ListBox1.Selected[ListBox1.Items.IndexOf(varName)] then
-        begin
-            Chart1.AddSeries(ser);
-        end;
 
     end;
     ser.AddXY(now, value);
+
+    with ListBox1 do
+    begin
+        if Selected[Items.IndexOf(varName)] then
+        begin
+            if ser.ParentChart = nil then
+                Chart1.AddSeries(ser);
+        end;
+    end;
+
+end;
+
+procedure TFormCurrentChart.Setup(par: TwinControl);
+begin
+    Parent := par;
+    Align := alRight;
+    BorderStyle := bsNone;
+    Visible := true;
+    Left := 100500;
+    BringToFront;
 end;
 
 end.
