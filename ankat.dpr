@@ -11,7 +11,6 @@ uses
   listports in 'utils\listports.pas',
   stringutils in 'utils\stringutils.pas',
   UnitData in 'UnitData.pas' {DataModule1: TDataModule},
-  UnitFrameDelay in 'UnitFrameDelay.pas' {FrameDelay: TFrame},
   UnitFormLogNodes in 'UnitFormLogNodes.pas',
   CurrentWorkTreeData in 'CurrentWorkTreeData.pas',
   UnitFormPopup in 'UnitFormPopup.pas' {FormPopup},

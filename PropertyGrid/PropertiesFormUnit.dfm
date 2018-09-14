@@ -4,16 +4,12 @@ object PropertiesForm: TPropertiesForm
   ClientHeight = 382
   ClientWidth = 1111
   Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -16
-  Font.Name = 'Tahoma'
-  Font.Style = []
+  ParentFont = True
   OldCreateOrder = False
   OnCreate = FormCreate
   OnHide = FormHide
   PixelsPerInch = 96
-  TextHeight = 19
+  TextHeight = 13
   object VST3: TVirtualStringTree
     Left = 0
     Top = 0
@@ -23,20 +19,22 @@ object PropertiesForm: TPropertiesForm
     Colors.BorderColor = clWindowText
     Colors.HotColor = clBlack
     DefaultNodeHeight = 28
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -15
+    Font.Name = 'Tahoma'
+    Font.Style = []
     Header.AutoSizeIndex = 1
-    Header.Font.Charset = DEFAULT_CHARSET
-    Header.Font.Color = clWindowText
-    Header.Font.Height = -16
-    Header.Font.Name = 'Tahoma'
-    Header.Font.Style = []
     Header.Height = 25
     Header.Options = [hoAutoResize, hoColumnResize, hoVisible, hoAutoSpring]
+    Header.ParentFont = True
     HintAnimation = hatFade
     HintMode = hmHint
     Images = TreeImages
     IncrementalSearch = isAll
     IncrementalSearchTimeout = 500
     Indent = 19
+    ParentFont = False
     ParentShowHint = False
     ShowHint = True
     TabOrder = 0
@@ -83,7 +81,7 @@ object PropertiesForm: TPropertiesForm
     Left = 422
     Top = 224
     Bitmap = {
-      494C010107001300540010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
+      494C0101070013005C0010001000FFFFFFFFFF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

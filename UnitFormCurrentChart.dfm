@@ -7,7 +7,7 @@ object FormCurrentChart: TFormCurrentChart
   Color = clWindow
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -16
+  Font.Height = -15
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
@@ -16,7 +16,7 @@ object FormCurrentChart: TFormCurrentChart
   OnResize = FormResize
   OnShow = FormShow
   PixelsPerInch = 96
-  TextHeight = 19
+  TextHeight = 18
   object Panel14: TPanel
     Left = 0
     Top = 5
@@ -68,7 +68,7 @@ object FormCurrentChart: TFormCurrentChart
     Width = 87
     Height = 589
     Align = alLeft
-    ItemHeight = 19
+    ItemHeight = 18
     MultiSelect = True
     TabOrder = 5
     OnClick = ListBox1Click
@@ -140,7 +140,7 @@ object FormCurrentChart: TFormCurrentChart
     Left = 480
     Top = 178
     Bitmap = {
-      494C010101009C00C00232003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010101009C00C80232003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000C8000000320000000100200000000000409C
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

@@ -5,20 +5,22 @@ interface
 uses
     Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
     System.Classes, Vcl.Graphics,
-    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, PropertiesFormUnit;
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, PropertiesFormUnit, Vcl.StdCtrls,
+  Vcl.ExtCtrls;
 
 type
     TFormSettings = class(TForm)
+    Panel2: TPanel;
+    Button1: TButton;
     procedure FormCreate(Sender: TObject);
-    procedure FormDeactivate(Sender: TObject);
-    procedure FormActivate(Sender: TObject);
-    procedure FormHide(Sender: TObject);
     private
         { Private declarations }
         FPropertiesForm : TPropertiesForm;
 
     public
         { Public declarations }
+        procedure SetConfig;
+        procedure CancelEditNode;
     end;
 
 var
@@ -30,11 +32,6 @@ implementation
 
 uses UnitData, config;
 
-
-procedure TFormSettings.FormActivate(Sender: TObject);
-begin
-    FPropertiesForm.SetConfig(DataModule1.GetConfig);
-end;
 
 procedure TFormSettings.FormCreate(Sender: TObject);
 begin
@@ -52,14 +49,17 @@ begin
                 DataModule1.UpdateConfig(p);
         end);
     end;
+    SetConfig;
+
 end;
 
-procedure TFormSettings.FormDeactivate(Sender: TObject);
+procedure TFormSettings.SetConfig;
 begin
-    Hide;
+    FPropertiesForm.VST3.CancelEditNode;
+    FPropertiesForm.SetConfig(DataModule1.GetConfig);
 end;
 
-procedure TFormSettings.FormHide(Sender: TObject);
+procedure TFormSettings.CancelEditNode;
 begin
     FPropertiesForm.VST3.CancelEditNode;
 end;

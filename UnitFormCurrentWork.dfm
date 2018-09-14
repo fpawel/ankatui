@@ -8,7 +8,7 @@ object FormCurrentWork: TFormCurrentWork
   Constraints.MinWidth = 200
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -16
+  Font.Height = -15
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
@@ -16,7 +16,7 @@ object FormCurrentWork: TFormCurrentWork
   OnCreate = FormCreate
   OnDeactivate = FormDeactivate
   PixelsPerInch = 96
-  TextHeight = 19
+  TextHeight = 18
   object VirtualStringTree1: TVirtualStringTree
     Left = 0
     Top = 41
@@ -25,21 +25,11 @@ object FormCurrentWork: TFormCurrentWork
     Align = alClient
     BorderStyle = bsNone
     DefaultNodeHeight = 25
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -16
-    Font.Name = 'Tahoma'
-    Font.Style = []
     Header.AutoSizeIndex = 0
-    Header.Font.Charset = DEFAULT_CHARSET
-    Header.Font.Color = clWindowText
-    Header.Font.Height = -13
-    Header.Font.Name = 'Tahoma'
-    Header.Font.Style = []
     Header.Height = 30
     Header.Options = [hoColumnResize, hoDrag, hoShowImages, hoShowSortGlyphs, hoVisible]
+    Header.ParentFont = True
     Images = ImageList2
-    ParentFont = False
     TabOrder = 0
     TreeOptions.MiscOptions = [toAcceptOLEDrop, toCheckSupport, toFullRepaintOnResize, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
     OnBeforeCellPaint = VirtualStringTree1BeforeCellPaint
@@ -68,7 +58,6 @@ object FormCurrentWork: TFormCurrentWork
     Caption = '   '#1047#1072#1087#1091#1089#1090#1080#1090#1100': [0] '#1053#1072#1089#1090#1088#1086#1081#1082#1072' '#1040#1085#1082#1072#1090
     TabOrder = 1
     OnClick = Button1Click
-    ExplicitTop = -6
   end
   object ImageList2: TImageList
     ColorDepth = cd32Bit
@@ -78,7 +67,7 @@ object FormCurrentWork: TFormCurrentWork
     Left = 472
     Top = 256
     Bitmap = {
-      494C010103001801D00110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010103001801D80110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

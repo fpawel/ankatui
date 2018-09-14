@@ -16,9 +16,11 @@ type
         Panel2: TPanel;
         ComboBox1: TComboBox;
         Label2: TLabel;
+    Button2: TButton;
         procedure FormCreate(Sender: TObject);
         procedure Button1Click(Sender: TObject);
         procedure ComboBox1Change(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
     private
         { Private declarations }
         FParty, FSerials: TConfigSection;
@@ -26,6 +28,7 @@ type
         procedure Validate(p: TConfigProperty);
 
     public
+        FAcceptHandler : TAcceptHandler;
 
         { Public declarations }
     end;
@@ -39,6 +42,11 @@ implementation
 
 uses System.Generics.Collections, stringutils, UnitData,
     FireDAC.Comp.Client, FireDAC.Stan.Param;
+
+procedure TFormNewPartyDialog.Button2Click(Sender: TObject);
+begin
+    Close;
+end;
 
 procedure TFormNewPartyDialog.ComboBox1Change(Sender: TObject);
 var
@@ -71,6 +79,7 @@ procedure TFormNewPartyDialog.FormCreate(Sender: TObject);
 var
     i: integer;
 begin
+    FAcceptHandler := nil;
     FParty := DataModule1.GetConfig[0];
     FParty.FSortOrder := 0;
     for I := 0 to length(FPArty.FProperties)-1 do
@@ -164,14 +173,17 @@ begin
     l.Free;
 
     DataModule1.NewParty(FParty, serials);
+
+    if Assigned(FAcceptHandler) then
+        FAcceptHandler();
+
+
     if Application.MainForm = self then
     begin
         DataModule1.FDConnectionProductsDB.Connected := false;
         DataModule1.FDConnectionConfig.Connected := false;
         Close;
-    end
-    else
-        ModalResult := mrOk;
+    end;
 end;
 
 end.

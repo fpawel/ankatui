@@ -5,14 +5,10 @@ object FormDelay: TFormDelay
   ClientHeight = 44
   ClientWidth = 647
   Color = clWindow
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -15
-  Font.Name = 'Tahoma'
-  Font.Style = []
+  ParentFont = True
   OldCreateOrder = False
   PixelsPerInch = 96
-  TextHeight = 18
+  TextHeight = 13
   object PanelPlaceHolder: TPanel
     Left = 0
     Top = 0
@@ -24,9 +20,6 @@ object FormDelay: TFormDelay
     Color = clHighlightText
     ParentBackground = False
     TabOrder = 0
-    ExplicitLeft = -153
-    ExplicitWidth = 788
-    ExplicitHeight = 59
     object ProgressBar1: TProgressBar
       Left = 0
       Top = 26
@@ -34,8 +27,6 @@ object FormDelay: TFormDelay
       Height = 18
       Align = alBottom
       TabOrder = 0
-      ExplicitTop = 32
-      ExplicitWidth = 635
     end
     object Panel1: TPanel
       Left = 0
@@ -46,9 +37,6 @@ object FormDelay: TFormDelay
       Alignment = taLeftJustify
       BevelOuter = bvNone
       TabOrder = 1
-      ExplicitTop = 8
-      ExplicitWidth = 635
-      ExplicitHeight = 32
       object Panel2: TPanel
         Left = 170
         Top = 0
@@ -58,10 +46,6 @@ object FormDelay: TFormDelay
         Alignment = taLeftJustify
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitLeft = 296
-        ExplicitTop = 2
-        ExplicitWidth = 217
-        ExplicitHeight = 24
       end
       object Panel3: TPanel
         Left = 0
@@ -102,8 +86,6 @@ object FormDelay: TFormDelay
         BevelOuter = bvNone
         Caption = '00:00:00'
         TabOrder = 4
-        ExplicitLeft = 184
-        ExplicitTop = -1
       end
     end
   end

@@ -5,11 +5,7 @@ object FormReadVars: TFormReadVars
   ClientHeight = 507
   ClientWidth = 874
   Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
+  ParentFont = True
   OldCreateOrder = False
   OnCreate = FormCreate
   PixelsPerInch = 96
@@ -34,8 +30,6 @@ object FormReadVars: TFormReadVars
     OnDrawCell = StringGrid2DrawCell
     OnKeyPress = StringGrid2KeyPress
     OnSelectCell = StringGrid2SelectCell
-    ExplicitWidth = 361
-    ExplicitHeight = 433
     ColWidths = (
       64
       64

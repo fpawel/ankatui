@@ -4,10 +4,10 @@ object FormSettings: TFormSettings
   Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
   ClientHeight = 300
   ClientWidth = 635
-  Color = clBtnFace
+  Color = clWindow
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
+  Font.Height = -15
   Font.Name = 'Tahoma'
   Font.Style = []
   Icon.Data = {
@@ -3128,10 +3128,29 @@ object FormSettings: TFormSettings
     FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
   OldCreateOrder = False
   Position = poScreenCenter
-  OnActivate = FormActivate
   OnCreate = FormCreate
-  OnDeactivate = FormDeactivate
-  OnHide = FormHide
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 18
+  object Panel2: TPanel
+    Left = 504
+    Top = 0
+    Width = 131
+    Height = 300
+    Align = alRight
+    BevelOuter = bvNone
+    TabOrder = 0
+    DesignSize = (
+      131
+      300)
+    object Button1: TButton
+      Left = 6
+      Top = 13
+      Width = 117
+      Height = 44
+      Anchors = [akLeft, akTop, akRight]
+      Caption = #1047#1072#1082#1088#1099#1090#1100
+      TabOrder = 0
+      ExplicitWidth = 213
+    end
+  end
 end

@@ -5,11 +5,7 @@ object FormLog: TFormLog
   ClientHeight = 576
   ClientWidth = 1093
   Color = clWindow
-  Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
-  Font.Style = []
+  ParentFont = True
   OldCreateOrder = False
   OnCreate = FormCreate
   PixelsPerInch = 96
@@ -29,21 +25,11 @@ object FormLog: TFormLog
     Height = 576
     Align = alLeft
     DefaultNodeHeight = 25
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -15
-    Font.Name = 'Tahoma'
-    Font.Style = []
     Header.AutoSizeIndex = -1
-    Header.Font.Charset = DEFAULT_CHARSET
-    Header.Font.Color = clWindowText
-    Header.Font.Height = -16
-    Header.Font.Name = 'Tahoma'
-    Header.Font.Style = []
     Header.Height = 23
     Header.Options = [hoColumnResize, hoDrag, hoShowSortGlyphs, hoVisible, hoFullRepaintOnResize]
+    Header.ParentFont = True
     Images = ImageList1
-    ParentFont = False
     TabOrder = 0
     OnBeforeCellPaint = VirtualStringTree1BeforeCellPaint
     OnChange = VirtualStringTree1Change
@@ -94,7 +80,7 @@ object FormLog: TFormLog
     Left = 128
     Top = 168
     Bitmap = {
-      494C010106009C004C0110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010106009C00500110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       000000000000000000000000000000000000B5794DFFB5794DFFB5794DFFB579
       4DFFB5794DFFB5794DFFB5794DFFB5794DFFB5794DFFB5794DFFB5794DFFB579

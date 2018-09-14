@@ -46,7 +46,7 @@ type
         Panel4: TPanel;
         Panel1: TPanel;
         CheckBox1: TCheckBox;
-        Panel3: TPanel;
+        PanelMenuBar: TPanel;
         ToolBar1: TToolBar;
         ImageList1: TImageList;
         PopupMenu1: TPopupMenu;
@@ -58,7 +58,7 @@ type
         Splitter1: TSplitter;
         Panel5: TPanel;
         ImageList2: TImageList;
-        PageControl2: TPageControl;
+    PageControlMain: TPageControl;
         TabSheet3: TTabSheet;
         TabSheet4: TTabSheet;
         N3: TMenuItem;
@@ -66,11 +66,11 @@ type
         TabSheet8: TTabSheet;
         N4: TMenuItem;
         N5: TMenuItem;
-        ToolButton3: TToolButton;
+    ToolButtonSettings: TToolButton;
         PanelCurrentWorkContent: TPanel;
         RichEdit1: TRichEdit;
         PanelConsole: TPanel;
-        Panel10: TPanel;
+        PanelConsoleHeader: TPanel;
         ToolBar4: TToolBar;
         ImageList3: TImageList;
         ToolButtonConsoleHide: TToolButton;
@@ -85,7 +85,7 @@ type
         Panel11: TPanel;
         Panel12: TPanel;
         PanelCurrentWorkTitle: TPanel;
-    ToolBarCurrentWorkContent: TToolBar;
+        ToolBarCurrentWorkContent: TToolBar;
         ToolButtonCloseCurrentWork: TToolButton;
         N6: TMenuItem;
         N7: TMenuItem;
@@ -93,7 +93,13 @@ type
         Panel8: TPanel;
         Panel14: TPanel;
         PanelPlaceholderCurrentPartyMain: TPanel;
-    Panel6: TPanel;
+        Panel6: TPanel;
+        Panel13: TPanel;
+        Panel15: TPanel;
+        PanelMainContent: TPanel;
+        ImageList4: TImageList;
+        Panel3: TPanel;
+    ToolButtonClose: TToolButton;
         procedure FormCreate(Sender: TObject);
         procedure ComboBox1CloseUp(Sender: TObject);
         procedure StringGrid1SelectCell(Sender: TObject; ACol, ARow: integer;
@@ -110,7 +116,7 @@ type
         procedure ToolButtonStopClick(Sender: TObject);
         procedure StringGrid1DblClick(Sender: TObject);
         procedure FormClose(Sender: TObject; var Action: TCloseAction);
-        procedure ToolButton3Click(Sender: TObject);
+        procedure ToolButtonSettingsClick(Sender: TObject);
         procedure ToolButtonMoveConsoleUpClick(Sender: TObject);
         procedure ToolButtonMoveConsoleDownClick(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -126,6 +132,7 @@ type
           Shift: TShiftState; X, Y: integer);
         procedure N7Click(Sender: TObject);
         procedure N8Click(Sender: TObject);
+    procedure ToolButtonCloseClick(Sender: TObject);
     private
         { Private declarations }
 
@@ -146,6 +153,8 @@ type
         procedure SetCurrentWorkContent(widget: TControl;
           contetnt_title: string);
 
+        procedure SetMainContent(widget: TControl);
+
     public
 
         FProducts: TArray<TProduct>;
@@ -160,7 +169,6 @@ type
         procedure Init2;
         procedure SetupWorkStarted(widget: TControl; work: string);
         procedure SetCoef(product_order, coef_order: integer);
-
 
     end;
 
@@ -248,7 +256,7 @@ begin
         VirtualStringTree1.Parent := TabSheet7;
         FFormLog.FOnRenderMessages := procedure
             begin
-                if PageControl2.activePage = TabSheet7 then
+                if PageControlMain.activePage = TabSheet7 then
                 begin
                     FFormLog.RichEdit1.SetFocus;
                     SendMessage(FFormLog.RichEdit1.Handle, EM_SCROLL,
@@ -344,7 +352,8 @@ begin
                     FormCurrentChart.NewChart;
                     FormCurrentChart.Setup(PanelCurrentWorkContent);
                 end;
-            end else
+            end
+            else
             begin
                 FormCurrentChart.Hide;
             end;
@@ -399,7 +408,7 @@ begin
         Font.Assign(self.Font);
     end;
     FormCurrentChart.NewChart;
-    FormCurrentChart.Setup( FormReadVars );
+    FormCurrentChart.Setup(FormReadVars);
 end;
 
 procedure TForm1.N2Click(Sender: TObject);
@@ -422,9 +431,13 @@ end;
 
 procedure TForm1.N7Click(Sender: TObject);
 begin
-    FormNewPartyDialog.ShowModal;
-    if FormNewPartyDialog.ModalResult = mrOk then
+    FormNewPartyDialog.Button2.OnClick := ToolButtonCloseClick;
+    FormNewPartyDialog.FAcceptHandler := procedure
+    begin
         SetCurrentParty;
+    end;
+    SetMainContent(FormNewPartyDialog);
+    
 end;
 
 procedure TForm1.N8Click(Sender: TObject);
@@ -738,7 +751,7 @@ begin
 end;
 
 procedure TForm1.StringGrid1DrawCell(Sender: TObject; ACol, ARow: integer;
-  Rect: TRect; State: TGridDrawState);
+Rect: TRect; State: TGridDrawState);
 var
     grd: TStringGrid;
     cnv: TCanvas;
@@ -858,7 +871,7 @@ begin
 end;
 
 procedure TForm1.StringGrid1MouseUp(Sender: TObject; Button: TMouseButton;
-  Shift: TShiftState; X, Y: integer);
+Shift: TShiftState; X, Y: integer);
 var
     r: TRect;
 begin
@@ -877,7 +890,7 @@ begin
 end;
 
 procedure TForm1.StringGrid1SelectCell(Sender: TObject; ACol, ARow: integer;
-  var CanSelect: boolean);
+var CanSelect: boolean);
 var
     r: TRect;
     grd: TStringGrid;
@@ -955,12 +968,16 @@ begin
     ComboBox1.Visible := false;
 end;
 
-procedure TForm1.ToolButton3Click(Sender: TObject);
+procedure TForm1.ToolButtonCloseClick(Sender: TObject);
 begin
-    FormSettings.Position := poScreenCenter;
-    FormSettings.Show;
-    ShowWindow(FormSettings.Handle, SW_RESTORE);
-    // PropertiesForm.Show;
+    SetMainContent(PageControlMain);
+
+end;
+
+procedure TForm1.ToolButtonSettingsClick(Sender: TObject);
+begin
+    FormSettings.Button1.OnClick := ToolButtonCloseClick;
+    SetMainContent(FormSettings);
 end;
 
 procedure TForm1.ToolButtonCloseCurrentWorkClick(Sender: TObject);
@@ -1032,7 +1049,7 @@ begin
 end;
 
 procedure TForm1.ToolButtonRunMouseUp(Sender: TObject; Button: TMouseButton;
-  Shift: TShiftState; X, Y: integer);
+Shift: TShiftState; X, Y: integer);
 begin
     with ToolButtonRun do
         with ClientToScreen(Point(0, Height)) do
@@ -1047,7 +1064,7 @@ begin
 end;
 
 procedure TForm1.SetCurrentWorkContent(widget: TControl;
-  contetnt_title: string);
+contetnt_title: string);
 begin
     if Assigned(widget) then
     begin
@@ -1113,6 +1130,33 @@ begin
     FormManualControl.GroupBox2.Enabled := not started;
     ToolButtonRun.Visible := not started;
     ToolButtonStop.Visible := started;
+end;
+
+procedure TForm1.SetMainContent(widget: TControl);
+var widget_is_pagecontrolmain : boolean;
+    prev:TControl;
+begin
+    prev := PanelMainContent.Controls[0];
+
+    if widget = FormSettings then
+        FormSettings.SetConfig;
+
+    if prev = FormSettings then
+        FormSettings.CancelEditNode;
+
+    prev.Hide;
+    prev.Parent := nil;
+
+    widget.Parent := PanelMainContent;
+    widget.Align := alclient;
+    if widget is TForm then
+        (widget as TForm).BorderStyle := bsNone;
+    widget.Show;
+
+    widget_is_pagecontrolmain := widget = PageControlMain;
+
+    ToolButtonClose.Visible := not widget_is_pagecontrolmain;
+    ToolButtonSettings.Visible := widget_is_pagecontrolmain;
 end;
 
 end.

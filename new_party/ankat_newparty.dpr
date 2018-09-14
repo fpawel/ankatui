@@ -11,8 +11,8 @@ uses
   stringutils in '..\utils\stringutils.pas',
   listports in '..\utils\listports.pas',
   stringgridutils in '..\utils\stringgridutils.pas',
-
-  variantutils in '..\utils\variantutils.pas';
+  variantutils in '..\utils\variantutils.pas',
+  models in '..\models.pas';
 
 {$R *.res}
 
