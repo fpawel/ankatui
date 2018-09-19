@@ -58,7 +58,7 @@ type
         Splitter1: TSplitter;
         Panel5: TPanel;
         ImageList2: TImageList;
-    PageControlMain: TPageControl;
+        PageControlMain: TPageControl;
         TabSheet3: TTabSheet;
         TabSheet4: TTabSheet;
         N3: TMenuItem;
@@ -66,7 +66,7 @@ type
         TabSheet8: TTabSheet;
         N4: TMenuItem;
         N5: TMenuItem;
-    ToolButtonSettings: TToolButton;
+        ToolButtonSettings: TToolButton;
         PanelCurrentWorkContent: TPanel;
         RichEdit1: TRichEdit;
         PanelConsole: TPanel;
@@ -99,7 +99,7 @@ type
         PanelMainContent: TPanel;
         ImageList4: TImageList;
         Panel3: TPanel;
-    ToolButtonClose: TToolButton;
+        ToolButtonClose: TToolButton;
         procedure FormCreate(Sender: TObject);
         procedure ComboBox1CloseUp(Sender: TObject);
         procedure StringGrid1SelectCell(Sender: TObject; ACol, ARow: integer;
@@ -132,7 +132,7 @@ type
           Shift: TShiftState; X, Y: integer);
         procedure N7Click(Sender: TObject);
         procedure N8Click(Sender: TObject);
-    procedure ToolButtonCloseClick(Sender: TObject);
+        procedure ToolButtonCloseClick(Sender: TObject);
     private
         { Private declarations }
 
@@ -183,7 +183,8 @@ uses DataRichEditOutput, pipe, dateutils, rest.json, Winapi.uxtheme,
     listports, System.IOUtils,
     CurrentWorkTreeData, stringutils, vclutils, UnitFormChart, UnitFormSettings,
     UnitFormCurrentWork, UnitFormDelay, System.Types, System.UITypes, findproc,
-    PropertiesFormUnit, UnitHostAppData, UnitFormCurrentChart, UnitFormReadVars;
+    PropertiesFormUnit, UnitHostAppData, UnitFormCurrentChart, UnitFormReadVars,
+    TlHelp32;
 
 {$R *.dfm}
 
@@ -319,7 +320,29 @@ begin
 
     if E is EPipeHostError then
         Close;
+end;
 
+function processExists(exeFileName: string): boolean;
+var
+    ContinueLoop: BOOL;
+    FSnapshotHandle: THandle;
+    FProcessEntry32: TProcessEntry32;
+begin
+    FSnapshotHandle := CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    FProcessEntry32.dwSize := SizeOf(FProcessEntry32);
+    ContinueLoop := Process32First(FSnapshotHandle, FProcessEntry32);
+    Result := false;
+    while integer(ContinueLoop) <> 0 do
+    begin
+        if ((UpperCase(ExtractFileName(FProcessEntry32.szExeFile))
+          = UpperCase(exeFileName)) or (UpperCase(FProcessEntry32.szExeFile)
+          = UpperCase(exeFileName))) then
+        begin
+            Result := True;
+        end;
+        ContinueLoop := Process32Next(FSnapshotHandle, FProcessEntry32);
+    end;
+    CloseHandle(FSnapshotHandle);
 end;
 
 procedure TForm1.Init2;
@@ -403,7 +426,7 @@ begin
         Parent := self;
         Align := alclient;
         BorderStyle := bsNone;
-        Visible := true;
+        Visible := True;
         Parent := self.PanelCurrentWorkContent;
         Font.Assign(self.Font);
     end;
@@ -433,11 +456,11 @@ procedure TForm1.N7Click(Sender: TObject);
 begin
     FormNewPartyDialog.Button2.OnClick := ToolButtonCloseClick;
     FormNewPartyDialog.FAcceptHandler := procedure
-    begin
-        SetCurrentParty;
-    end;
+        begin
+            SetCurrentParty;
+        end;
     SetMainContent(FormNewPartyDialog);
-    
+
 end;
 
 procedure TForm1.N8Click(Sender: TObject);
@@ -468,7 +491,7 @@ begin
     if (PanelCurrentWorkContent.ControlCount > 0) AND
       (PanelCurrentWorkContent.Controls[0] = FormCurrentWork) then
     begin
-        ToolButtonCloseCurrentWork.Visible := true;
+        ToolButtonCloseCurrentWork.Visible := True;
     end
     else
     begin
@@ -619,7 +642,7 @@ begin
     if FileExists(FileName) then
     begin
         fs := TFileStream.Create(FileName, fmOpenRead);
-        fs.Read(wp, sizeof(wp));
+        fs.Read(wp, SizeOf(wp));
         fs.Free;
         SetWindowPlacement(Handle, wp);
     end;
@@ -648,8 +671,9 @@ begin
       'window.position'), fmOpenWrite or fmCreate);
     if not GetWindowPlacement(Handle, wp) then
         raise Exception.Create('GetWindowPlacement: false');
-    fs.Write(wp, sizeof(wp));
+    fs.Write(wp, SizeOf(wp));
     fs.Free;
+    PageControlMain.Parent := PanelMainContent;
 end;
 
 procedure TForm1.SetCurrentParty;
@@ -924,7 +948,7 @@ begin
 
                     Left := r.Left - 6;
                     Top := r.Top - 3;
-                    Visible := true;
+                    Visible := True;
                 end;
                 ComboBox1.Visible := false;
             end;
@@ -948,7 +972,7 @@ begin
                     Width := r.Width;
                     Left := r.Left;
                     Top := r.Top;
-                    Visible := true;
+                    Visible := True;
 
                 end;
                 CheckBox1.Visible := false;
@@ -989,13 +1013,13 @@ end;
 
 procedure TForm1.ToolButtonConsoleHideClick(Sender: TObject);
 begin
-    ToolButtonMoveConsoleDown.Visible := true;
-    ToolButtonMoveConsoleUp.Visible := true;
+    ToolButtonMoveConsoleDown.Visible := True;
+    ToolButtonMoveConsoleUp.Visible := True;
     ToolButtonConsoleHide.Visible := false;
     SplitterConsoleHoriz.Visible := false;
     SplitterConsoleVert.Visible := false;
     PanelConsolePlaceholderRight.Visible := false;
-    PanelConsolePlaceholderBottom.Visible := true;
+    PanelConsolePlaceholderBottom.Visible := True;
     PanelConsole.Parent := PanelConsolePlaceholderBottom;
     PanelConsole.Height := Panel2.Height;
     PanelConsolePlaceholderBottom.OnResize := nil;
@@ -1008,12 +1032,12 @@ end;
 procedure TForm1.ToolButtonMoveConsoleDownClick(Sender: TObject);
 begin
     ToolButtonMoveConsoleDown.Visible := false;
-    ToolButtonMoveConsoleUp.Visible := true;
-    ToolButtonConsoleHide.Visible := true;
-    SplitterConsoleHoriz.Visible := true;
+    ToolButtonMoveConsoleUp.Visible := True;
+    ToolButtonConsoleHide.Visible := True;
+    SplitterConsoleHoriz.Visible := True;
     SplitterConsoleVert.Visible := false;
     PanelConsolePlaceholderRight.Visible := false;
-    PanelConsolePlaceholderBottom.Visible := true;
+    PanelConsolePlaceholderBottom.Visible := True;
 
     PanelConsole.Parent := PanelConsolePlaceholderBottom;
     SplitterConsoleHoriz.Top := 0;
@@ -1027,12 +1051,12 @@ end;
 
 procedure TForm1.ToolButtonMoveConsoleUpClick(Sender: TObject);
 begin
-    ToolButtonMoveConsoleDown.Visible := true;
+    ToolButtonMoveConsoleDown.Visible := True;
     ToolButtonMoveConsoleUp.Visible := false;
-    ToolButtonConsoleHide.Visible := true;
+    ToolButtonConsoleHide.Visible := True;
     SplitterConsoleHoriz.Visible := false;
-    SplitterConsoleVert.Visible := true;
-    PanelConsolePlaceholderRight.Visible := true;
+    SplitterConsoleVert.Visible := True;
+    PanelConsolePlaceholderRight.Visible := True;
     PanelConsolePlaceholderBottom.Visible := false;
 
     PanelConsole.Parent := PanelConsolePlaceholderRight;
@@ -1083,7 +1107,7 @@ begin
 
             end;
         widget.Parent := PanelCurrentWorkContent;
-        widget.Visible := true;
+        widget.Visible := True;
     end;
     PanelCurrentWorkTitle.Caption := '   ' + contetnt_title;
 end;
@@ -1097,7 +1121,7 @@ begin
 
     Panel5.Caption := work;
     Panel5.Font.Color := clNavy;
-    UpdatedControlsVisibilityOnStartedChanged(true);
+    UpdatedControlsVisibilityOnStartedChanged(True);
     SetCurrentWorkContent(widget, work);
 end;
 
@@ -1133,8 +1157,9 @@ begin
 end;
 
 procedure TForm1.SetMainContent(widget: TControl);
-var widget_is_pagecontrolmain : boolean;
-    prev:TControl;
+var
+    widget_is_pagecontrolmain: boolean;
+    prev: TControl;
 begin
     prev := PanelMainContent.Controls[0];
 

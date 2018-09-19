@@ -100,7 +100,7 @@ var
 
 implementation
 
-uses dateutils, Vcl.dialogs, System.Variants, stringutils, variantutils;
+uses dateutils, Vcl.dialogs,  System.Variants, stringutils, variantutils;
 
 { %CLASSGROUP 'Vcl.Controls.TControl' }
 
@@ -108,6 +108,17 @@ uses dateutils, Vcl.dialogs, System.Variants, stringutils, variantutils;
 
 procedure TDataModule1.DataModuleCreate(Sender: TObject);
 begin
+    if GetEnvironmentVariable('MYAPPDATA') = ''  then
+    begin
+        FDConnectionProductsDB.Params.Database :=
+            '$(APPDATA)\Аналитприбор\ankat\products.db';
+        FDConnectionConfig.Params.Database :=
+            '$(APPDATA)\Аналитприбор\ankat\config.db';
+
+    end;
+
+
+
     FDConnectionProductsDB.Connected := true;
     FDConnectionConfig.Connected := true;
     SetLength(FVars, 0);
