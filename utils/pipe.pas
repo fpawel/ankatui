@@ -6,7 +6,6 @@ uses System.Classes, Winapi.Windows, REST.Json, System.SyncObjs,
     System.Generics.Collections,
     sysutils;
 
-
 type
 
     EPipeHostError = class(Exception);
@@ -78,7 +77,7 @@ type
 
         function Fetch1(Msg: string; obj: TObject): string;
         function Fetch2(Msg: string; Str: string): string;
-        property Connected : boolean read FConnected;
+        property Connected: boolean read FConnected;
 
     end;
 
@@ -151,8 +150,7 @@ begin
 
 end;
 
-procedure TPipeConnection.thisReadFile(var Buffer;
-numberOfbytesToRead: DWORD);
+procedure TPipeConnection.thisReadFile(var Buffer; numberOfbytesToRead: DWORD);
 var
     readed_count: DWORD;
 begin
@@ -168,7 +166,8 @@ begin
     end;
 end;
 
-procedure TPipeConnection.thisWriteFile(var Buffer; numberOfbytesToWrite: DWORD);
+procedure TPipeConnection.thisWriteFile(var Buffer;
+numberOfbytesToWrite: DWORD);
 var
     writen_count: DWORD;
 begin
@@ -177,7 +176,8 @@ begin
         raise_exception('not connected');
     end;
 
-    if not(WriteFile(hPipe, Buffer, numberOfbytesToWrite, writen_count, nil)) then
+    if not(WriteFile(hPipe, Buffer, numberOfbytesToWrite, writen_count, nil))
+    then
     begin
         raise_exception('WriteFile');
     end;
@@ -196,7 +196,7 @@ end;
 function TPipeConnection.FormatError(error: string): string;
 var
     Buffer: array [0 .. 2047] of Char;
-    strWinError:string;
+    strWinError: string;
 begin
     FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, nil, GetLastError, $400, @Buffer,
       SizeOf(Buffer), nil);
@@ -204,8 +204,7 @@ begin
     if error <> '' then
         if strWinError <> '' then
             result := error + ': ' + strWinError
-    else
-        if strWinError <> '' then
+        else if strWinError <> '' then
             result := strWinError;
     if result <> '' then
         result := FName + ': ' + result
@@ -327,7 +326,7 @@ begin
         exit(false);
     FConnected := true;
     self.Suspended := false;
-    Result := true;
+    result := true;
 end;
 
 procedure TPipe.Handle(Msg: string; h: TReadPipeHandler);
@@ -339,28 +338,40 @@ begin
     FHandlers.Add(Msg, h);
 end;
 
+procedure termintate_error(error: string);
+begin
+    Application.MessageBox(PWideChar(error), 'Анкат: критический сбой',
+      MB_OK or MB_ICONERROR);
+    Application.Terminate;
+end;
+
 procedure TPipe.Execute;
 var
     m: TStrMsg;
+    s: string;
 begin
     while (not terminated) and FConnected do
     begin
         m := FPipeMasterToPeerConn.ReadStrMsg;
+        s := '';
         Synchronize(
             procedure
-            var
-                s: string;
             begin
                 if (not terminated) and FConnected then
                 begin
                     if not FHandlers.ContainsKey(m.Msg) then
-                        self.raise_exception(m.Msg + ': not found handler');
-                    s := FHandlers[m.Msg](m.Str);
-                    if s <> '' then
-                        FPipeMasterToPeerConn.WriteString(s);
+                        termintate_error(m.Msg + ': not found handler');
+                    try
+                        s := FHandlers[m.Msg](m.Str);
+                    except
+                        on e: Exception do
+                            termintate_error(m.Msg + ': ' + e.Message);
+                    end;
 
                 end;
             end);
+        if s <> '' then
+            FPipeMasterToPeerConn.WriteString(s);
     end;
 end;
 

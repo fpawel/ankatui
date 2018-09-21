@@ -465,7 +465,8 @@ end;
 
 procedure TForm1.N8Click(Sender: TObject);
 begin
-    FormManualControl.Show;
+    SetCurrentWorkContent(FormManualControl, '”правление');
+    ToolButtonCloseCurrentWork.Visible := True;
 end;
 
 function TForm1.HandleEndWork(content: string): string;
@@ -489,7 +490,10 @@ begin
     end;
 
     if (PanelCurrentWorkContent.ControlCount > 0) AND
-      (PanelCurrentWorkContent.Controls[0] = FormCurrentWork) then
+      (
+        (PanelCurrentWorkContent.Controls[0] = FormCurrentWork) OR
+        (PanelCurrentWorkContent.Controls[0] = FormManualControl)
+        )then
     begin
         ToolButtonCloseCurrentWork.Visible := True;
     end
@@ -1095,9 +1099,8 @@ begin
         with PanelCurrentWorkContent do
             while ControlCount > 0 do
             begin
-                if Controls[0] is TForm then
-                    Controls[0].Visible := false;
-                Controls[0].Parent := nil;
+                Controls[0].Visible := false;
+                Controls[0].Parent := self;
             end;
         if widget is TForm then
             with widget as TForm do
@@ -1148,10 +1151,14 @@ end;
 
 procedure TForm1.UpdatedControlsVisibilityOnStartedChanged(started: boolean);
 begin
-    FormManualControl.Button1.Enabled := not started;
-    FormManualControl.Button6.Enabled := not started;
-    FormManualControl.RadioGroup1.Enabled := not started;
-    FormManualControl.GroupBox2.Enabled := not started;
+    FormManualControl.Enabled := not started;
+    ModifyControl(FormManualControl,
+    procedure (const AControl: TControl)
+    begin
+      AControl.Enabled := not started;
+    end
+    );
+    FormManualControl.Enabled := not started;
     ToolButtonRun.Visible := not started;
     ToolButtonStop.Visible := started;
 end;
@@ -1170,8 +1177,7 @@ begin
         FormSettings.CancelEditNode;
 
     prev.Hide;
-    prev.Parent := nil;
-
+    prev.Parent := self;
     widget.Parent := PanelMainContent;
     widget.Align := alclient;
     if widget is TForm then

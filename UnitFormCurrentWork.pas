@@ -72,6 +72,7 @@ procedure TFormCurrentWork.Button1Click(Sender: TObject);
 var
     o: TOperationInfo;
 begin
+    Visible := false;
     o := SelectedOperation;
     if o = nil then
         o := RootNodeData.FInfo;
@@ -80,7 +81,8 @@ begin
     HostAppData.FPipe.WriteMsgStr('RUN_MAIN_WORK', inttostr(o.FOrdinal));
     Button1.Visible := false;
     Form1.SetupWorkStarted(self, o.FName);
-
+    VirtualStringTree1.TreeOptions.MiscOptions := VirtualStringTree1.TreeOptions.MiscOptions
+        - [toCheckSupport] ;
 end;
 
 procedure TFormCurrentWork.FormCreate(Sender: TObject);
@@ -350,6 +352,7 @@ end;
 
 procedure TFormCurrentWork.SetupDialogMode;
 begin
+    Visible := false;
     SetupWorksTree;
     BorderStyle := bsDialog;
     Align := alnone;
@@ -358,6 +361,8 @@ begin
     Width := 800;
     Height := 550;
     Position := poScreenCenter;
+    VirtualStringTree1.TreeOptions.MiscOptions := VirtualStringTree1.TreeOptions.MiscOptions
+        + [toCheckSupport] ;
     Visible := true;
 end;
 

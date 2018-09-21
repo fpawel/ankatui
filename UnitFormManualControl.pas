@@ -22,21 +22,16 @@ type
         RadioGroup1: TRadioGroup;
         GroupBox2: TGroupBox;
         Button2: TButton;
-        Label1: TLabel;
-        Label2: TLabel;
         Button3: TButton;
         Button4: TButton;
         Button5: TButton;
         Edit2: TEdit;
-        Label3: TLabel;
-    GroupBox3: TGroupBox;
-    Edit3: TEdit;
+    Label2: TLabel;
     Button6: TButton;
         procedure Edit1Change(Sender: TObject);
         procedure Button1Click(Sender: TObject);
     procedure ComboBox2Change(Sender: TObject);
     procedure Button6Click(Sender: TObject);
-    procedure Edit3Change(Sender: TObject);
     private
         { Private declarations }
         procedure InvalidateModbusCommand;
@@ -69,8 +64,8 @@ end;
 
 procedure TFormManualControl.Button6Click(Sender: TObject);
 begin
-    HostAppData.FPipe.WriteMsgStr('SEND_SET_WORK_MODE',  Edit3.Text);
-    Form1.SetupWorkStarted(nil, 'установкарежима работы');
+    HostAppData.FPipe.WriteMsgStr('SEND_SET_WORK_MODE',  Edit1.Text);
+    Form1.SetupWorkStarted(nil, 'установка режима работы');
 end;
 
 procedure TFormManualControl.ComboBox2Change(Sender: TObject);
@@ -81,12 +76,6 @@ end;
 procedure TFormManualControl.Edit1Change(Sender: TObject);
 begin
     InvalidateModbusCommand;
-end;
-
-procedure TFormManualControl.Edit3Change(Sender: TObject);
-var arg:extended;
-begin
-    Button6.Enabled := TryStrToFloat( str_validate_decimal_separator(Edit3.Text), arg);
 end;
 
 procedure TFormManualControl.InvalidateModbusCommand;
