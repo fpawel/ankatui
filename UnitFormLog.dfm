@@ -5,11 +5,15 @@ object FormLog: TFormLog
   ClientHeight = 576
   ClientWidth = 1093
   Color = clWindow
-  ParentFont = True
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -15
+  Font.Name = 'Tahoma'
+  Font.Style = []
   OldCreateOrder = False
   OnCreate = FormCreate
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 18
   object Splitter1: TSplitter
     Left = 489
     Top = 0
@@ -80,7 +84,7 @@ object FormLog: TFormLog
     Left = 128
     Top = 168
     Bitmap = {
-      494C010106009C00500110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010106009C00540110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       000000000000000000000000000000000000B5794DFFB5794DFFB5794DFFB579
       4DFFB5794DFFB5794DFFB5794DFFB5794DFFB5794DFFB5794DFFB5794DFFB579

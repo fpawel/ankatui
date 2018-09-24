@@ -13,6 +13,8 @@ uses
 
 type
 
+    TQueryHandler = reference to procedure(q: TFDQuery);
+
     TDataModule1 = class(TDataModule)
         FDConnectionProductsDB: TFDConnection;
         FDPhysSQLiteDriverLink1: TFDPhysSQLiteDriverLink;
@@ -38,6 +40,9 @@ type
         { Private declarations }
         FVars: TArray<TDeviceVar>;
         procedure read_config_section(sect: TConfigSection);
+
+        procedure DoQuery(AConnection: TFDConnection; sql_text: string;
+          prepare, exec: TQueryHandler);
     public
         { Public declarations }
         function DeviceVars: TArray<TDeviceVar>;
@@ -93,6 +98,9 @@ type
         function GetConfigPropertyValueList(property_name: string)
           : TArray<string>;
 
+        procedure QueryProducts(sql_text: string; prepare, exec: TQueryHandler);
+        procedure QueryConfig(sql_text: string; prepare, exec: TQueryHandler);
+
     end;
 
 var
@@ -100,7 +108,7 @@ var
 
 implementation
 
-uses dateutils, Vcl.dialogs,  System.Variants, stringutils, variantutils;
+uses dateutils, Vcl.dialogs, System.Variants, stringutils, variantutils;
 
 { %CLASSGROUP 'Vcl.Controls.TControl' }
 
@@ -108,16 +116,14 @@ uses dateutils, Vcl.dialogs,  System.Variants, stringutils, variantutils;
 
 procedure TDataModule1.DataModuleCreate(Sender: TObject);
 begin
-    if GetEnvironmentVariable('MYAPPDATA') = ''  then
+    if GetEnvironmentVariable('MYAPPDATA') = '' then
     begin
         FDConnectionProductsDB.Params.Database :=
-            '$(APPDATA)\Аналитприбор\ankat\products.db';
+          '$(APPDATA)\Аналитприбор\ankat\products.db';
         FDConnectionConfig.Params.Database :=
-            '$(APPDATA)\Аналитприбор\ankat\config.db';
+          '$(APPDATA)\Аналитприбор\ankat\config.db';
 
     end;
-
-
 
     FDConnectionProductsDB.Connected := true;
     FDConnectionConfig.Connected := true;
@@ -132,8 +138,8 @@ begin
         while not Eof do
         begin
             SetLength(FVars, length(FVars) + 1);
-            FVars[length(FVars)-1] := TDeviceVar.Create;
-            with FVars[length(FVars)-1] do
+            FVars[length(FVars) - 1] := TDeviceVar.Create;
+            with FVars[length(FVars) - 1] do
             begin
                 FVar := FieldValues['var'];
                 FName := FieldValues['name'];
@@ -405,7 +411,8 @@ begin
 end;
 
 function TDataModule1.GetDeviceVarByName(s: string): integer;
-var v:TDeviceVar;
+var
+    v: TDeviceVar;
 begin
     for v in FVars do
     begin
@@ -418,17 +425,18 @@ begin
 end;
 
 function TDataModule1.GetDeviceVarName(v: integer): string;
-var x:TDeviceVar;
+var
+    x: TDeviceVar;
 begin
     for x in FVars do
         if x.FVar = v then
-            exit(x.FName);
-    exit('');
+            Exit(x.FName);
+    Exit('');
 end;
 
 function TDataModule1.DeviceVars: TArray<TDeviceVar>;
 begin
-    exit(FVars);
+    Exit(FVars);
 end;
 
 procedure TDataModule1.FDConnectionProductsDBError(ASender, AInitiator: TObject;
@@ -533,7 +541,7 @@ end;
 function TDataModule1.CurrentPartyCoefs: TArray<RProductCoefValue>;
 var
     xs: TList<RProductCoefValue>;
-    X: RProductCoefValue;
+    x: RProductCoefValue;
 begin
     xs := TList<RProductCoefValue>.Create;
 
@@ -545,11 +553,11 @@ begin
         First;
         while not Eof do
         begin
-            X.Serial := FieldValues['product_serial'];
-            X.Ordinal := FieldValues['ordinal'];
-            X.Coef := FieldValues['coefficient_id'];
-            X.Value := FieldValues['value'];
-            xs.Add(X);
+            x.Serial := FieldValues['product_serial'];
+            x.Ordinal := FieldValues['ordinal'];
+            x.Coef := FieldValues['coefficient_id'];
+            x.Value := FieldValues['value'];
+            xs.Add(x);
             Next;
         end;
         Close;
@@ -953,7 +961,43 @@ begin
     end;
 end;
 
+procedure TDataModule1.DoQuery(AConnection: TFDConnection; sql_text: string;
+  prepare, exec: TQueryHandler);
+var
+    fdquery: TFDQuery;
+begin
+    fdquery := TFDQuery.Create(nil);
+    with fdquery do
+    begin
+        Connection := AConnection;
+        SQL.Text := sql_text;
+        if Assigned(prepare) then
+            prepare(fdquery);
+        if Assigned(exec) then
+            raise Exception.Create('exec not assigned');
+        Open;
+        First;
+        while not Eof do
+        begin
+            exec(fdquery);
+            Next;
+        end;
+        Close;
+        Free;
+    end;
+end;
 
+procedure TDataModule1.QueryProducts(sql_text: string;
+  prepare, exec: TQueryHandler);
+begin
+    DoQuery(FDConnectionProductsDB, sql_text, prepare, exec);
+end;
+
+procedure TDataModule1.QueryConfig(sql_text: string;
+  prepare, exec: TQueryHandler);
+begin
+    DoQuery(FDConnectionConfig, sql_text, prepare, exec);
+end;
 
 
 end.

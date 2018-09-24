@@ -10,8 +10,6 @@ uses
 
 type
     TFormSettings = class(TForm)
-    Panel2: TPanel;
-    Button1: TButton;
     procedure FormCreate(Sender: TObject);
     private
         { Private declarations }
