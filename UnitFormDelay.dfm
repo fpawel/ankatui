@@ -52,7 +52,7 @@ object FormDelay: TFormDelay
         Left = 113
         Top = 0
         Width = 58
-        Height = 23
+        Height = 18
         Align = alLeft
         Caption = '00:00:00'
         Font.Charset = DEFAULT_CHARSET
@@ -61,13 +61,12 @@ object FormDelay: TFormDelay
         Font.Name = 'Tahoma'
         Font.Style = []
         ParentFont = False
-        ExplicitLeft = 138
       end
       object LabelTotalTime: TLabel
         Left = 39
         Top = 0
         Width = 58
-        Height = 23
+        Height = 18
         Align = alLeft
         Caption = '00:00:00'
         Font.Charset = DEFAULT_CHARSET
@@ -76,14 +75,12 @@ object FormDelay: TFormDelay
         Font.Name = 'Tahoma'
         Font.Style = []
         ParentFont = False
-        ExplicitLeft = 74
-        ExplicitHeight = 18
       end
       object LabelWhat: TLabel
         Left = 0
         Top = 0
         Width = 23
-        Height = 23
+        Height = 18
         Align = alLeft
         Caption = '?dd'
         Font.Charset = DEFAULT_CHARSET
@@ -97,7 +94,7 @@ object FormDelay: TFormDelay
         Left = 187
         Top = 0
         Width = 31
-        Height = 23
+        Height = 18
         Align = alLeft
         Caption = '50%'
         Font.Charset = DEFAULT_CHARSET
@@ -106,7 +103,6 @@ object FormDelay: TFormDelay
         Font.Name = 'Tahoma'
         Font.Style = []
         ParentFont = False
-        ExplicitHeight = 18
       end
       object Panel14: TPanel
         Left = 23

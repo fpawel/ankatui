@@ -46,22 +46,18 @@ type
         Panel4: TPanel;
         Panel1: TPanel;
         CheckBox1: TCheckBox;
-        PanelMenuBar: TPanel;
-        ToolBar1: TToolBar;
         ImageList1: TImageList;
         PopupMenu1: TPopupMenu;
         N1: TMenuItem;
         N2: TMenuItem;
-        ToolBar2: TToolBar;
-        ToolButtonRun: TToolButton;
+    ToolBarParty: TToolBar;
+    ToolButtonParty: TToolButton;
         ToolButtonStop: TToolButton;
         Splitter1: TSplitter;
-        Panel5: TPanel;
         ImageList2: TImageList;
         N3: TMenuItem;
         N4: TMenuItem;
         N5: TMenuItem;
-        ToolButtonSettings: TToolButton;
         PanelCurrentWorkContent: TPanel;
         RichEdit1: TRichEdit;
         PanelConsole: TPanel;
@@ -75,7 +71,7 @@ type
         PanelConsolePlaceholderBottom: TPanel;
         SplitterConsoleHoriz: TSplitter;
         SplitterConsoleVert: TSplitter;
-        Panel2: TPanel;
+    PanelLastMessage: TPanel;
         Panel9: TPanel;
         Panel11: TPanel;
         Panel12: TPanel;
@@ -89,19 +85,16 @@ type
         Panel14: TPanel;
         PanelPlaceholderCurrentPartyMain: TPanel;
         Panel6: TPanel;
-        Panel13: TPanel;
-        Panel15: TPanel;
-        PanelMainContent: TPanel;
         ImageList4: TImageList;
         Panel3: TPanel;
-        ToolButtonClose: TToolButton;
-        N9: TMenuItem;
-        N10: TMenuItem;
-        N11: TMenuItem;
-        N12: TMenuItem;
-        PanelMainContentTitle: TPanel;
-        ToolBar3: TToolBar;
-        ToolButtonCloseMainContent: TToolButton;
+    PageControlMain: TPageControl;
+        TabSheetParty: TTabSheet;
+        TabSheetParties: TTabSheet;
+        TabSheetLogs: TTabSheet;
+        TabSheetCharts: TTabSheet;
+    TabSheetSettings: TTabSheet;
+    Panel10: TPanel;
+    Panel15: TPanel;
         procedure FormCreate(Sender: TObject);
         procedure ComboBox1CloseUp(Sender: TObject);
         procedure StringGrid1SelectCell(Sender: TObject; ACol, ARow: integer;
@@ -118,7 +111,6 @@ type
         procedure ToolButtonStopClick(Sender: TObject);
         procedure StringGrid1DblClick(Sender: TObject);
         procedure FormClose(Sender: TObject; var Action: TCloseAction);
-        procedure ToolButtonSettingsClick(Sender: TObject);
         procedure ToolButtonMoveConsoleUpClick(Sender: TObject);
         procedure ToolButtonMoveConsoleDownClick(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -130,15 +122,13 @@ type
         procedure N1Click(Sender: TObject);
         procedure N3Click(Sender: TObject);
         procedure N2Click(Sender: TObject);
-        procedure ToolButtonRunMouseUp(Sender: TObject; Button: TMouseButton;
+        procedure ToolButtonPartyMouseUp(Sender: TObject; Button: TMouseButton;
           Shift: TShiftState; X, Y: integer);
         procedure N7Click(Sender: TObject);
         procedure N8Click(Sender: TObject);
-        procedure ToolButtonCloseClick(Sender: TObject);
-        procedure N10Click(Sender: TObject);
-        procedure N11Click(Sender: TObject);
-        procedure N12Click(Sender: TObject);
-        procedure ToolButtonCloseMainContentClick(Sender: TObject);
+        procedure PageControlMainDrawTab(Control: TCustomTabControl;
+          TabIndex: integer; const Rect: TRect; Active: boolean);
+    procedure PageControlMainChange(Sender: TObject);
     private
         { Private declarations }
 
@@ -158,8 +148,6 @@ type
 
         procedure SetCurrentWorkContent(widget: TControl;
           contetnt_title: string);
-
-        procedure SetMainContent(widget: TControl);
 
     public
 
@@ -363,8 +351,8 @@ begin
 
     if not HostAppData.FPipe.Connect('ANKAT') then
     begin
-        Panel5.Caption := 'Нет хост-процеса';
-        Panel5.Font.Color := clRed;
+        Panel15.Caption := '   Нет хост-процеса';
+        Panel15.Font.Color := clRed;
     end
     else
     begin
@@ -386,30 +374,6 @@ begin
       inttostr(DataModule1.CurrentPartyProducts[product_order].FSerial));
     X.Free;
 
-end;
-
-procedure TForm1.N10Click(Sender: TObject);
-begin
-    SetMainContent(FormParties);
-end;
-
-procedure TForm1.N11Click(Sender: TObject);
-begin
-    FormLog.FOnRenderMessages := procedure
-        begin
-            if PanelMainContent.Controls[0] = FormLog then
-            begin
-                FormLog.RichEdit1.SetFocus;
-                SendMessage(FormLog.RichEdit1.Handle, EM_SCROLL,
-                  SB_LINEDOWN, 0);
-            end;
-        end;
-    SetMainContent(FormLog);
-end;
-
-procedure TForm1.N12Click(Sender: TObject);
-begin
-    SetMainContent(FormChart);
 end;
 
 procedure TForm1.N1Click(Sender: TObject);
@@ -450,13 +414,13 @@ end;
 
 procedure TForm1.N7Click(Sender: TObject);
 begin
-    FormNewPartyDialog.Button2.OnClick := ToolButtonCloseClick;
+
     FormNewPartyDialog.FAcceptHandler := procedure
         begin
             SetCurrentParty;
+            FormNewPartyDialog.ModalResult := mrOk;
         end;
-    SetMainContent(FormNewPartyDialog);
-
+    FormNewPartyDialog.ShowModal;
 end;
 
 procedure TForm1.N8Click(Sender: TObject);
@@ -475,13 +439,13 @@ begin
     X := TJson.JsonToObject<TEndWorkInfo>(content);
     if X.FError <> '' then
     begin
-        Panel5.Caption := X.FName + ': ' + X.FError;
-        Panel5.Font.Color := clRed;
+        PanelLastMessage.Caption := X.FName + ': ' + X.FError;
+        PanelLastMessage.Font.Color := clRed;
     end
     else
     begin
-        Panel5.Caption := X.FName + ': выполнено';
-        Panel5.Font.Color := clNavy;
+        PanelLastMessage.Caption := X.FName + ': выполнено';
+        PanelLastMessage.Font.Color := clNavy;
 
     end;
 
@@ -536,14 +500,14 @@ begin
     Result := '';
     m := TJson.JsonToObject<TWorkMsg>(content);
 
-    Panel2.Caption := Format('[%d] %s: %s', [m.FWorkIndex, m.FWork, m.FText]);
+    PanelLastMessage.Caption := Format('[%d] %s: %s', [m.FWorkIndex, m.FWork, m.FText]);
     if m.FLevel >= LError then
     begin
-        Panel2.Font.Color := clRed;
+        PanelLastMessage.Font.Color := clRed;
         FormCurrentWork.SetRunError;
     end
     else
-        Panel2.Font.Color := clNavy;
+        PanelLastMessage.Font.Color := clNavy;
 
     SendMessage(RichEdit1.Handle, EM_SCROLL, SB_LINEDOWN, 0);
     RichEdit1.SelStart := Length(RichEdit1.Text);
@@ -581,16 +545,16 @@ begin
     X := TJson.JsonToObject<TReadVar>(content);
     p := FProducts[X.FProductOrder];
     v := FormReadVars.FVars[X.FVarOrder];
-    Panel2.Font.Color := clNavy;
-    Panel2.Caption := Format('Считывание: АНКАТ %d: регистр %d: %s: %s: ',
+    PanelLastMessage.Font.Color := clNavy;
+    PanelLastMessage.Caption := Format('Считывание: АНКАТ %d: регистр %d: %s: %s: ',
       [p.FSerial, v.FVar, v.FName, v.FDescription]);
 
     if X.FError = '' then
-        Panel2.Caption := Panel2.Caption + FloatToStr(X.FValue)
+        PanelLastMessage.Caption := PanelLastMessage.Caption + FloatToStr(X.FValue)
     else
     begin
-        Panel2.Caption := Panel2.Caption + X.FError;
-        Panel2.Font.Color := clRed;
+        PanelLastMessage.Caption := PanelLastMessage.Caption + X.FError;
+        PanelLastMessage.Font.Color := clRed;
     end;
 
     FormReadVars.HandleReadVar(X);
@@ -609,16 +573,16 @@ begin
     X := TJson.JsonToObject<TReadCoef>(content);
     p := FProducts[X.FProductOrder];
     v := FFrameCoef.FCoefs[X.FCoefficientOrder];
-    Panel2.Font.Color := clNavy;
-    Panel2.Caption := Format('Считывание: АНКАТ %d: коэффициент %d: %s: %s: ',
+    PanelLastMessage.Font.Color := clNavy;
+    PanelLastMessage.Caption := Format('Считывание: АНКАТ %d: коэффициент %d: %s: %s: ',
       [p.FSerial, v.FVar, v.FName, v.FDescription]);
 
     if X.FError = '' then
-        Panel2.Caption := Panel2.Caption + FloatToStr(X.FValue)
+        PanelLastMessage.Caption := PanelLastMessage.Caption + FloatToStr(X.FValue)
     else
     begin
-        Panel2.Caption := Panel2.Caption + X.FError;
-        Panel2.Font.Color := clRed;
+        PanelLastMessage.Caption := PanelLastMessage.Caption + X.FError;
+        PanelLastMessage.Font.Color := clRed;
     end;
 
     FFrameCoef.HandleReadCoef(X);
@@ -656,6 +620,48 @@ begin
     RichEdit1.SetFocus;
     SendMessage(RichEdit1.Handle, EM_SCROLL, SB_LINEDOWN, 0);
 
+    with FormSettings do
+    begin
+        Parent := TabSheetSettings;
+        Align := alClient;
+        BorderStyle := bsNone;
+        Visible := true;
+    end;
+
+    with FormChart do
+    begin
+        Parent := TabSheetCharts;
+        Align := alClient;
+        BorderStyle := bsNone;
+        Visible := true;
+    end;
+
+    with FormLog do
+    begin
+        Parent := TabSheetLogs;
+        Align := alClient;
+        BorderStyle := bsNone;
+        Visible := true;
+    end;
+
+    with FormParties do
+    begin
+        Parent := TabSheetParties;
+        Align := alClient;
+        BorderStyle := bsNone;
+        Visible := true;
+    end;
+
+    with FormDelay do
+    begin
+        Parent := TabSheetParty;
+        Align := alBottom;
+        BorderStyle := bsNone;
+        Visible := false;
+    end;
+
+
+
 end;
 
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -671,7 +677,6 @@ begin
         raise Exception.Create('GetWindowPlacement: false');
     fs.Write(wp, SizeOf(wp));
     fs.Free;
-    PanelPlaceholderCurrentPartyMain.Parent := PanelMainContent;
 end;
 
 procedure TForm1.SetCurrentParty;
@@ -705,6 +710,19 @@ begin
     end;
     FormReadVars.SetCurrentParty(FProducts);
     FFrameCoef.SetCurrentParty(FProducts);
+end;
+
+procedure TForm1.PageControlMainChange(Sender: TObject);
+begin
+    (Sender as TPageControl).Repaint;
+    if PageControlMain.ActivePage = TabSheetSettings then
+        FormSettings.SetConfig;
+end;
+
+procedure TForm1.PageControlMainDrawTab(Control: TCustomTabControl;
+TabIndex: integer; const Rect: TRect; Active: boolean);
+begin
+    PageControl_DrawVerticalTab(Control, TabIndex, Rect, Active);
 end;
 
 procedure TForm1.PanelConsolePlaceholderBottomResize(Sender: TObject);
@@ -841,7 +859,7 @@ begin
 
     end;
 
-    StringGrid_DrawCellBounds(cnv, acol, arow,  Rect);
+    StringGrid_DrawCellBounds(cnv, ACol, ARow, Rect);
 end;
 
 procedure TForm1.StringGrid1KeyPress(Sender: TObject; var Key: Char);
@@ -973,28 +991,11 @@ begin
     ComboBox1.Visible := false;
 end;
 
-procedure TForm1.ToolButtonCloseClick(Sender: TObject);
-begin
-    SetMainContent(PanelPlaceholderCurrentPartyMain);
-
-end;
-
-procedure TForm1.ToolButtonSettingsClick(Sender: TObject);
-begin
-    SetMainContent(FormSettings);
-end;
-
 procedure TForm1.ToolButtonCloseCurrentWorkClick(Sender: TObject);
 begin
     ToolButtonCloseCurrentWork.Visible := false;
     SetCurrentWorkContent(FFrameCoef, 'Коэффициенты');
 
-end;
-
-procedure TForm1.ToolButtonCloseMainContentClick(Sender: TObject);
-begin
-
-    SetMainContent(PanelPlaceholderCurrentPartyMain);
 end;
 
 procedure TForm1.ToolButtonConsoleHideClick(Sender: TObject);
@@ -1007,9 +1008,9 @@ begin
     PanelConsolePlaceholderRight.Visible := false;
     PanelConsolePlaceholderBottom.Visible := True;
     PanelConsole.Parent := PanelConsolePlaceholderBottom;
-    PanelConsole.Height := Panel2.Height;
+    PanelConsole.Height := PanelLastMessage.Height;
     PanelConsolePlaceholderBottom.OnResize := nil;
-    PanelConsolePlaceholderBottom.Height := Panel2.Height;
+    PanelConsolePlaceholderBottom.Height := PanelLastMessage.Height;
     PanelConsolePlaceholderBottom.OnResize :=
       PanelConsolePlaceholderBottomResize;
     FIni.WriteString('positions', 'console', 'hiden');
@@ -1058,10 +1059,10 @@ begin
 
 end;
 
-procedure TForm1.ToolButtonRunMouseUp(Sender: TObject; Button: TMouseButton;
+procedure TForm1.ToolButtonPartyMouseUp(Sender: TObject; Button: TMouseButton;
 Shift: TShiftState; X, Y: integer);
 begin
-    with ToolButtonRun do
+    with ToolButtonParty do
         with ClientToScreen(Point(0, Height)) do
             PopupMenu1.Popup(X, Y);
 end;
@@ -1079,7 +1080,7 @@ begin
     if Assigned(widget) then
     begin
         with PanelCurrentWorkContent do
-            while ControlCount > 0 do
+            if (ControlCount > 0) and (Controls[0] <> widget) then
             begin
                 Controls[0].Visible := false;
                 Controls[0].Parent := self;
@@ -1104,8 +1105,8 @@ begin
     if ToolButtonCloseCurrentWork.Visible then
         ToolButtonCloseCurrentWork.Click;
 
-    Panel5.Caption := work;
-    Panel5.Font.Color := clNavy;
+    PanelLastMessage.Caption := work;
+    PanelLastMessage.Font.Color := clNavy;
     UpdatedControlsVisibilityOnStartedChanged(True);
     SetCurrentWorkContent(widget, work);
 end;
@@ -1140,50 +1141,8 @@ begin
             AControl.Enabled := not started;
         end);
     FormManualControl.Enabled := not started;
-    ToolButtonRun.Visible := not started;
+    ToolButtonParty.Visible := not started;
     ToolButtonStop.Visible := started;
-end;
-
-procedure TForm1.SetMainContent(widget: TControl);
-var
-    widget_is_current_party: boolean;
-    prev: TControl;
-begin
-    prev := PanelMainContent.Controls[0];
-
-    if widget = FormSettings then
-        FormSettings.SetConfig;
-
-    if prev = FormSettings then
-        FormSettings.CancelEditNode;
-
-    prev.Hide;
-    prev.Parent := self;
-    widget.Parent := PanelMainContent;
-    widget.Align := alclient;
-    if widget is TForm then
-        (widget as TForm).BorderStyle := bsNone;
-    widget.Show;
-
-    widget_is_current_party := widget = PanelPlaceholderCurrentPartyMain;
-
-    ToolButtonClose.Visible := not widget_is_current_party;
-    ToolButtonSettings.Visible := widget_is_current_party;
-
-    PanelMainContentTitle.Visible := not widget_is_current_party;
-    PanelMainContentTitle.Top := 100500;
-
-    if widget = FormLog then
-        PanelMainContentTitle.Caption := '   Журнал'
-    else if widget = FormChart then
-        PanelMainContentTitle.Caption := '   График'
-    else if widget = FormSettings then
-        PanelMainContentTitle.Caption := '   Настройки'
-    else if widget = FormNewPartyDialog then
-        PanelMainContentTitle.Caption := '   Новая партия'
-    else if widget = FormParties then
-        PanelMainContentTitle.Caption := '   Архив';
-
 end;
 
 end.

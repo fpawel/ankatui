@@ -58,19 +58,7 @@ begin
     ProgressBar1.Max := i.FDurationMS;
     Timer1.Enabled := i.FEnabled;
     LabelTotalTime.Caption := TimeToStr(IncMilliSecond(0, i.FDurationMS));
-    if i.FEnabled then
-    begin
-        BorderStyle := bsNone;
-        Align := alclient;
-        Parent := Form1.Panel5;
-        Visible := true;
-
-    end
-    else
-    begin
-        Parent := form1;
-        Visible := false;
-    end;
+    Visible := i.FEnabled;
 end;
 
 procedure TFormDelay.Timer1Timer(Sender: TObject);

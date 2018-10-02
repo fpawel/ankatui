@@ -257,8 +257,7 @@ begin
     if (ACol = 0) and (ARow > 0) then
         StringGrid_DrawCheckBoxCell(grd, ACol, ARow, Rect, State, Checked);
 
-    StringGrid_DrawCellBounds(cnv, acol, arow,  Rect);
-
+    StringGrid_DrawCellBounds(cnv, ACol, ARow, Rect);
 
 end;
 

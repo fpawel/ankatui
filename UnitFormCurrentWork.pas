@@ -389,11 +389,11 @@ begin
                 d.FInfo.FHasMessage := true;
                 d.FInfo.FHasError := false;
             end;
-            if (d.FChildren.Count = 0) and op.FRun then
-            begin
-                Form1.Panel5.Caption := d.text;
-                Form1.Panel5.Font.Color := clNavy;
-            end;
+//            if (d.FChildren.Count = 0) and op.FRun then
+//            begin
+//                Form1.Panel5.Caption := d.text;
+//                Form1.Panel5.Font.Color := clNavy;
+//            end;
             d.FRun := op.FRun;
             VirtualStringTree1.RepaintNode(d.FNode);
         end);
