@@ -41,8 +41,7 @@ type
         FVars: TArray<TDeviceVar>;
         procedure read_config_section(sect: TConfigSection);
 
-        procedure DoQuery(AConnection: TFDConnection; sql_text: string;
-          prepare, exec: TQueryHandler);
+        
     public
         { Public declarations }
         function DeviceVars: TArray<TDeviceVar>;
@@ -98,8 +97,7 @@ type
         function GetConfigPropertyValueList(property_name: string)
           : TArray<string>;
 
-        procedure QueryProducts(sql_text: string; prepare, exec: TQueryHandler);
-        procedure QueryConfig(sql_text: string; prepare, exec: TQueryHandler);
+        
 
     end;
 
@@ -961,43 +959,8 @@ begin
     end;
 end;
 
-procedure TDataModule1.DoQuery(AConnection: TFDConnection; sql_text: string;
-  prepare, exec: TQueryHandler);
-var
-    fdquery: TFDQuery;
-begin
-    fdquery := TFDQuery.Create(nil);
-    with fdquery do
-    begin
-        Connection := AConnection;
-        SQL.Text := sql_text;
-        if Assigned(prepare) then
-            prepare(fdquery);
-        if Assigned(exec) then
-            raise Exception.Create('exec not assigned');
-        Open;
-        First;
-        while not Eof do
-        begin
-            exec(fdquery);
-            Next;
-        end;
-        Close;
-        Free;
-    end;
-end;
 
-procedure TDataModule1.QueryProducts(sql_text: string;
-  prepare, exec: TQueryHandler);
-begin
-    DoQuery(FDConnectionProductsDB, sql_text, prepare, exec);
-end;
 
-procedure TDataModule1.QueryConfig(sql_text: string;
-  prepare, exec: TQueryHandler);
-begin
-    DoQuery(FDConnectionConfig, sql_text, prepare, exec);
-end;
 
 
 end.

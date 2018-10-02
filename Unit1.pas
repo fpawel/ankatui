@@ -841,24 +841,7 @@ begin
 
     end;
 
-    cnv.Pen.Color := lineColor;
-    cnv.Pen.Width := -1;
-
-    cnv.MoveTo(Rect.Left, Rect.Bottom);
-    cnv.LineTo(Rect.Left, Rect.Top);
-    cnv.LineTo(Rect.Right, Rect.Top);
-
-    if ACol = grd.ColCount - 1 then
-    begin
-        cnv.MoveTo(Rect.Right, Rect.Top);
-        cnv.LineTo(Rect.Right, Rect.Bottom);
-    end;
-
-    if ARow = grd.RowCount - 1 then
-    begin
-        cnv.MoveTo(Rect.Left, Rect.Bottom);
-        cnv.LineTo(Rect.Right, Rect.Bottom);
-    end;
+    StringGrid_DrawCellBounds(cnv, acol, arow,  Rect);
 end;
 
 procedure TForm1.StringGrid1KeyPress(Sender: TObject; var Key: Char);

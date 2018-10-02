@@ -12,12 +12,35 @@ procedure StringGrid_RedrawCell(grd: TStringGrid; acol, arow: integer);
 procedure StringGrid_RedrawRow(grd: TStringGrid; arow: integer);
 procedure DrawCheckbox(par_ctrl:TWinControl; cnv:TCanvas; Rect: TRect; checked:boolean; text:string );
 
-
+procedure StringGrid_DrawCellBounds(cnv: TCanvas; acol, arow: integer;
+  Rect: TRect);
 
 
 implementation
 
 uses winapi.windows, system.math, winapi.uxtheme;
+
+procedure StringGrid_DrawCellBounds(cnv: TCanvas; acol, arow: integer;
+  Rect: TRect);
+begin
+    with cnv do
+    begin
+        Pen.Color := $00BCBCBC;
+        Pen.Width := -1;
+        if arow = 0 then
+        begin
+            MoveTo(Rect.Left, Rect.Top);
+            LineTo(Rect.Right, Rect.Top);
+        end
+        else
+            MoveTo(Rect.Right, Rect.Top);
+
+        LineTo(Rect.Right, Rect.Bottom);
+        LineTo(Rect.Left, Rect.Bottom);
+        if acol = 0 then
+            LineTo(Rect.Left, Rect.Top);
+    end;
+end;
 
 procedure StringGrid_Redraw(grd: TStringGrid);
 var

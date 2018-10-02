@@ -257,24 +257,8 @@ begin
     if (ACol = 0) and (ARow > 0) then
         StringGrid_DrawCheckBoxCell(grd, ACol, ARow, Rect, State, Checked);
 
-    cnv.Pen.Color := lineColor;
-    cnv.Pen.Width := -1;
+    StringGrid_DrawCellBounds(cnv, acol, arow,  Rect);
 
-    cnv.MoveTo(Rect.Left, Rect.Bottom);
-    cnv.LineTo(Rect.Left, Rect.Top);
-    cnv.LineTo(Rect.Right, Rect.Top);
-
-    if ACol = grd.ColCount - 1 then
-    begin
-        cnv.MoveTo(Rect.Right, Rect.Top);
-        cnv.LineTo(Rect.Right, Rect.Bottom);
-    end;
-
-    if ARow = grd.RowCount - 1 then
-    begin
-        cnv.MoveTo(Rect.Left, Rect.Bottom);
-        cnv.LineTo(Rect.Right, Rect.Bottom);
-    end;
 
 end;
 
