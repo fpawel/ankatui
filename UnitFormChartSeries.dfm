@@ -1,7 +1,7 @@
-object FormCurrentChart: TFormCurrentChart
+object FormChartSeries: TFormChartSeries
   Left = 0
   Top = 0
-  Caption = 'FormCurrentChart'
+  Caption = 'FormChartSeries'
   ClientHeight = 599
   ClientWidth = 1000
   Color = clWindow
@@ -12,9 +12,6 @@ object FormCurrentChart: TFormCurrentChart
   Font.Style = []
   OldCreateOrder = False
   OnCreate = FormCreate
-  OnHide = FormHide
-  OnResize = FormResize
-  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 18
   object Panel14: TPanel
@@ -120,14 +117,6 @@ object FormCurrentChart: TFormCurrentChart
       TabOrder = 0
       DefaultCanvas = 'TGDIPlusCanvas'
       ColorPaletteIndex = 13
-      object Splitter1: TSplitter
-        Left = 893
-        Top = 0
-        Width = 5
-        Height = 589
-        Align = alRight
-        ExplicitLeft = 875
-      end
     end
   end
   object ImageList1: TImageList
@@ -140,7 +129,7 @@ object FormCurrentChart: TFormCurrentChart
     Left = 480
     Top = 178
     Bitmap = {
-      494C010101009C00C80232003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010101009C00D40232003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000C8000000320000000100200000000000409C
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

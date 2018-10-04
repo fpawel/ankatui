@@ -3132,25 +3132,26 @@ object Form1: TForm1
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 18
+  object SplitterConsoleHoriz: TSplitter
+    Left = 0
+    Top = 523
+    Width = 1100
+    Height = 5
+    Cursor = crVSplit
+    Align = alBottom
+    Color = clBtnFace
+    ParentColor = False
+    ExplicitLeft = 8
+    ExplicitTop = 435
+  end
   object Panel4: TPanel
     Left = 1095
-    Top = 10
+    Top = 32
     Width = 5
-    Height = 648
+    Height = 491
     Align = alRight
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitTop = 50
-    ExplicitHeight = 608
-  end
-  object Panel1: TPanel
-    Left = 0
-    Top = 0
-    Width = 1100
-    Height = 5
-    Align = alTop
-    BevelOuter = bvNone
-    TabOrder = 1
   end
   object Panel8: TPanel
     Left = 0
@@ -3159,515 +3160,375 @@ object Form1: TForm1
     Height = 5
     Align = alBottom
     BevelOuter = bvNone
-    TabOrder = 2
+    TabOrder = 1
   end
   object Panel14: TPanel
     Left = 0
-    Top = 10
+    Top = 32
     Width = 5
-    Height = 648
+    Height = 491
     Align = alLeft
     BevelOuter = bvNone
-    TabOrder = 3
-    ExplicitTop = 50
-    ExplicitHeight = 608
-  end
-  object Panel3: TPanel
-    Left = 0
-    Top = 5
-    Width = 1100
-    Height = 5
-    Align = alTop
-    BevelOuter = bvNone
-    TabOrder = 4
-    ExplicitTop = 45
+    TabOrder = 2
   end
   object PageControlMain: TPageControl
     Left = 5
-    Top = 10
+    Top = 32
     Width = 1090
-    Height = 648
-    ActivePage = TabSheetParty
+    Height = 491
+    ActivePage = TabSheetProducts
     Align = alClient
     MultiLine = True
     OwnerDraw = True
     TabHeight = 100
-    TabOrder = 5
+    TabOrder = 3
     TabPosition = tpLeft
     TabWidth = 50
     OnChange = PageControlMainChange
     OnDrawTab = PageControlMainDrawTab
-    ExplicitLeft = 2
-    ExplicitTop = 11
-    object TabSheetParty: TTabSheet
-      Caption = #1055#1072#1088#1090#1080#1103
-      ExplicitWidth = 373
-      ExplicitHeight = 243
-      object PanelPlaceholderCurrentPartyMain: TPanel
+    object TabSheetProducts: TTabSheet
+      Caption = #1055#1088#1080#1073#1086#1088#1099
+      DesignSize = (
+        982
+        483)
+      object Splitter1: TSplitter
+        Left = 393
+        Top = 0
+        Width = 5
+        Height = 483
+        Color = cl3DLight
+        ParentColor = False
+        ExplicitLeft = 289
+        ExplicitHeight = 504
+      end
+      object StringGrid1: TStringGrid
         Left = 0
         Top = 0
-        Width = 982
-        Height = 640
-        Align = alClient
+        Width = 393
+        Height = 483
+        Align = alLeft
+        BorderStyle = bsNone
+        ColCount = 4
+        DefaultDrawing = False
+        FixedColor = clBackground
+        FixedCols = 0
+        RowCount = 1
+        FixedRows = 0
+        GradientEndColor = clBlack
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing]
+        TabOrder = 2
+        OnDblClick = StringGrid1DblClick
+        OnDrawCell = StringGrid1DrawCell
+        OnKeyPress = StringGrid1KeyPress
+        OnMouseUp = StringGrid1MouseUp
+        OnSelectCell = StringGrid1SelectCell
+        OnTopLeftChanged = StringGrid1TopLeftChanged
+        ColWidths = (
+          64
+          64
+          64
+          64)
+        RowHeights = (
+          24)
+      end
+      object ComboBox1: TComboBox
+        Left = 118
+        Top = 163
+        Width = 145
+        Height = 24
+        BevelInner = bvNone
         BevelOuter = bvNone
+        Style = csOwnerDrawFixed
+        Anchors = []
+        Color = clGradientInactiveCaption
+        ItemHeight = 18
+        ItemIndex = 0
+        TabOrder = 1
+        Text = 'COM1'
+        OnCloseUp = ComboBox1CloseUp
+        OnDropDown = ComboBox1DropDown
+        OnExit = ComboBox1Exit
+        Items.Strings = (
+          'COM1')
+      end
+      object CheckBox1: TCheckBox
+        Left = 97
+        Top = 245
+        Width = 97
+        Height = 17
+        Anchors = []
+        Caption = 'CheckBox1'
         TabOrder = 0
-        OnResize = PanelConsolePlaceholderRightResize
-        ExplicitWidth = 519
-        ExplicitHeight = 514
-        object Splitter1: TSplitter
-          Left = 281
-          Top = 0
-          Width = 5
-          Height = 435
-          Color = clBtnFace
-          ParentColor = False
-          ExplicitLeft = 1013
-          ExplicitTop = 65
-          ExplicitHeight = 355
-        end
-        object SplitterConsoleHoriz: TSplitter
-          Left = 0
-          Top = 435
-          Width = 982
-          Height = 5
-          Cursor = crVSplit
-          Align = alBottom
-          Color = clBtnFace
-          ParentColor = False
-          ExplicitLeft = -2
-          ExplicitTop = 414
-          ExplicitWidth = 1087
-        end
-        object SplitterConsoleVert: TSplitter
-          Left = 818
-          Top = 0
-          Width = 5
-          Height = 435
-          Align = alRight
-          Color = clBtnFace
-          ParentColor = False
-          Visible = False
-          ExplicitLeft = 866
-          ExplicitTop = 53
-          ExplicitHeight = 340
-        end
-        object PanelConsolePlaceholderRight: TPanel
-          Left = 823
-          Top = 0
-          Width = 159
-          Height = 435
-          Align = alRight
-          BevelOuter = bvNone
-          TabOrder = 0
-          Visible = False
-          OnResize = PanelConsolePlaceholderRightResize
-          ExplicitLeft = 360
-          ExplicitHeight = 309
-        end
-        object PanelConsolePlaceholderBottom: TPanel
-          Left = 0
-          Top = 440
-          Width = 982
-          Height = 200
-          Align = alBottom
-          Alignment = taLeftJustify
-          BevelOuter = bvNone
-          ParentColor = True
-          TabOrder = 1
-          OnResize = PanelConsolePlaceholderBottomResize
-          ExplicitTop = 314
-          ExplicitWidth = 519
-          object PanelConsole: TPanel
-            Left = 0
-            Top = 0
-            Width = 982
-            Height = 200
-            Align = alClient
-            Alignment = taLeftJustify
-            BevelOuter = bvNone
-            ParentColor = True
-            TabOrder = 0
-            ExplicitWidth = 519
-            object RichEdit1: TRichEdit
-              Left = 0
-              Top = 32
-              Width = 982
-              Height = 168
-              Align = alClient
-              BorderStyle = bsNone
-              Font.Charset = RUSSIAN_CHARSET
-              Font.Color = clWindowText
-              Font.Height = -16
-              Font.Name = 'Tahoma'
-              Font.Style = []
-              ParentFont = False
-              ReadOnly = True
-              ScrollBars = ssVertical
-              TabOrder = 0
-              Zoom = 100
-              ExplicitWidth = 519
-            end
-            object PanelConsoleHeader: TPanel
-              Left = 0
-              Top = 0
-              Width = 982
-              Height = 32
-              Align = alTop
-              Alignment = taLeftJustify
-              BevelOuter = bvNone
-              Color = clGradientInactiveCaption
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clGray
-              Font.Height = -16
-              Font.Name = 'Tahoma'
-              Font.Style = [fsBold]
-              ParentBackground = False
-              ParentFont = False
-              TabOrder = 1
-              ExplicitWidth = 519
-              object Panel6: TPanel
-                Left = 0
-                Top = 0
-                Width = 129
-                Height = 32
-                Align = alLeft
-                Alignment = taLeftJustify
-                BevelOuter = bvNone
-                Caption = '   '#1057#1086#1086#1073#1097#1077#1085#1080#1103':'
-                Font.Charset = DEFAULT_CHARSET
-                Font.Color = clGray
-                Font.Height = -15
-                Font.Name = 'Tahoma'
-                Font.Style = [fsBold]
-                ParentColor = True
-                ParentFont = False
-                TabOrder = 2
-              end
-              object PanelLastMessage: TPanel
-                Left = 129
-                Top = 0
-                Width = 787
-                Height = 32
-                Align = alClient
-                Alignment = taLeftJustify
-                BevelOuter = bvNone
-                Font.Charset = DEFAULT_CHARSET
-                Font.Color = clGray
-                Font.Height = -15
-                Font.Name = 'Tahoma'
-                Font.Style = []
-                ParentColor = True
-                ParentFont = False
-                TabOrder = 1
-                ExplicitWidth = 324
-              end
-              object ToolBar4: TToolBar
-                Left = 916
-                Top = 0
-                Width = 66
-                Align = alRight
-                ButtonHeight = 31
-                ButtonWidth = 32
-                Caption = 'ToolBar1'
-                EdgeInner = esNone
-                EdgeOuter = esNone
-                Images = ImageList3
-                TabOrder = 0
-                ExplicitLeft = 453
-                object ToolButtonMoveConsoleUp: TToolButton
-                  Left = 0
-                  Top = 0
-                  Caption = 'ToolButtonMoveConsoleUp'
-                  ImageIndex = 2
-                  OnClick = ToolButtonMoveConsoleUpClick
-                end
-                object ToolButtonMoveConsoleDown: TToolButton
-                  Left = 32
-                  Top = 0
-                  Caption = 'ToolButtonMoveConsoleDown'
-                  ImageIndex = 1
-                  Visible = False
-                  OnClick = ToolButtonMoveConsoleDownClick
-                end
-                object ToolButtonConsoleHide: TToolButton
-                  Left = 64
-                  Top = 0
-                  Caption = 'ToolButtonConsoleHide'
-                  ImageIndex = 0
-                  OnClick = ToolButtonConsoleHideClick
-                end
-              end
-            end
-          end
-        end
-        object Panel9: TPanel
-          Left = 5
-          Top = 0
-          Width = 276
-          Height = 435
-          Align = alLeft
-          BevelOuter = bvNone
-          TabOrder = 2
-          ExplicitHeight = 309
-          object StringGrid1: TStringGrid
-            Left = 0
-            Top = 32
-            Width = 276
-            Height = 403
-            Align = alClient
-            BorderStyle = bsNone
-            ColCount = 4
-            DefaultDrawing = False
-            FixedColor = clBackground
-            FixedCols = 0
-            RowCount = 1
-            FixedRows = 0
-            GradientEndColor = clBlack
-            Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goColSizing]
-            TabOrder = 0
-            OnDblClick = StringGrid1DblClick
-            OnDrawCell = StringGrid1DrawCell
-            OnKeyPress = StringGrid1KeyPress
-            OnMouseUp = StringGrid1MouseUp
-            OnSelectCell = StringGrid1SelectCell
-            OnTopLeftChanged = StringGrid1TopLeftChanged
-            ExplicitHeight = 277
-            ColWidths = (
-              64
-              64
-              64
-              64)
-            RowHeights = (
-              24)
-          end
-          object ComboBox1: TComboBox
-            Left = 21
-            Top = 116
-            Width = 145
-            Height = 24
-            BevelInner = bvNone
-            BevelOuter = bvNone
-            Style = csOwnerDrawFixed
-            Color = clGradientInactiveCaption
-            ItemHeight = 18
-            ItemIndex = 0
-            TabOrder = 1
-            Text = 'COM1'
-            OnCloseUp = ComboBox1CloseUp
-            OnDropDown = ComboBox1DropDown
-            OnExit = ComboBox1Exit
-            Items.Strings = (
-              'COM1')
-          end
-          object CheckBox1: TCheckBox
-            Left = 23
-            Top = 76
-            Width = 143
-            Height = 34
-            Caption = 'CheckBox1'
-            TabOrder = 2
-            Visible = False
-            OnClick = CheckBox1Click
-          end
-          object Panel11: TPanel
-            Left = 0
-            Top = 0
-            Width = 276
-            Height = 32
-            Align = alTop
-            Alignment = taLeftJustify
-            BevelOuter = bvNone
-            Color = clGradientInactiveCaption
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clGray
-            Font.Height = -15
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentBackground = False
-            ParentFont = False
-            TabOrder = 3
-            object Panel10: TPanel
-              Left = 0
-              Top = 0
-              Width = 276
-              Height = 32
-              Align = alTop
-              Alignment = taLeftJustify
-              BevelOuter = bvNone
-              Caption = '   '#1055#1088#1080#1073#1086#1088#1099' '#1087#1072#1088#1090#1080#1080
-              Color = clGradientInactiveCaption
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clGray
-              Font.Height = -15
-              Font.Name = 'Tahoma'
-              Font.Style = [fsBold]
-              ParentBackground = False
-              ParentFont = False
-              TabOrder = 0
-              ExplicitLeft = -1
-              ExplicitTop = 2
-              object ToolBarParty: TToolBar
-                Left = 0
-                Top = 0
-                Width = 30
-                Align = alLeft
-                ButtonHeight = 30
-                ButtonWidth = 30
-                Caption = 'ToolBar1'
-                EdgeInner = esNone
-                EdgeOuter = esNone
-                Images = ImageList4
-                TabOrder = 0
-                object ToolButtonParty: TToolButton
-                  Left = 0
-                  Top = 0
-                  Hint = #1040#1074#1090#1086#1084#1072#1090#1080#1095#1077#1089#1082#1072#1103' '#1085#1072#1089#1090#1088#1086#1081#1082#1072
-                  Caption = 'ToolButtonParty'
-                  ImageIndex = 0
-                  ParentShowHint = False
-                  ShowHint = True
-                  OnMouseUp = ToolButtonPartyMouseUp
-                end
-                object ToolButtonStop: TToolButton
-                  Left = 30
-                  Top = 0
-                  Hint = #1055#1088#1077#1088#1074#1072#1090#1100' '#1074#1099#1087#1086#1083#1085#1077#1085#1080#1077
-                  Caption = 'ToolButtonStop'
-                  ImageIndex = 1
-                  ParentShowHint = False
-                  ShowHint = True
-                  Visible = False
-                  OnClick = ToolButtonStopClick
-                end
-              end
-              object Panel15: TPanel
-                Left = 30
-                Top = 0
-                Width = 246
-                Height = 32
-                Align = alClient
-                Alignment = taLeftJustify
-                BevelOuter = bvNone
-                Caption = '   '#1055#1088#1080#1073#1086#1088#1099' '#1087#1072#1088#1090#1080#1080
-                Color = clGradientInactiveCaption
-                Font.Charset = DEFAULT_CHARSET
-                Font.Color = clGray
-                Font.Height = -15
-                Font.Name = 'Tahoma'
-                Font.Style = [fsBold]
-                ParentBackground = False
-                ParentFont = False
-                TabOrder = 1
-                ExplicitLeft = 29
-                ExplicitTop = 2
-              end
-            end
-          end
-        end
-        object Panel7: TPanel
-          Left = 0
-          Top = 0
-          Width = 5
-          Height = 435
-          Align = alLeft
-          BevelOuter = bvNone
-          TabOrder = 3
-          ExplicitHeight = 309
-        end
-        object Panel12: TPanel
-          Left = 286
-          Top = 0
-          Width = 532
-          Height = 435
-          Align = alClient
-          Alignment = taLeftJustify
-          BevelOuter = bvNone
-          ParentColor = True
-          TabOrder = 4
-          ExplicitWidth = 69
-          ExplicitHeight = 309
-          object PanelCurrentWorkContent: TPanel
-            Left = 0
-            Top = 32
-            Width = 532
-            Height = 403
-            Align = alClient
-            Alignment = taLeftJustify
-            BevelOuter = bvNone
-            ParentColor = True
-            TabOrder = 0
-            ExplicitLeft = 1
-            ExplicitTop = 31
-          end
-          object PanelCurrentWorkTitle: TPanel
-            Left = 0
-            Top = 0
-            Width = 532
-            Height = 32
-            Align = alTop
-            Alignment = taLeftJustify
-            BevelOuter = bvNone
-            Caption = '   '#1050#1086#1101#1092#1092#1080#1094#1080#1077#1085#1090#1099
-            Color = clGradientInactiveCaption
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clGray
-            Font.Height = -15
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentBackground = False
-            ParentFont = False
-            TabOrder = 1
-            ExplicitWidth = 69
-            object ToolBarCurrentWorkContent: TToolBar
-              Left = 500
-              Top = 0
-              Width = 32
-              Align = alRight
-              ButtonHeight = 31
-              ButtonWidth = 32
-              Caption = 'ToolBar1'
-              EdgeInner = esNone
-              EdgeOuter = esNone
-              Images = ImageList3
-              TabOrder = 0
-              ExplicitLeft = 37
-              object ToolButtonCloseCurrentWork: TToolButton
-                Left = 0
-                Top = 0
-                Caption = 'ToolButtonConsoleHide'
-                ImageIndex = 0
-                Visible = False
-                OnClick = ToolButtonCloseCurrentWorkClick
-              end
-            end
-          end
-        end
+        Visible = False
+        OnClick = CheckBox1Click
       end
     end
-    object TabSheetParties: TTabSheet
-      Caption = #1040#1088#1093#1080#1074
-      ImageIndex = 1
-      ExplicitWidth = 373
-      ExplicitHeight = 243
-    end
-    object TabSheetLogs: TTabSheet
-      Caption = #1046#1091#1088#1085#1072#1083
+    object TabSheetVars: TTabSheet
+      Caption = #1054#1087#1088#1086#1089
       ImageIndex = 2
-      ExplicitWidth = 373
-      ExplicitHeight = 243
-    end
-    object TabSheetCharts: TTabSheet
-      Caption = #1043#1088#1072#1092#1080#1082#1080
-      ImageIndex = 3
-      ExplicitLeft = 112
+      ExplicitLeft = 0
       ExplicitTop = 0
-      ExplicitWidth = 373
-      ExplicitHeight = 243
+      ExplicitWidth = 0
+      ExplicitHeight = 473
+    end
+    object TabSheetCurrentChart: TTabSheet
+      Caption = #1043#1088#1072#1092#1080#1082
+      ImageIndex = 5
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 473
+    end
+    object TabSheetCoefs: TTabSheet
+      Caption = #1050#1086#1101#1092'-'#1090#1099
+      ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 473
     end
     object TabSheetSettings: TTabSheet
       Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
       ImageIndex = 4
-      ExplicitHeight = 600
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 473
+    end
+    object TabSheetArchive: TTabSheet
+      Caption = #1040#1088#1093#1080#1074
+      ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 473
+      object PageControl1: TPageControl
+        Left = 0
+        Top = 0
+        Width = 982
+        Height = 483
+        ActivePage = TabSheetParties
+        Align = alClient
+        TabOrder = 0
+        object TabSheetParties: TTabSheet
+          Caption = #1055#1072#1088#1090#1080#1080
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
+        end
+        object TabSheetCharts: TTabSheet
+          Caption = #1043#1088#1072#1092#1080#1082#1080
+          ImageIndex = 3
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
+        end
+        object TabSheetLogs: TTabSheet
+          Caption = #1046#1091#1088#1085#1072#1083
+          ImageIndex = 2
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
+        end
+      end
+    end
+  end
+  object PanelConsolePlaceholderBottom: TPanel
+    Left = 0
+    Top = 528
+    Width = 1100
+    Height = 130
+    Align = alBottom
+    Alignment = taLeftJustify
+    BevelOuter = bvNone
+    ParentColor = True
+    TabOrder = 4
+    OnResize = PanelConsolePlaceholderBottomResize
+    object PanelConsole: TPanel
+      Left = 0
+      Top = 0
+      Width = 1100
+      Height = 130
+      Align = alClient
+      Alignment = taLeftJustify
+      BevelOuter = bvNone
+      Constraints.MinHeight = 30
+      ParentColor = True
+      TabOrder = 0
+      object RichEdit1: TRichEdit
+        Left = 0
+        Top = 32
+        Width = 1100
+        Height = 98
+        Align = alClient
+        BorderStyle = bsNone
+        Font.Charset = RUSSIAN_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -16
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+        ReadOnly = True
+        ScrollBars = ssVertical
+        TabOrder = 0
+        Zoom = 100
+      end
+      object PanelConsoleHeader: TPanel
+        Left = 0
+        Top = 0
+        Width = 1100
+        Height = 32
+        Align = alTop
+        Alignment = taLeftJustify
+        BevelOuter = bvNone
+        Color = clGradientInactiveCaption
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clGray
+        Font.Height = -16
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentBackground = False
+        ParentFont = False
+        TabOrder = 1
+        object Panel6: TPanel
+          Left = 0
+          Top = 0
+          Width = 129
+          Height = 32
+          Align = alLeft
+          Alignment = taLeftJustify
+          BevelOuter = bvNone
+          Caption = '   '#1057#1086#1086#1073#1097#1077#1085#1080#1103':'
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clGray
+          Font.Height = -15
+          Font.Name = 'Tahoma'
+          Font.Style = [fsBold]
+          ParentColor = True
+          ParentFont = False
+          TabOrder = 2
+        end
+        object PanelLastMessage: TPanel
+          Left = 129
+          Top = 0
+          Width = 938
+          Height = 32
+          Align = alClient
+          Alignment = taLeftJustify
+          BevelOuter = bvNone
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clGray
+          Font.Height = -15
+          Font.Name = 'Tahoma'
+          Font.Style = []
+          ParentColor = True
+          ParentFont = False
+          TabOrder = 1
+        end
+        object ToolBar4: TToolBar
+          Left = 1067
+          Top = 0
+          Width = 33
+          Align = alRight
+          ButtonHeight = 31
+          ButtonWidth = 32
+          Caption = 'ToolBar1'
+          EdgeInner = esNone
+          EdgeOuter = esNone
+          Images = ImageList3
+          TabOrder = 0
+          object ToolButtonMoveConsoleDown: TToolButton
+            Left = 0
+            Top = 0
+            Caption = 'ToolButtonMoveConsoleDown'
+            ImageIndex = 1
+            Visible = False
+            OnClick = ToolButtonMoveConsoleDownClick
+          end
+          object ToolButtonConsoleHide: TToolButton
+            Left = 32
+            Top = 0
+            Caption = 'ToolButtonConsoleHide'
+            ImageIndex = 0
+            OnClick = ToolButtonConsoleHideClick
+          end
+        end
+      end
+    end
+  end
+  object PanelTopBar: TPanel
+    Left = 0
+    Top = 0
+    Width = 1100
+    Height = 32
+    Align = alTop
+    Alignment = taLeftJustify
+    BevelOuter = bvNone
+    Caption = '   '#1055#1088#1080#1073#1086#1088#1099' '#1087#1072#1088#1090#1080#1080
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clGray
+    Font.Height = -15
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentBackground = False
+    ParentColor = True
+    ParentFont = False
+    TabOrder = 5
+    object ToolBarParty: TToolBar
+      Left = 0
+      Top = 0
+      Width = 30
+      Align = alLeft
+      ButtonHeight = 30
+      ButtonWidth = 30
+      Caption = 'ToolBar1'
+      EdgeInner = esNone
+      EdgeOuter = esNone
+      Images = ImageList4
+      TabOrder = 0
+      object ToolButtonParty: TToolButton
+        Left = 0
+        Top = 0
+        Hint = #1040#1074#1090#1086#1084#1072#1090#1080#1095#1077#1089#1082#1072#1103' '#1085#1072#1089#1090#1088#1086#1081#1082#1072
+        Caption = 'ToolButtonParty'
+        ImageIndex = 0
+        ParentShowHint = False
+        ShowHint = True
+        OnMouseUp = ToolButtonPartyMouseUp
+      end
+      object ToolButtonStop: TToolButton
+        Left = 30
+        Top = 0
+        Hint = #1055#1088#1077#1088#1074#1072#1090#1100' '#1074#1099#1087#1086#1083#1085#1077#1085#1080#1077
+        Caption = 'ToolButtonStop'
+        ImageIndex = 1
+        ParentShowHint = False
+        ShowHint = True
+        Visible = False
+        OnClick = ToolButtonStopClick
+      end
+    end
+    object PanelPartyTopMessage: TPanel
+      Left = 30
+      Top = 0
+      Width = 1070
+      Height = 32
+      Align = alClient
+      Alignment = taLeftJustify
+      BevelOuter = bvNone
+      Caption = '   '
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clGray
+      Font.Height = -15
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentBackground = False
+      ParentColor = True
+      ParentFont = False
+      TabOrder = 1
     end
   end
   object ImageList1: TImageList
@@ -3680,7 +3541,7 @@ object Form1: TForm1
     Left = 480
     Top = 178
     Bitmap = {
-      494C010109009C00D40232003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010109009C00E00232003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000C8000000960000000100200000000000C0D4
       0100000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -7592,7 +7453,6 @@ object Form1: TForm1
     end
     object N8: TMenuItem
       Caption = #1056#1091#1095#1085#1086#1077' '#1091#1087#1088#1072#1074#1083#1077#1085#1080#1077
-      OnClick = N8Click
     end
     object N6: TMenuItem
       Caption = '-'
@@ -7610,7 +7470,7 @@ object Form1: TForm1
     Left = 472
     Top = 256
     Bitmap = {
-      494C010103001801640210001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010103001801700210001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -7759,7 +7619,7 @@ object Form1: TForm1
     Left = 544
     Top = 178
     Bitmap = {
-      494C01010300D401A80219001900FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C01010300D401B40219001900FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000640000001900000001002000000000001027
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -8101,7 +7961,7 @@ object Form1: TForm1
     Left = 576
     Top = 266
     Bitmap = {
-      494C010102002403300314001400FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010102002403480314001400FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000500000001400000001002000000000000019
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -8117,6 +7977,7 @@ object Form1: TForm1
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
+      00010000052A00001048000010480000052A0000000100000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -8125,59 +7986,8 @@ object Form1: TForm1
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      000000000000000000000000000000000000120D084C5B432BA85B432BA85B43
-      2BA85B432BA85B432BA85B432BA85B432BA85B432BA85B432BA85B432BA85B43
-      2BA85B432BA85B432BA85B432BA85B432BA85B432BA85B432BA85B432BA8150F
-      0953000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000004A372498FEF0DFFFFEF0DFFFFEF0
-      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0
-      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFF553E
-      26A3000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000004A372498FEF0DFFFFEF0DFFFFEF0
-      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0
-      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFF553E
-      26A30000000000000000000000000000000000000000120D084C5B432BA85B43
-      2BA85B432BA85B432BA85B432BA85B432BA85B432BA85B432BA8150F09530000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000E0B07444E3A269B4E3A269B4E3A
-      269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A
-      269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B110D
-      084B00000000000000000000000000000000000000004A372498FEF0DFFFFEF0
-      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFF553E26A30000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      000000000000000000000000000000000000000000004A372498FEF0DFFFFEF0
-      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFF553E26A30000
+      0000000000000000000000000000000000000000000000000010000039850000
+      AAE50000D5FF0000D5FF0000D5FF0000D5FF0000AAE500003782000000100000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -8186,19 +7996,9 @@ object Form1: TForm1
       000000000000000000000000000000000000120D084C5B432BA85B432BA85B43
       2BA85B432BA85B432BA85B432BA85B432BA85B432BA85B432BA85B432BA85B43
       2BA85B432BA85B432BA85B432BA85B432BA85B432BA85B432BA85B432BA8150F
-      095300000000000000000000000000000000000000004A372498FEF0DFFFFEF0
-      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFF553E26A30000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000004A372498FEF0DFFFFEF0DFFFFEF0
-      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0
-      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFF553E
-      26A300000000000000000000000000000000000000004A372498FEF0DFFFFEF0
-      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFF553E26A30000
-      0000000000000000000000000000000000000000000000000000000000000000
+      09530000000000000000000000000000000000000A3A0000AFE70000D5FF0000
+      98D800003C8800001E6000001E6000003D89000098D80000D5FF0000ACE60000
+      0A3A000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -8206,9 +8006,19 @@ object Form1: TForm1
       0000000000000000000000000000000000004A372498FEF0DFFFFEF0DFFFFEF0
       DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0
       DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFF553E
-      26A300000000000000000000000000000000000000004A372498FEF0DFFFFEF0
-      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFF553E26A30000
+      26A300000000000000000000000000000A3A0000CDFA0000CDFA00001C5E0000
+      0002000000000000000000000000000000000000000200001D5E0000C1F30000
+      C8F800000A380000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000004A372498FEF0DFFFFEF0DFFFFEF0
+      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0
+      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFF553E
+      26A300000000000000000000000F0000B2E90000CCFA0000D5FF000060AB0000
+      0004000000000000000000000000000000000000000000000000000007300000
+      BEF20000B0E80000000E00000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -8216,8 +8026,9 @@ object Form1: TForm1
       0000000000000000000000000000000000000E0B07444E3A269B4E3A269B4E3A
       269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A
       269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B110D
-      084B00000000000000000000000000000000000000004A372498FEF0DFFFFEF0
-      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFF553E26A30000
+      084B000000000000000000003A860000D5FF00001E6100005CA80000D5FF0000
+      60AB000000040000000000000000000000000000000000000000000000000000
+      1E600000D5FF0000388400000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -8225,10 +8036,9 @@ object Form1: TForm1
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      000000000000000000000000000000000000000000004A372498FEF0DFFFFEF0
-      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFF553E26A30000
-      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000010000AAE5000098D7000000010000000300005CA80000
+      D5FF000060AB0000000400000000000000000000000000000000000000000000
+      0002000098D80000AAE500000001000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -8236,19 +8046,9 @@ object Form1: TForm1
       000000000000000000000000000000000000120D084C5B432BA85B432BA85B43
       2BA85B432BA85B432BA85B432BA85B432BA85B432BA85B432BA85B432BA85B43
       2BA85B432BA85B432BA85B432BA85B432BA85B432BA85B432BA85B432BA8150F
-      095300000000000000000000000000000000000000004A372498FEF0DFFFFEF0
-      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFF553E26A30000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000004A372498FEF0DFFFFEF0DFFFFEF0
-      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0
-      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFF553E
-      26A300000000000000000000000000000000000000000E0B07444E3A269B4E3A
-      269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B110D084B0000
-      0000000000000000000000000000000000000000000000000000000000000000
+      0953000000000000062C0000D5FF00003B870000000000000000000000030000
+      5CA80000D5FF000060AB00000004000000000000000000000000000000000000
+      000000003C880000D5FF0000052A000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -8256,9 +8056,19 @@ object Form1: TForm1
       0000000000000000000000000000000000004A372498FEF0DFFFFEF0DFFFFEF0
       DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0
       DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFF553E
-      26A3000000000000000000000000000000000000000000000000000000000000
+      26A300000000000010470000D5FF00001E610000000000000000000000000000
+      000300005CA80000D5FF000060AB000000040000000000000000000000000000
+      000000001F620000D5FF00001047000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000004A372498FEF0DFFFFEF0DFFFFEF0
+      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0
+      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFF553E
+      26A300000000000010470000D5FF00001E610000000000000000000000000000
+      00000000000300005CA80000D5FF000060AB0000000400000000000000000000
+      000000001F620000D5FF00001047000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -8266,7 +8076,68 @@ object Form1: TForm1
       0000000000000000000000000000000000000E0B07444E3A269B4E3A269B4E3A
       269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A
       269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B110D
-      084B000000000000000000000000000000000000000000000000000000000000
+      084B000000000000062C0000D5FF00003A860000000000000000000000000000
+      0000000000000000000300005CA80000D5FF000060AB00000004000000000000
+      000000003C880000D5FF0000062B000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000020000AAE5000098D70000000100000000000000000000
+      000000000000000000000000000300005CA80000D5FF000060AB000000040000
+      0001000098D70000AAE500000001000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000120D084C5B432BA85B432BA85B43
+      2BA85B432BA85B432BA85B432BA85B432BA85B432BA85B432BA85B432BA85B43
+      2BA85B432BA85B432BA85B432BA85B432BA85B432BA85B432BA85B432BA8150F
+      0953000000000000000000003B870000D5FF00001A5A00000000000000000000
+      00000000000000000000000000000000000300005CA80000D5FF000060AB0000
+      1F620000D5FF00003A8600000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000004A372498FEF0DFFFFEF0DFFFFEF0
+      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0
+      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFF553E
+      26A30000000000000000000000110000B2E90000BCF00000072F000000000000
+      0000000000000000000000000000000000000000000300005BA70000D5FF0000
+      CCFA0000B0E80000000F00000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000004A372498FEF0DFFFFEF0DFFFFEF0
+      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0
+      DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFFFEF0DFFF553E
+      26A300000000000000000000000000000B3B0000C8F80000BDF100001B5B0000
+      0001000000000000000000000000000000000000000100001C5D0000CDFA0000
+      CDFB00000A390000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000E0B07444E3A269B4E3A269B4E3A
+      269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A
+      269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B4E3A269B110D
+      084B0000000000000000000000000000000000000B3C0000B0E80000D5FF0000
+      96D600003C8800001E6000001E6000003C88000098D70000D5FF0000B0E80000
+      0B3B000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000000000000000001000003B870000
+      ACE60000D5FF0000D5FF0000D5FF0000D5FF0000AAE500003A86000000100000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -8276,18 +8147,7 @@ object Form1: TForm1
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000000000000000000000000000000000000000
+      00020000062B00001149000011490000062B0000000100000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

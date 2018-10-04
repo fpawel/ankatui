@@ -1,4 +1,4 @@
-unit UnitFormChart;
+unit UnitFormCharts;
 
 interface
 
@@ -7,16 +7,15 @@ uses
     System.Classes, Vcl.Graphics,
     Vcl.Controls, Vcl.Forms, Vcl.Dialogs, FireDAC.Comp.Client, UnitData,
     VirtualTrees, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.ComCtrls, HTMLUn2, HtmlView,
-    System.ImageList, UnitFormChartNodes, Vcl.ImgList, VclTee.TeeGDIPlus,
+    System.ImageList, UnitFormChartsNodes, Vcl.ImgList, VclTee.TeeGDIPlus,
     VclTee.TeEngine, VclTee.TeeProcs, VclTee.Chart, VclTee.Series;
 
 type
 
-    TFormChart = class(TForm)
+    TFormCharts = class(TForm)
         ImageList1: TImageList;
         Splitter1: TSplitter;
         VirtualStringTree1: TVirtualStringTree;
-        Chart1: TChart;
         procedure FormCreate(Sender: TObject);
         procedure VirtualStringTree1BeforeCellPaint(Sender: TBaseVirtualTree;
           TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
@@ -47,14 +46,18 @@ type
     end;
 
 var
-    FormChart: TFormChart;
+    FormCharts: TFormCharts;
 
 implementation
 
 {$R *.dfm}
 
 uses dateutils, FireDAC.Stan.PAram, stringutils, richeditutils,
-    variantutils, stringgridutils;
+    variantutils, stringgridutils, UnitFormChartSeries;
+
+var
+    FormChart1: TFormChartSeries;
+    DateTimeFmtStngs: TFormatSettings;
 
 function inttostr2(n: integer): string;
 begin
@@ -63,34 +66,22 @@ begin
         result := '0' + result;
 end;
 
-procedure GetSeriesValues(ser: TFastLineSeries; SeriesID: int64; AVar: integer;
-  product_serial: integer);
-var
-    FmtStngs: TFormatSettings;
-    X: string;
-    y: double;
+procedure GetSeriesValues(SeriesID: int64);
 begin
-    FmtStngs := TFormatSettings.Create(GetThreadLocale);
-    FmtStngs.DateSeparator := '.';
-    FmtStngs.ShortDateFormat := 'dd/MM/yyyy';
-    FmtStngs.TimeSeparator := ':';
-    FmtStngs.LongTimeFormat := 'h:mm:ss';
+    FormChart1.NewChart;
     with TFDQuery.Create(nil) do
     begin
         Connection := DataModule1.FDConnectionProductsDB;
         SQL.Text :=
-          'SELECT created_at,value FROM chart_value_info WHERE product_serial = :product_serial '
-          + 'AND var = :var AND series_id = :series_id;';
-        ParamByName('product_serial').Value := product_serial;
-        ParamByName('var').Value := AVar;
+          'SELECT * FROM chart_value_info WHERE series_id = :series_id;';
         ParamByName('series_id').Value := SeriesID;
         open;
         First;
         while not Eof do
         begin
-            X := FieldValues['created_at'];
-            y := FieldValues['value'];
-            ser.AddNullXY(StrToDateTime(X, FmtStngs), y);
+            FormChart1.AddValue(FieldValues['product_serial'],
+                FieldValues['var'], FieldValues['value'],
+                    StrToDateTime(FieldValues['created_at'], DateTimeFmtStngs));
             Next;
         end;
         Close;
@@ -110,7 +101,7 @@ begin
     freeNodeData(t, n.NextSibling);
 end;
 
-procedure TFormChart.FormCreate(Sender: TObject);
+procedure TFormCharts.FormCreate(Sender: TObject);
 var
     year: integer;
 
@@ -118,17 +109,31 @@ begin
     VirtualStringTree1.NodeDataSize := SizeOf(RTreeData);
     for year in DataModule1.SeriesYears do
         TNodeYear.Create(VirtualStringTree1, year);
-    Chart1.Visible := false;
+    Application.CreateForm(TFormChartSeries, FormChart1);
+    with FormChart1 do
+    begin
+        Parent := self;
+        Align := alClient;
+        BorderStyle := bsNone;
+        Visible := false;
+        Font.Assign(self.Font);
+    end;
+
+    DateTimeFmtStngs := TFormatSettings.Create(GetThreadLocale);
+    DateTimeFmtStngs.DateSeparator := '.';
+    DateTimeFmtStngs.ShortDateFormat := 'dd/MM/yyyy';
+    DateTimeFmtStngs.TimeSeparator := ':';
+    DateTimeFmtStngs.LongTimeFormat := 'h:mm:ss';
 end;
 
-procedure TFormChart.RichEdit1ContextPopup(Sender: TObject; MousePos: TPoint;
+procedure TFormCharts.RichEdit1ContextPopup(Sender: TObject; MousePos: TPoint;
   var Handled: boolean);
 begin
     RichEdit_PopupMenu(TRichEdit(Sender));
     Handled := true;
 end;
 
-procedure TFormChart.VirtualStringTree1BeforeCellPaint(Sender: TBaseVirtualTree;
+procedure TFormCharts.VirtualStringTree1BeforeCellPaint(Sender: TBaseVirtualTree;
   TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   CellPaintMode: TVTCellPaintMode; CellRect: TRect; var ContentRect: TRect);
 begin
@@ -139,7 +144,7 @@ begin
     end;
 end;
 
-procedure TFormChart.VirtualStringTree1Change(Sender: TBaseVirtualTree;
+procedure TFormCharts.VirtualStringTree1Change(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 var
     p: PTreeData;
@@ -149,74 +154,19 @@ var
 
 begin
 
-    Chart1.Visible := false;
+    FormChart1.Visible := false;
     if not Assigned(Node) then
         exit;
     p := Sender.GetNodeData(Node);
-    if p.X is TNodeVar then
-        with p.X as TNodeVar do
+    if p.X is TNodeSeries then
         begin
-            while Chart1.SeriesCount > 0 do
-                with Chart1.Series[0] do
-                begin
-                    ParentChart := nil;
-                    Free;
-                end;
-
-            Chart1.Title.Caption := FVarName;
-            for product_serial in DataModule1.GetSeriesVarProducts
-              (FSeriesInfo.SeriesID, FVar) do
-            begin
-                ser := TFastLineSeries.Create(nil);
-                ser.XValues.DateTime := true;
-                ser.Title := inttostr(product_serial);
-                GetSeriesValues(ser, FSeriesInfo.SeriesID, FVar,
-                  product_serial);
-                Chart1.AddSeries(ser);
-            end;
-
-            with Chart1 do
-            begin
-                Title.Caption := FVarName;
-                Visible := true;
-            end;
-
-        end
-    else if p.X is TNodeVarProduct then
-        with p.X as TNodeVarProduct do
-        begin
-            while Chart1.SeriesCount > 0 do
-                with Chart1.Series[0] do
-                begin
-                    ParentChart := nil;
-                    Free;
-                end;
-
-            ser := TFastLineSeries.Create(nil);
-            ser.XValues.DateTime := true;
-            ser.Title := inttostr(FSerial);
-            GetSeriesValues(ser, FSeriesInfo.SeriesID, FVar, FSerial);
-
-            with Chart1 do
-            begin
-                Title.Caption := FVarName + ': ' + inttostr(FSerial);
-                AddSeries(ser);
-                Visible := true;
-            end;
-
+            GetSeriesValues((p.X as TNodeSeries).FSeriesInfo.SeriesID);
+            FormChart1.Visible := true;
         end;
-
-    with Chart1 do
-    begin
-        Legend.Visible := Visible AND (SeriesCount > 1);
-        if SeriesCount = 1 then
-            Title.Caption := Title.Caption + ': ' + Series[0].Title;
-
-    end;
 
 end;
 
-procedure TFormChart.VirtualStringTree1Collapsed(Sender: TBaseVirtualTree;
+procedure TFormCharts.VirtualStringTree1Collapsed(Sender: TBaseVirtualTree;
   Node: PVirtualNode);
 var
     p: PTreeData;
@@ -227,7 +177,7 @@ begin
     p.X.FPopulated := false;
 end;
 
-procedure TFormChart.VirtualStringTree1Expanding(Sender: TBaseVirtualTree;
+procedure TFormCharts.VirtualStringTree1Expanding(Sender: TBaseVirtualTree;
   Node: PVirtualNode; var Allowed: boolean);
 var
     p: PTreeData;
@@ -236,10 +186,10 @@ begin
     if p.X.FPopulated then
         exit;
     p.X.Populate;
-    p.X.FPopulated := node.ChildCount > 0;
+    p.X.FPopulated := Node.ChildCount > 0;
 end;
 
-procedure TFormChart.VirtualStringTree1GetImageIndex(Sender: TBaseVirtualTree;
+procedure TFormCharts.VirtualStringTree1GetImageIndex(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Kind: TVTImageKind; Column: TColumnIndex;
   var Ghosted: boolean; var ImageIndex: TImageIndex);
 var
@@ -255,7 +205,7 @@ begin
 
 end;
 
-procedure TFormChart.VirtualStringTree1GetText(Sender: TBaseVirtualTree;
+procedure TFormCharts.VirtualStringTree1GetText(Sender: TBaseVirtualTree;
   Node: PVirtualNode; Column: TColumnIndex; TextType: TVSTTextType;
   var CellText: string);
 var
@@ -266,7 +216,7 @@ begin
         CellText := p.X.FColumn[Column].Text;
 end;
 
-procedure TFormChart.VirtualStringTree1PaintText(Sender: TBaseVirtualTree;
+procedure TFormCharts.VirtualStringTree1PaintText(Sender: TBaseVirtualTree;
   const TargetCanvas: TCanvas; Node: PVirtualNode; Column: TColumnIndex;
   TextType: TVSTTextType);
 var
@@ -285,11 +235,6 @@ begin
                     if not Sender.Selected[Node] then
                         TargetCanvas.Font.Color := clNavy;
 
-                end
-                else if p.X is TNodeVar then
-                begin
-                    if not Sender.Selected[Node] then
-                        TargetCanvas.Font.Color := clMaroon;
                 end;
 
             end;

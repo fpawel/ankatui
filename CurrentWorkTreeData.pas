@@ -2,32 +2,9 @@ unit CurrentWorkTreeData;
 
 interface
 
-uses VirtualTrees, System.Generics.Collections;
+uses VirtualTrees, System.Generics.Collections, HostAppModels;
 
 type
-
-    
-
-    TNotifyInteger = class
-        FValue: int64;
-    end;
-
-    TNotifyOperation = class
-        FOrdinal: integer;
-        FName: string;
-        FRun: boolean;
-    end;
-
-    TOperationInfo = class
-    public
-        FName: string;
-        FOrdinal: integer;
-        FChildren: array of TOperationInfo;
-        FHasError: boolean;
-        FHasMessage: boolean;
-    end;
-
-    
 
     TNodeData = class
         FInfo: TOperationInfo;
@@ -57,13 +34,9 @@ type
         X: TNodeData;
     end;
 
-    
-
 implementation
 
-uses  System.sysutils;
-
-
+uses System.sysutils;
 
 constructor TNodeData.Create(aNode: PVirtualNode; ainfo: TOperationInfo);
 begin
@@ -177,7 +150,5 @@ begin
     end;
 
 end;
-
-
 
 end.

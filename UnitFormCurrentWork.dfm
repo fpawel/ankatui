@@ -14,14 +14,14 @@ object FormCurrentWork: TFormCurrentWork
   OldCreateOrder = False
   Position = poScreenCenter
   OnCreate = FormCreate
-  OnDeactivate = FormDeactivate
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 18
   object VirtualStringTree1: TVirtualStringTree
     Left = 0
-    Top = 41
+    Top = 0
     Width = 778
-    Height = 443
+    Height = 484
     Align = alClient
     BorderStyle = bsNone
     DefaultNodeHeight = 25
@@ -34,11 +34,11 @@ object FormCurrentWork: TFormCurrentWork
     TreeOptions.MiscOptions = [toAcceptOLEDrop, toCheckSupport, toFullRepaintOnResize, toInitOnSave, toToggleOnDblClick, toWheelPanning, toEditOnClick]
     OnBeforeCellPaint = VirtualStringTree1BeforeCellPaint
     OnChange = VirtualStringTree1Change
-    OnChecked = VirtualStringTree1Checked
+    OnChecking = VirtualStringTree1Checking
+    OnFreeNode = VirtualStringTree1FreeNode
     OnGetText = VirtualStringTree1GetText
     OnPaintText = VirtualStringTree1PaintText
     OnGetImageIndex = VirtualStringTree1GetImageIndex
-    ExplicitTop = 47
     Columns = <
       item
         Position = 1
@@ -50,16 +50,6 @@ object FormCurrentWork: TFormCurrentWork
         WideText = #8470
       end>
   end
-  object Button1: TButton
-    Left = 0
-    Top = 0
-    Width = 778
-    Height = 41
-    Align = alTop
-    Caption = '   '#1047#1072#1087#1091#1089#1090#1080#1090#1100': [0] '#1053#1072#1089#1090#1088#1086#1081#1082#1072' '#1040#1085#1082#1072#1090
-    TabOrder = 1
-    OnClick = Button1Click
-  end
   object ImageList2: TImageList
     ColorDepth = cd32Bit
     BlendColor = clWindow
@@ -68,7 +58,7 @@ object FormCurrentWork: TFormCurrentWork
     Left = 472
     Top = 256
     Bitmap = {
-      494C010103001801DC0110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010103001801EC0110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

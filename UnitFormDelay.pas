@@ -6,32 +6,31 @@ uses
     Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
     System.Classes, Vcl.Graphics,
     Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.ComCtrls,
-    Vcl.StdCtrls, models, Vcl.ToolWin;
+    Vcl.StdCtrls, models, Vcl.ToolWin, System.ImageList, Vcl.ImgList;
 
 type
 
     TFormDelay = class(TForm)
-        PanelPlaceHolder: TPanel;
-        ProgressBar1: TProgressBar;
         Panel1: TPanel;
         Timer1: TTimer;
-    ToolBar2: TToolBar;
-    ToolButton1: TToolButton;
     LabelCurrentTime: TLabel;
     LabelTotalTime: TLabel;
     LabelWhat: TLabel;
-    Panel14: TPanel;
     LabelProgress: TLabel;
     Panel2: TPanel;
-    Panel4: TPanel;
     Panel5: TPanel;
+    ToolBar1: TToolBar;
+    ToolButtonStop: TToolButton;
+    ImageList4: TImageList;
+    Panel3: TPanel;
+    Panel4: TPanel;
+    ProgressBar1: TProgressBar;
         procedure Timer1Timer(Sender: TObject);
     procedure ToolButton1Click(Sender: TObject);
     private
         { Private declarations }
     public
         { Public declarations }
-        procedure Stop;
         procedure SetupDelay(i: TDelayInfo);
     end;
 
@@ -42,12 +41,7 @@ implementation
 
 {$R *.dfm}
 
-uses rest.json, System.DateUtils, Unit1, UnitHostAppData, math;
-
-procedure TFormDelay.Stop;
-begin
-
-end;
+uses rest.json, System.DateUtils,  UnitHostAppData, math;
 
 procedure TFormDelay.SetupDelay(i: TDelayInfo);
 begin
@@ -57,7 +51,8 @@ begin
     ProgressBar1.Position := 0;
     ProgressBar1.Max := i.FDurationMS;
     Timer1.Enabled := i.FEnabled;
-    LabelTotalTime.Caption := TimeToStr(IncMilliSecond(0, i.FDurationMS));
+    LabelTotalTime.Caption := FormatDateTime('HH:mm:ss', IncMilliSecond(0, i.FDurationMS));
+
     Visible := i.FEnabled;
 end;
 

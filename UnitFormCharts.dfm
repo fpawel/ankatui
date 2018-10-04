@@ -1,7 +1,7 @@
-object FormChart: TFormChart
+object FormCharts: TFormCharts
   Left = 0
   Top = 0
-  Caption = 'FormChart'
+  Caption = 'FormCharts'
   ClientHeight = 576
   ClientWidth = 1093
   Color = clWindow
@@ -67,34 +67,6 @@ object FormChart: TFormChart
         Width = 38
       end>
   end
-  object Chart1: TChart
-    Left = 494
-    Top = 0
-    Width = 599
-    Height = 576
-    Legend.Alignment = laBottom
-    Legend.Title.Visible = False
-    Legend.Visible = False
-    MarginLeft = 30
-    MarginRight = 14
-    MarginTop = 0
-    MarginUnits = muPixels
-    Title.Font.Charset = RUSSIAN_CHARSET
-    Title.Font.Color = clBlack
-    Title.Font.Height = -19
-    Title.Font.Name = 'Consolas'
-    Title.Text.Strings = (
-      'TChart')
-    Title.VertMargin = 0
-    RightAxis.Visible = False
-    View3D = False
-    Align = alClient
-    BevelOuter = bvNone
-    Color = clWindow
-    TabOrder = 1
-    DefaultCanvas = 'TGDIPlusCanvas'
-    ColorPaletteIndex = 13
-  end
   object ImageList1: TImageList
     ColorDepth = cd32Bit
     BlendColor = clWindow
@@ -103,7 +75,7 @@ object FormChart: TFormChart
     Left = 128
     Top = 168
     Bitmap = {
-      494C010106009C006C0110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010106009C00700110001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000002000000001002000000000000020
       000000000000000000000000000000000000B5794DFFB5794DFFB5794DFFB579
       4DFFB5794DFFB5794DFFB5794DFFB5794DFFB5794DFFB5794DFFB5794DFFB579

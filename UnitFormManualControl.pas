@@ -57,15 +57,15 @@ var
 begin
     X := TSendModbusCmd.Create;
     if GetModbusCommand(X.FCmd, X.FArg) then
-        HostAppData.FPipe.WriteMsgJSON('MODBUS_CMD', X);
+        HostAppData.Pipe.WriteMsgJSON('MODBUS_CMD', X);
     X.Free;
-    Form1.SetupWorkStarted(self, 'отправка команды');
+    Form1.SetupWorkStarted( 'отправка команды');
 end;
 
 procedure TFormManualControl.Button6Click(Sender: TObject);
 begin
-    HostAppData.FPipe.WriteMsgStr('SEND_SET_WORK_MODE',  Edit1.Text);
-    Form1.SetupWorkStarted(self, 'установка режима работы');
+    HostAppData.Pipe.WriteMsgStr('SEND_SET_WORK_MODE',  Edit1.Text);
+    Form1.SetupWorkStarted( 'установка режима работы');
 end;
 
 procedure TFormManualControl.ComboBox2Change(Sender: TObject);
@@ -93,9 +93,9 @@ begin
     with ComboBox2 do
     begin
         Items.Clear;
-        for i := 0 to length(HostAppData.FCmds.FItems) - 1 do
+        for i := 0 to length(HostAppData.Cmds.FItems) - 1 do
         begin
-            Items.Add(HostAppData.FCmds.FItems[i].FStr);
+            Items.Add(HostAppData.Cmds.FItems[i].FStr);
         end;
         ItemIndex := 0;
     end;
@@ -110,7 +110,7 @@ begin
         result := TryStrToInt(str_validate_decimal_separator
           (ComboBox2.Text), cmd)
     else
-        cmd := HostAppData.FCmds.FItems[ComboBox2.ItemIndex].FCmd;
+        cmd := HostAppData.Cmds.FItems[ComboBox2.ItemIndex].FCmd;
     result := result AND TryStrToFloat(Edit1.Text, arg);
 end;
 

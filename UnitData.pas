@@ -41,10 +41,9 @@ type
         FVars: TArray<TDeviceVar>;
         procedure read_config_section(sect: TConfigSection);
 
-        
     public
         { Public declarations }
-        function DeviceVars: TArray<TDeviceVar>;
+
         function GetDeviceVarName(v: integer): string;
         function GetDeviceVarByName(s: string): integer;
         function DeviceCoefs: TArray<TDeviceVar>;
@@ -59,13 +58,16 @@ type
         procedure UpdateCurrentWorkCheckState(Ordinal: integer;
           checkState: string);
         function GetCurrentWorkCheckState(Ordinal: integer): integer;
-        procedure UpdateDeviceVarChecked(devicevar: integer; checked: boolean);
+
+        procedure UpdateDeviceVarChecked(n_var: integer; checked: boolean);
+        procedure InvertDeviceVarChecked(n_var: integer);
 
         function InvertProductsChecked: boolean;
         function InvertVarsChecked: boolean;
 
         function CurrentPartyCoefs: TArray<RProductCoefValue>;
         procedure UpdateCoefChecked(Coef: integer; checked: boolean);
+
         function InvertCoefsChecked: boolean;
         function GetCoefValue(product_ordinal, Coef: integer): string;
         procedure SetCoefValue(product_ordinal, Coef: integer; Value: string);
@@ -97,7 +99,7 @@ type
         function GetConfigPropertyValueList(property_name: string)
           : TArray<string>;
 
-        
+        property DeviceVars: TArray<TDeviceVar> read FVars;
 
     end;
 
@@ -283,15 +285,21 @@ begin
 
 end;
 
-procedure TDataModule1.UpdateDeviceVarChecked(devicevar: integer;
+procedure TDataModule1.InvertDeviceVarChecked(n_var: integer);
+begin
+    UpdateDeviceVarChecked(n_var, not DeviceVars[n_var].FChecked);
+end;
+
+procedure TDataModule1.UpdateDeviceVarChecked(n_var: integer;
   checked: boolean);
 begin
+    DeviceVars[n_var].FChecked := checked;
     with TFDQuery.Create(nil) do
     begin
         Connection := FDConnectionProductsDB;
         SQL.Text :=
           'UPDATE read_var SET checked = :checked WHERE var = :devicevar;';
-        ParamByName('devicevar').Value := devicevar;
+        ParamByName('devicevar').Value := DeviceVars[n_var].FVar;
         ParamByName('checked').Value := checked;
         ExecSQL;
         Free;
@@ -430,11 +438,6 @@ begin
         if x.FVar = v then
             Exit(x.FName);
     Exit('');
-end;
-
-function TDataModule1.DeviceVars: TArray<TDeviceVar>;
-begin
-    Exit(FVars);
 end;
 
 procedure TDataModule1.FDConnectionProductsDBError(ASender, AInitiator: TObject;
@@ -958,9 +961,5 @@ begin
         Free;
     end;
 end;
-
-
-
-
 
 end.

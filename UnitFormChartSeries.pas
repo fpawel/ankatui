@@ -1,4 +1,4 @@
-unit UnitFormCurrentChart;
+unit UnitFormChartSeries;
 
 interface
 
@@ -16,7 +16,7 @@ type
         ProductSerial, VarID: integer;
     end;
 
-    TFormCurrentChart = class(TForm)
+    TFormChartSeries = class(TForm)
         Panel14: TPanel;
         Panel1: TPanel;
         Panel4: TPanel;
@@ -26,62 +26,37 @@ type
         ListBox1: TListBox;
         PanelConsolePlaceholder: TPanel;
         Chart1: TChart;
-        Splitter1: TSplitter;
         procedure FormCreate(Sender: TObject);
         procedure ListBox1Click(Sender: TObject);
-        procedure FormResize(Sender: TObject);
-        procedure FormHide(Sender: TObject);
-        procedure FormShow(Sender: TObject);
     private
         { Private declarations }
         FSeries: TDictionary<ProductVar, TFastLineSeries>;
 
     public
         { Public declarations }
-        procedure AddValue(product_serial, var_id: integer; value: double);
+        procedure AddValue(product_serial, var_id: integer; value: double;
+          time: TDateTime);
 
-        procedure Setup(par: TwinControl);
         procedure NewChart;
     end;
 
 var
-    FormCurrentChart: TFormCurrentChart;
+    FormChartSeries: TFormChartSeries;
 
 implementation
 
 {$R *.dfm}
 
-uses UnitData, stringutils, dateutils, StrUtils, Unit1;
+uses UnitData, stringutils, dateutils, StrUtils;
 
-procedure TFormCurrentChart.FormCreate(Sender: TObject);
+procedure TFormChartSeries.FormCreate(Sender: TObject);
 begin
     FSeries := TDictionary<ProductVar, TFastLineSeries>.create;
     Chart1.title.Visible := false;
-    Width := Form1.FIni.ReadInteger('FormCurrentChart', 'Width', Width);
-end;
-
-procedure TFormCurrentChart.FormHide(Sender: TObject);
-begin
-    Splitter1.Parent := nil;
-    Splitter1.Visible := false;
-    Parent := nil;
 
 end;
 
-procedure TFormCurrentChart.FormResize(Sender: TObject);
-begin
-    Form1.FIni.WriteInteger('FormCurrentChart', 'Width', Width);
-end;
-
-procedure TFormCurrentChart.FormShow(Sender: TObject);
-begin
-    Splitter1.Parent := Parent;
-    Splitter1.Visible := true;
-    Splitter1.Left := 0;
-
-end;
-
-procedure TFormCurrentChart.ListBox1Click(Sender: TObject);
+procedure TFormChartSeries.ListBox1Click(Sender: TObject);
 var
     i, dev_var: integer;
     k: ProductVar;
@@ -117,7 +92,7 @@ begin
     end;
 end;
 
-procedure TFormCurrentChart.NewChart;
+procedure TFormChartSeries.NewChart;
 var
     ser: TFastLineSeries;
     k: ProductVar;
@@ -147,15 +122,15 @@ begin
         Result := 0;
 end;
 
-procedure TFormCurrentChart.AddValue(product_serial, var_id: integer;
-value: double);
+procedure TFormChartSeries.AddValue(product_serial, var_id: integer;
+value: double; time: TDateTime);
 var
     varName: string;
     ser: TFastLineSeries;
     k: ProductVar;
     sl: TStringList;
-    n,i: integer;
-    sel:array of boolean;
+    n, i: integer;
+    sel: array of boolean;
 begin
 
     varName := DataModule1.GetDeviceVarName(var_id);
@@ -167,9 +142,8 @@ begin
         ListBox1.Selected[n] := n = 0;
 
         SetLength(sel, ListBox1.Items.Count);
-        for I := 0 to ListBox1.Items.Count-1 do
+        for i := 0 to ListBox1.Items.Count - 1 do
             sel[i] := ListBox1.Selected[i];
-
 
         sl := TStringList.create;
         sl.Assign(ListBox1.Items);
@@ -177,8 +151,8 @@ begin
         ListBox1.Items.Assign(sl);
         sl.Free;
 
-        for I := 0 to ListBox1.Items.Count-1 do
-            ListBox1.Selected[i] := sel[i] ;
+        for i := 0 to ListBox1.Items.Count - 1 do
+            ListBox1.Selected[i] := sel[i];
     end;
     if not FSeries.TryGetValue(k, ser) then
     begin
@@ -188,7 +162,7 @@ begin
         FSeries.Add(k, ser);
 
     end;
-    ser.AddXY(now, value);
+    ser.AddXY(time, value);
 
     with ListBox1 do
     begin
@@ -199,16 +173,6 @@ begin
         end;
     end;
 
-end;
-
-procedure TFormCurrentChart.Setup(par: TwinControl);
-begin
-    Parent := par;
-    Align := alRight;
-    BorderStyle := bsNone;
-    Visible := true;
-    Left := 100500;
-    BringToFront;
 end;
 
 end.

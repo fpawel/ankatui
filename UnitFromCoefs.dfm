@@ -1,14 +1,24 @@
-object FrameCoef: TFrameCoef
+object FormCoefs: TFormCoefs
   Left = 0
   Top = 0
-  Width = 528
-  Height = 450
-  TabOrder = 0
+  Caption = 'FormCoefs'
+  ClientHeight = 300
+  ClientWidth = 635
+  Color = clWindow
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  OnCreate = FormCreate
+  PixelsPerInch = 96
+  TextHeight = 13
   object StringGrid3: TStringGrid
     Left = 0
     Top = 0
-    Width = 528
-    Height = 450
+    Width = 635
+    Height = 300
     Align = alClient
     BorderStyle = bsNone
     ColCount = 3

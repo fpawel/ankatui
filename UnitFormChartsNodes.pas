@@ -1,4 +1,4 @@
-unit UnitFormChartNodes;
+unit UnitFormChartsNodes;
 
 interface
 
@@ -64,30 +64,10 @@ type
     TNodeSeries = class(TNodeData)
     public
         FSeriesInfo: RSeriesInfo;
-        procedure Populate; override;
         constructor Create(ATreeView: TVirtualStringTree; ANode: PVirtualNode;
           ASeriesInfo: RSeriesInfo);
     end;
 
-    TNodeVar = class(TNodeData)
-    public
-        FSeriesInfo: RSeriesInfo;
-        FVar: integer;
-        FVarName: string;
-        procedure Populate; override;
-        constructor Create(ATreeView: TVirtualStringTree; ANode: PVirtualNode;
-          ASeriesInfo: RSeriesInfo; AVar: integer; AVarName: string);
-    end;
-
-    TNodeVarProduct = class(TNodeData)
-    public
-        FSeriesInfo: RSeriesInfo;
-        FVar: integer;
-        FVarName: string;
-        FSerial: integer;
-        constructor Create(ATreeView: TVirtualStringTree; ANode: PVirtualNode;
-          ASeriesInfo: RSeriesInfo; AVar: integer; AVarName: string; ASerial: integer);
-    end;
 
     RTreeData = record
         X: TNodeData;
@@ -180,34 +160,7 @@ begin
     FColumn[1].Text := TimeToStr(ASeriesInfo.CreatedAt);
     FColumn[2].Text := inttostr(ASeriesInfo.PartyID);
     FColumn[0].ImageIndex := 3;
-end;
-
-constructor TNodeVar.Create(ATreeView: TVirtualStringTree; ANode: PVirtualNode;
-  ASeriesInfo: RSeriesInfo; AVar: integer; AVarName: string);
-begin
-    inherited Create(ATreeView, ATreeView.AddChild(ANode));
-
-    FSeriesInfo := ASeriesInfo;
-    FVar := AVar;
-    FVarName := AVarName;
-    FColumn[0].Text := inttostr(AVar) + ' ' + AVarName;
-    FColumn[0].ImageIndex := 4;
-
-end;
-
-constructor TNodeVarProduct.Create(ATreeView: TVirtualStringTree;
-  ANode: PVirtualNode; ASeriesInfo: RSeriesInfo; AVar: integer; AVarName: string;
-  ASerial: integer);
-begin
-    inherited Create(ATreeView, ATreeView.AddChild(ANode));
     ATreeView.HasChildren[FNode] := false;
-
-    FSeriesInfo := ASeriesInfo;
-    FVar := AVar;
-    FVarName := AVarName;
-    FSerial := ASerial;
-    FColumn[0].Text := inttostr(ASerial);
-    FColumn[0].ImageIndex := 5;
 end;
 
 
@@ -293,33 +246,5 @@ begin
     
 end;
 
-procedure TNodeSeries.Populate;
-begin
-    with TFDQuery.Create(nil) do
-    begin
-        Connection := DataModule1.FDConnectionProductsDB;
-        SQL.Text :=
-          'SELECT DISTINCT var, var_name FROM chart_value_info WHERE series_id = :series_id;';
-        ParamByName('series_id').Value := FSeriesInfo.SeriesID;
-        open;
-        First;
-        while not Eof do
-        begin
-            TNodeVar.Create(FTreeView, FNode, FSeriesInfo,
-              FieldValues['var'], FieldValues['var_name']);
-            Next;
-        end;
-        Free;
-    end;
-end;
-
-procedure TNodeVar.Populate;
-var n:integer;
-begin
-    for n in DataModule1.GetSeriesVarProducts(FSeriesInfo.SeriesID, FVar) do
-    begin
-        TNodeVarProduct.Create(FTreeView, FNode, FSeriesInfo, FVar, FVarName, n);
-    end;
-end;
 
 end.

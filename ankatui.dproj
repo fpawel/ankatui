@@ -128,17 +128,13 @@
         <DCCReference Include="UnitFormLog.pas">
             <Form>FormLog</Form>
         </DCCReference>
-        <DCCReference Include="UnitFrameCoef.pas">
-            <Form>FrameCoef</Form>
-            <DesignClass>TFrame</DesignClass>
-        </DCCReference>
         <DCCReference Include="UnitFormManualControl.pas">
             <Form>FormManualControl</Form>
         </DCCReference>
-        <DCCReference Include="UnitFormChart.pas">
-            <Form>FormChart</Form>
+        <DCCReference Include="UnitFormCharts.pas">
+            <Form>FormCharts</Form>
         </DCCReference>
-        <DCCReference Include="UnitFormChartNodes.pas"/>
+        <DCCReference Include="UnitFormChartsNodes.pas"/>
         <DCCReference Include="msglevel.pas"/>
         <DCCReference Include="utils\variantutils.pas"/>
         <DCCReference Include="utils\vclutils.pas"/>
@@ -174,8 +170,8 @@
         </DCCReference>
         <DCCReference Include="config\config.pas"/>
         <DCCReference Include="DataRichEditOutput.pas"/>
-        <DCCReference Include="UnitFormCurrentChart.pas">
-            <Form>FormCurrentChart</Form>
+        <DCCReference Include="UnitFormChartSeries.pas">
+            <Form>FormChartSeries</Form>
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="models.pas"/>
@@ -183,6 +179,11 @@
             <Form>FormReadVars</Form>
             <FormType>dfm</FormType>
         </DCCReference>
+        <DCCReference Include="UnitFromCoefs.pas">
+            <Form>FormCoefs</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="HostAppModels.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -214,33 +215,18 @@
                 </Excluded_Packages>
             </Delphi.Personality>
             <Deployment Version="3">
-                <DeployFile LocalName="Win32\Debug\ankatui.exe" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="C:\Users\fpawel\.ankat\ankatui.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>ankatui.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployClass Name="DependencyModule">
-                    <Platform Name="Win32">
-                        <Operation>0</Operation>
-                        <Extensions>.dll;.bpl</Extensions>
-                    </Platform>
+                <DeployClass Name="ProjectiOSDeviceResourceRules">
                     <Platform Name="iOSDevice64">
                         <Operation>1</Operation>
-                        <Extensions>.dylib</Extensions>
-                    </Platform>
-                    <Platform Name="OSX32">
-                        <RemoteDir>Contents\MacOS</RemoteDir>
-                        <Operation>1</Operation>
-                        <Extensions>.dylib</Extensions>
                     </Platform>
                     <Platform Name="iOSDevice32">
                         <Operation>1</Operation>
-                        <Extensions>.dylib</Extensions>
-                    </Platform>
-                    <Platform Name="iOSSimulator">
-                        <Operation>1</Operation>
-                        <Extensions>.dylib</Extensions>
                     </Platform>
                 </DeployClass>
                 <DeployClass Name="ProjectOSXResource">
@@ -619,12 +605,27 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
-                <DeployClass Name="ProjectiOSDeviceResourceRules">
+                <DeployClass Name="DependencyModule">
+                    <Platform Name="Win32">
+                        <Operation>0</Operation>
+                        <Extensions>.dll;.bpl</Extensions>
+                    </Platform>
                     <Platform Name="iOSDevice64">
                         <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                    <Platform Name="OSX32">
+                        <RemoteDir>Contents\MacOS</RemoteDir>
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
                     </Platform>
                     <Platform Name="iOSDevice32">
                         <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
+                    </Platform>
+                    <Platform Name="iOSSimulator">
+                        <Operation>1</Operation>
+                        <Extensions>.dylib</Extensions>
                     </Platform>
                 </DeployClass>
                 <ProjectRoot Platform="iOSDevice64" Name="$(PROJECTNAME).app"/>
