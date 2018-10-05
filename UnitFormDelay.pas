@@ -73,7 +73,7 @@ end;
 
 procedure TFormDelay.ToolButton1Click(Sender: TObject);
 begin
-    HostAppData.FPipe.WriteMsgJSON('SKIP_DELAY', nil);
+    HostAppData.Pipe.WriteMsgJSON('SKIP_DELAY', nil);
 end;
 
 end.

@@ -117,7 +117,7 @@ begin
     if p.X is TNodeParty then
     begin
         HtmlViewer1.LoadFromString(
-            HostAppData.FPipe.Fetch2('PARTY_INFO',
+            HostAppData.Pipe.Fetch2('PARTY_INFO',
                 IntToStr((p.X as TNodeParty).FPartyID)) );
         HtmlViewer1.Align := alClient;
         HtmlViewer1.Visible := True;

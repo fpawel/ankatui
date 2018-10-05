@@ -82,7 +82,7 @@ end;
 procedure TFormCurrentWork.FormShow(Sender: TObject);
 begin
     OnShow := nil;
-    if HostAppData.FPipe.Connected then
+    if HostAppData.Pipe.Connected then
         SetupWorksTree;
 
 end;
@@ -297,7 +297,7 @@ end;
 procedure TFormCurrentWork.InitPipe(panel_message: TPanel);
 begin
 
-    HostAppData.FPipe.Handle('CURRENT_WORK',
+    HostAppData.Pipe.Handle('CURRENT_WORK',
         function(content: string): string
         var
             d: TNodeData;
@@ -377,7 +377,7 @@ begin
         VirtualStringTree1.RepaintNode(RootNodeData.FDescendants[i].FNode);
     end;
     UpdateWorksCheckedConfigDB;
-    HostAppData.FPipe.WriteMsgStr('RUN_MAIN_WORK', inttostr(GetWork.FOrdinal));
+    HostAppData.Pipe.WriteMsgStr('RUN_MAIN_WORK', inttostr(GetWork.FOrdinal));
 
 end;
 

@@ -294,7 +294,7 @@ begin
                     OnSetEditText := StringGrid3SetEditText;
                 end;
 
-                if HostAppData.FPipe.Connected then
+                if HostAppData.Pipe.Connected then
                 begin
                     Form1.SetCoef(ACol - 2, ARow - 1);
                 end;

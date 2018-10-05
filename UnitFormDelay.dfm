@@ -29,7 +29,7 @@ object FormDelay: TFormDelay
       Left = 74
       Top = 0
       Width = 58
-      Height = 32
+      Height = 18
       Align = alLeft
       Caption = '00:00:00'
       Font.Charset = DEFAULT_CHARSET
@@ -39,14 +39,12 @@ object FormDelay: TFormDelay
       Font.Style = []
       ParentFont = False
       Layout = tlCenter
-      ExplicitLeft = 113
-      ExplicitHeight = 18
     end
     object LabelTotalTime: TLabel
       Left = 0
       Top = 0
       Width = 58
-      Height = 32
+      Height = 18
       Align = alLeft
       Caption = '00:00:00'
       Font.Charset = DEFAULT_CHARSET
@@ -56,14 +54,12 @@ object FormDelay: TFormDelay
       Font.Style = []
       ParentFont = False
       Layout = tlCenter
-      ExplicitLeft = 39
-      ExplicitHeight = 18
     end
     object LabelWhat: TLabel
       Left = 195
       Top = 0
       Width = 23
-      Height = 32
+      Height = 18
       Align = alLeft
       Caption = '?dd'
       Font.Charset = DEFAULT_CHARSET
@@ -73,14 +69,12 @@ object FormDelay: TFormDelay
       Font.Style = []
       ParentFont = False
       Layout = tlCenter
-      ExplicitLeft = 256
-      ExplicitHeight = 31
     end
     object LabelProgress: TLabel
       Left = 148
       Top = 0
       Width = 31
-      Height = 32
+      Height = 18
       Align = alLeft
       Caption = '50%'
       Font.Charset = DEFAULT_CHARSET
@@ -90,8 +84,6 @@ object FormDelay: TFormDelay
       Font.Style = []
       ParentFont = False
       Layout = tlCenter
-      ExplicitLeft = 187
-      ExplicitHeight = 18
     end
     object Panel2: TPanel
       Left = 58
@@ -187,7 +179,7 @@ object FormDelay: TFormDelay
     Left = 576
     Top = 3
     Bitmap = {
-      494C010101004003480314001400FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C0101010040034C0314001400FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000500000001400000001002000000000000019
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
