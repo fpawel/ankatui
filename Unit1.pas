@@ -85,7 +85,7 @@ type
         StringGrid1: TStringGrid;
         PageControl1: TPageControl;
         TabSheetParties: TTabSheet;
-    Splitter1: TSplitter;
+        Splitter1: TSplitter;
         procedure FormCreate(Sender: TObject);
         procedure ComboBox1CloseUp(Sender: TObject);
         procedure StringGrid1SelectCell(Sender: TObject; ACol, ARow: integer;
@@ -156,7 +156,7 @@ uses UnitFormManualControl, UnitFormPopup, DataRichEditOutput, pipe, dateutils,
     System.Math, UnitFormNewPartyDialog,
     stringgridutils, UnitFormCharts,
     listports, System.IOUtils,
-    CurrentWorkTreeData, stringutils, vclutils,  UnitFormSettings,
+    CurrentWorkTreeData, stringutils, vclutils, UnitFormSettings,
     UnitFormCurrentWork, UnitFormDelay, System.Types, System.UITypes, findproc,
     PropertiesFormUnit, UnitHostAppData, UnitFormChartSeries, UnitFormReadVars,
     TlHelp32, UnitFormLog, UnitFormParties, UnitFromCoefs;
@@ -262,7 +262,7 @@ var
     wp: WINDOWPLACEMENT;
     fs: TFileStream;
 begin
-    HostAppData.Pipe.Close;
+    HostAppData.pipe.Close;
 
     fs := TFileStream.Create(TPath.Combine(ExtractFilePath(paramstr(0)),
       'window.position'), fmOpenWrite or fmCreate);
@@ -328,21 +328,21 @@ end;
 
 procedure TForm1.InitPipe;
 begin
-    HostAppData.Pipe.Handle('READ_COEFFICIENT', HandleReadCoefficient);
-    HostAppData.Pipe.Handle('READ_VAR', HandleReadVar);
+    HostAppData.pipe.Handle('READ_COEFFICIENT', HandleReadCoefficient);
+    HostAppData.pipe.Handle('READ_VAR', HandleReadVar);
 
-    HostAppData.Pipe.Handle('CURRENT_WORK_MESSAGE', HandleCurentWorkMessage);
+    HostAppData.pipe.Handle('CURRENT_WORK_MESSAGE', HandleCurentWorkMessage);
 
-    HostAppData.Pipe.Handle('PRODUCT_CONNECTED', HandleProductConnected);
+    HostAppData.pipe.Handle('PRODUCT_CONNECTED', HandleProductConnected);
 
-    HostAppData.Pipe.Handle('READ_PRODUCT', HandleReadProduct);
+    HostAppData.pipe.Handle('READ_PRODUCT', HandleReadProduct);
 
-    HostAppData.Pipe.Handle('END_WORK', HandleEndWork);
+    HostAppData.pipe.Handle('END_WORK', HandleEndWork);
 
-    HostAppData.Pipe.Handle('PROMPT_ERROR_STOP_WORK',
+    HostAppData.pipe.Handle('PROMPT_ERROR_STOP_WORK',
       HandlePromptErrorStopWork);
 
-    HostAppData.Pipe.Handle('DELAY',
+    HostAppData.pipe.Handle('DELAY',
         function(content: string): string
         var
             i: TDelayInfo;
@@ -374,7 +374,6 @@ begin
         PanelPartyTopMessage.Font.Color := clRed;
         FormCurrentWork.Visible := false;
 
-
     end;
 end;
 
@@ -385,7 +384,7 @@ begin
     X := TProductCoefficient.Create;
     X.FProduct := product_order;
     X.FCoefficient := coef_order;
-    HostAppData.Pipe.WriteMsgJSON('SET_COEFFICIENT', X);
+    HostAppData.pipe.WriteMsgJSON('SET_COEFFICIENT', X);
     SetupWorkStarted('Установка коэффициента ' +
       inttostr(DataModule1.DeviceCoefs[coef_order].FVar) + ' прибора ' +
       inttostr(DataModule1.CurrentPartyProducts[product_order].FSerial));
@@ -395,22 +394,22 @@ end;
 
 procedure TForm1.N1Click(Sender: TObject);
 begin
-    HostAppData.Pipe.WriteMsgJSON('READ_VARS', nil);
+    HostAppData.pipe.WriteMsgJSON('READ_VARS', nil);
     SetupWorkStarted('Опрос');
     TabSheetCurrentChart.TabVisible := True;
-    TabSheetVars.TabVisible := true;
+    TabSheetVars.TabVisible := True;
     FormChartSeries.NewChart;
 end;
 
 procedure TForm1.N2Click(Sender: TObject);
 begin
-    HostAppData.Pipe.WriteMsgJSON('READ_COEFFICIENTS', nil);
+    HostAppData.pipe.WriteMsgJSON('READ_COEFFICIENTS', nil);
     SetupWorkStarted('Считывание коэффициентов');
 end;
 
 procedure TForm1.N3Click(Sender: TObject);
 begin
-    HostAppData.Pipe.WriteMsgJSON('WRITE_COEFFICIENTS', nil);
+    HostAppData.pipe.WriteMsgJSON('WRITE_COEFFICIENTS', nil);
     SetupWorkStarted('Запись коэффициентов');
 end;
 
@@ -933,14 +932,14 @@ end;
 
 procedure TForm1.ToolButtonStopClick(Sender: TObject);
 begin
-    HostAppData.Pipe.WriteMsgJSON('CURRENT_WORK_STOP', nil);
+    HostAppData.pipe.WriteMsgJSON('CURRENT_WORK_STOP', nil);
     ToolButtonStop.Visible := false;
 
 end;
 
 procedure TForm1.SetupWorkStarted(work: string);
 begin
-    //FormCurrentWork.SetupWorksTree;
+    // FormCurrentWork.SetupWorksTree;
     PanelPartyTopMessage.Caption := work;
     PanelPartyTopMessage.Font.Color := clNavy;
     UpdatedControlsVisibilityOnStartedChanged(True);
