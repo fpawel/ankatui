@@ -18,7 +18,7 @@ type
     public
         { Public declarations }
         procedure SetConfig;
-        procedure CancelEditNode;
+        //procedure CancelEditNode;
     end;
 
 var
@@ -57,9 +57,9 @@ begin
     FPropertiesForm.SetConfig(DataModule1.GetConfig);
 end;
 
-procedure TFormSettings.CancelEditNode;
-begin
-    FPropertiesForm.VST3.CancelEditNode;
-end;
+//procedure TFormSettings.CancelEditNode;
+//begin
+//    FPropertiesForm.VST3.CancelEditNode;
+//end;
 
 end.

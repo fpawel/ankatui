@@ -363,16 +363,17 @@ begin
 
     PrintLastMessages(RichEdit1, 500);
 
-    if not HostAppData.Pipe.Connect('ANKAT') then
+    if HostAppData.Connect then
+    begin
+        FormManualControl.Init;
+
+    end
+    else
     begin
         PanelPartyTopMessage.Caption := '   Нет хост-процеса';
         PanelPartyTopMessage.Font.Color := clRed;
         FormCurrentWork.Visible := false;
-    end
-    else
-    begin
-        HostAppData.Connect;
-        FormManualControl.Init;
+
 
     end;
 end;

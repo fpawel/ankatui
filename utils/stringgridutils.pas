@@ -15,7 +15,6 @@ procedure DrawCheckbox(par_ctrl:TWinControl; cnv:TCanvas; Rect: TRect; checked:b
 procedure StringGrid_DrawCellBounds(cnv: TCanvas; acol, arow: integer;
   Rect: TRect);
 
-
 implementation
 
 uses winapi.windows, system.math, winapi.uxtheme;
