@@ -3266,22 +3266,42 @@ object Form1: TForm1
     object TabSheetVars: TTabSheet
       Caption = #1054#1087#1088#1086#1089
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object TabSheetCurrentChart: TTabSheet
       Caption = #1043#1088#1072#1092#1080#1082
       ImageIndex = 5
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object TabSheetCoefs: TTabSheet
       Caption = #1050#1086#1101#1092'-'#1090#1099
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object TabSheetSettings: TTabSheet
       Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
       ImageIndex = 4
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object TabSheetArchive: TTabSheet
       Caption = #1040#1088#1093#1080#1074
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object PageControl1: TPageControl
         Left = 0
         Top = 0
@@ -3292,14 +3312,26 @@ object Form1: TForm1
         TabOrder = 0
         object TabSheetParties: TTabSheet
           Caption = #1055#1072#1088#1090#1080#1080
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
         end
         object TabSheetCharts: TTabSheet
           Caption = #1043#1088#1072#1092#1080#1082#1080
           ImageIndex = 3
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
         end
         object TabSheetLogs: TTabSheet
           Caption = #1046#1091#1088#1085#1072#1083
           ImageIndex = 2
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
         end
       end
     end
@@ -3509,7 +3541,7 @@ object Form1: TForm1
     Left = 480
     Top = 178
     Bitmap = {
-      494C010109009C00EC0232003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010109009C00F40232003200FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000C8000000960000000100200000000000C0D4
       0100000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -7438,7 +7470,7 @@ object Form1: TForm1
     Left = 472
     Top = 256
     Bitmap = {
-      494C0101030018017C0210001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C010103001801840210001000FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000400000001000000001002000000000000010
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -7587,7 +7619,7 @@ object Form1: TForm1
     Left = 544
     Top = 178
     Bitmap = {
-      494C01010300D401C00219001900FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C01010300D401C80219001900FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000640000001900000001002000000000001027
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -7929,7 +7961,7 @@ object Form1: TForm1
     Left = 576
     Top = 266
     Bitmap = {
-      494C010102002403540314001400FFFFFF002110FFFFFFFFFFFFFFFF424D3600
+      494C0101020024035C0314001400FFFFFF002110FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000500000001400000001002000000000000019
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000

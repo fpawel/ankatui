@@ -173,7 +173,6 @@ type
 procedure TForm1.FormCreate(Sender: TObject);
 begin
     FFErrorLogMutex := TCriticalSection.Create;
-
     Application.OnException := OnException;
 
     FIni := TIniFile.Create(ExtractFileDir(paramstr(0)) + '\main.ini');
